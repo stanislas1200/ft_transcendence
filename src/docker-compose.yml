@@ -1,0 +1,31 @@
+version: '3.5'
+services:
+  auth_service:
+    build: ./services/AuthenticationService
+    volumes:
+      - ./services/AuthenticationService:/usr/src/app
+    ports:
+      - "8000:8000"
+    environment:
+      PGPASSWORD: ${PGPASSWORD}
+    depends_on:
+      - db
+    restart: on-failure:3
+
+  game_service:
+    build: ./services/GameService
+    volumes:
+      - ./services/GameService:/usr/src/app
+    ports:
+      - "8001:8001"
+    environment:
+      PGPASSWORD: ${PGPASSWORD}
+    depends_on:
+      - db
+    restart: on-failure:3
+
+  db:
+    image: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: example

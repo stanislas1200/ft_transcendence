@@ -1,0 +1,39 @@
+# Ignore dependencies
+/node_modules
+/vendor
+
+# Ignore logs and temporary files
+/log
+/tmp
+*.log
+
+# Ignore IDE and editor specific files
+.vscode
+.idea
+*.suo
+*.user
+*.sln.docstates
+*.swp
+*.swo
+
+# Ignore build and distribution directories
+/dist
+/build
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore Python specific files
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+
+# Ignore database files
+*.sqlite3
+*.db
+
+# Ignore environment and configuration files
+.env
+.config
