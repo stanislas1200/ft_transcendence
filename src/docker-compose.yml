@@ -7,7 +7,10 @@ services:
     ports:
       - "8000:8000"
     environment:
-      PGPASSWORD: ${PGPASSWORD}
+      PGPASSWORD: ${PGPASSWORD} # TODO : docker secret ?
+      42_CLIENT_UID: ${42_CLIENT_UID}
+      42_CLIENT_SECRET: ${42_CLIENT_SECRET}
+      OAUTH_REDIRECT_URI: ${OAUTH_REDIRECT_URI}
     depends_on:
       - db
     restart: on-failure:3

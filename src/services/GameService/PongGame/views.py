@@ -11,8 +11,8 @@ from django.core.cache import cache
 
 
 # service comunication
-def get_player(session_key, token):
-    response = requests.get('http://auth_service:8000/get_user/', params={'session_key': session_key, 'token': token})
+def get_player(session_key, token, user_id):
+    response = requests.get('http://auth_service:8000/get_user/', params={'session_key': session_key, 'token': token, 'UserId': user_id})
     if response.status_code == 200:
         user = response.json()
 
@@ -95,8 +95,9 @@ def join_game(request):
         game_id = request.GET.get('gameId')
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         token = auth_header.split(' ')[1] if ' ' in auth_header else ''
+        user_id = request.GET.get('UserId')
 
-        player = get_player(session_key, token)
+        player = get_player(session_key, token, user_id)
         if player == None:
             return JsonResponse({'error': 'Failed to get player'}, status=400)
         
@@ -165,8 +166,9 @@ def start_game(request):
     session_key = request.session.session_key
     auth_header = request.META.get('HTTP_AUTHORIZATION', '')
     token = auth_header.split(' ')[1] if ' ' in auth_header else ''
+    user_id = request.POST.get('UserId')
     
-    player = get_player(session_key, token)
+    player = get_player(session_key, token, user_id)
     if player == None:
         return JsonResponse({'error': 'Failed to get player'}, status=400)
     
