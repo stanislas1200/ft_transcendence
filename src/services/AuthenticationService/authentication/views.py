@@ -21,8 +21,8 @@ def oauth42(request):
 		# Exchange the authorization code for an access token
 		response = requests.post('https://api.intra.42.fr/oauth/token', data={
 			'grant_type': 'authorization_code',
-			'client_id': os.environ['42_CLIENT_UID'],
-			'client_secret': os.environ['42_CLIENT_SECRET'],
+			'client_id': os.environ['CLIENT_UID_42'],
+			'client_secret': os.environ['CLIENT_SECRET_42'],
 			'code': code,
 			'redirect_uri': os.environ['OAUTH_REDIRECT_URI'],  # Replace with your redirect URI
 		})
