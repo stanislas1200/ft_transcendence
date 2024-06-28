@@ -2,8 +2,6 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 import asyncio
-from django.forms.models import model_to_dict
-from .models import Game, Player, Score
 # from asgiref.sync import database_sync_to_async
 from asgiref.sync import sync_to_async
 # from .models import Game
