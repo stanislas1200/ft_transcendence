@@ -8,6 +8,57 @@ from django.contrib.auth.hashers import make_password, check_password
 import requests, secrets, os
 from .models import UserToken
 
+def check_username(username):
+	if not username:
+		return 1
+	return 0
+
+@csrf_exempt
+def update_user(request, user_id): # TODO : PATCH ?
+	# try:
+	# Check login
+	if request.user.is_authenticated:
+		user = request.user
+	else:
+		auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+		token = auth_header.split(' ')[1] if ' ' in auth_header else ''
+		if not (UserToken.objects.filter(token=token).exists()):
+			return JsonResponse({'error': 'User is not logged in'}, status=400)
+		user = UserToken.objects.get(token=token).User
+
+	# Check Input
+	username = request.POST.get('username')
+	email = request.POST.get('email')
+	first_name = request.POST.get('first_name')
+	last_name = request.POST.get('last_name')
+	avatar = request.FILES.getlist("avatar")
+	
+	if check_username(username): # TODO : check all user info
+		return JsonResponse({'error': 'Bad username'}, status=400)
+
+	# Update User TODO : all user info
+	if username: 
+		user.username = username
+	
+	if email: # TODO : confirm 
+		user.email = email
+	if first_name:
+		user.first_name = first_name
+	if last_name:
+		user.last_name = last_name
+
+	user.save()
+	if avatar: # TODO : user folder ? remove old avatar ... 
+		if (UserToken.objects.filter(user=user).exists()):
+			profile = UserToken.objects.get(user=user)
+			profile.avatar = avatar[0] # FIXME : list : [<InMemoryUploadedFile: 3.png (image/png)>]
+			profile.save()
+		
+	return JsonResponse({'message': f'Successfully updated profile'})
+
+	# except:
+	# 	return JsonResponse({'error': 'Failed to update user'}, status=400)
+
 # TODO : HTTPS, check django security settings
 
 @csrf_exempt

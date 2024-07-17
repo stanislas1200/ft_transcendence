@@ -120,6 +120,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Uploaded files folder
+MEDIA_ROOT = "/var/www/transcendence/media/"
 
 DATABASES = {
     'default': {
