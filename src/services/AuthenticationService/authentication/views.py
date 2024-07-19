@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.hashers import make_password, check_password
@@ -12,6 +12,31 @@ def check_username(username):
 	if not username:
 		return 1
 	return 0
+
+def validate_password(password):
+	if password and len(password) < 1:
+		return JsonResponse({'error': 'Password must be at least 1 characters long'}, status=400)
+	return None
+
+@csrf_exempt
+def get_avatar(request, user_id):
+	# Check login
+	if request.user.is_authenticated:
+		user = request.user
+	else:
+		auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+		token = auth_header.split(' ')[1] if ' ' in auth_header else ''
+		if not (UserToken.objects.filter(token=token).exists()):
+			return JsonResponse({'error': 'User is not logged in'}, status=400)
+		user = UserToken.objects.get(token=token).User
+
+	if (UserToken.objects.filter(user=user).exists()):
+		profile = UserToken.objects.get(user=user)
+		if not hasattr(profile, 'avatar') and profile.avatar:
+			return JsonResponse({'error': 'Avatar not found'}, status=404)
+		return HttpResponseRedirect(profile.avatar.url)
+
+	return JsonResponse({'error': 'User not found'}, status=404)
 
 @csrf_exempt
 def update_user(request, user_id): # TODO : PATCH ?
@@ -31,16 +56,25 @@ def update_user(request, user_id): # TODO : PATCH ?
 	email = request.POST.get('email')
 	first_name = request.POST.get('first_name')
 	last_name = request.POST.get('last_name')
+	current_password = request.POST.get('current_password')
+	new_password = request.POST.get('new_password')
 	avatar = request.FILES.getlist("avatar")
 	
 	if check_username(username): # TODO : check all user info
 		return JsonResponse({'error': 'Bad username'}, status=400)
+	
+	ret = validate_password(new_password)
+	if ret:
+		return ret
 
 	# Update User TODO : all user info
 	if username: 
+		if User.objects.filter(username=username).exists():
+			return JsonResponse({'error': 'Username already taken'}, status=400)
 		user.username = username
-	
-	if email: # TODO : confirm 
+	if email: # TODO : use password ??
+		if User.objects.filter(email=email).exists():
+			return JsonResponse({'error': 'Email already taken'}, status=400)
 		user.email = email
 	if first_name:
 		user.first_name = first_name
@@ -48,12 +82,19 @@ def update_user(request, user_id): # TODO : PATCH ?
 		user.last_name = last_name
 
 	user.save()
-	if avatar: # TODO : user folder ? remove old avatar ... 
+	if avatar:
 		if (UserToken.objects.filter(user=user).exists()):
 			profile = UserToken.objects.get(user=user)
-			profile.avatar = avatar[0] # FIXME : list : [<InMemoryUploadedFile: 3.png (image/png)>]
+			if profile.avatar:
+				profile.avatar.delete(save=True)
+			profile.avatar = avatar[0]
 			profile.save()
 		
+	if new_password:
+		if not check_password(current_password, user.password):
+			return JsonResponse({'error': 'Current password is incorrect'}, status=400)
+		user.set_password(new_password) # TODO : change token ?
+	user.save()
 	return JsonResponse({'message': f'Successfully updated profile'})
 
 	# except:
