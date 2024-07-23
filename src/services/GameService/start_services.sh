@@ -1,4 +1,5 @@
 #!/bin/bash
+python3 manage.py makemigrations
 service redis-server start
 
 python3 manage.py migrate
