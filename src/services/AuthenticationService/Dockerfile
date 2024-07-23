@@ -7,9 +7,10 @@ COPY . .
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN apt-get update && apt-get install -y redis-server postgresql-client dos2unix && rm -rf /var/lib/apt/lists/*
+RUN dos2unix start_services.sh
 RUN chmod +x start_services.sh
 
-EXPOSE 8000
+EXPOSE 8001
 
-# CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
 CMD ["/usr/src/app/start_services.sh"]
