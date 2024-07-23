@@ -2,8 +2,6 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 import asyncio
-from django.forms.models import model_to_dict
-from .models import Game, Player, Score
 # from asgiref.sync import database_sync_to_async
 from asgiref.sync import sync_to_async
 # from .models import Game
@@ -26,7 +24,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 		
 		self.game_id = self.scope['url_route']['kwargs']['game_id']
 		self.token = self.scope['url_route']['kwargs']['token'] # TODO : token in header 
-		player = await sync_to_async(get_player)(None, self.token)
+		user_id = self.scope['url_route']['kwargs']['UserId']
+		player = await sync_to_async(get_player)(None, self.token, user_id)
 
 
 		self.game_group_name = f'pong_game_{self.game_id}'
@@ -137,19 +136,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 	async def update_game_state(self, event):
 		await self.send(text_data=json.dumps(event['game_state']))
 
-
-	@sync_to_async
-	def get_session_id(self):
-		print(self.scope['session'].session_key)
-		return self.scope['session'].session_key
-
-	@sync_to_async
-	def move(self, direction, sessionId):
-		game_id = int(self.game_group_name.split('_')[-1])
-		game = Game.objects.get(id=game_id)
-		player = get_player(sessionId)
-		game.record_move(player, direction)
-
 	async def receive(self, text_data):
 		try:
 			data = json.loads(text_data)
@@ -164,114 +150,11 @@ class GameConsumer(AsyncWebsocketConsumer):
 				return self.send(text_data=json.dumps({
 					'error': 'Not a player'
 				}))
-			# n = Game.objects.get(id=self.game_id).gameProperty.players.get(token=token).n
-			# player = self.channel_layer.players[self.game_group_name]['p1']
-			# p = 'p1'
-			# if not player.get('token') == token:
-			# 	player = self.channel_layer.players[self.game_group_name]['p2']
-			# 	p = 'p2'
-			# 	if not player.get('token') == token:
-			# 		print("back")
-			# 		await self.send(text_data=json.dumps({
-			# 			'error': 'Not a player'
-			# 		}))
-			# 		return
 			move_pong(self.game_id, n, direction)
-			# player = data['player'] # TODO : check player id
-			
-			# if game[player]['y'] > 0 and direction == 'up':
-			# 	game[player]['y'] -= 20 # TODO: player speed var
-			# elif game[player]['y'] < 600 - 80 and direction == 'down': # TODO : setting / var width height from db
-			# 	game[player]['y'] += 20
 
-			
-			# sessionId = data['sessionId']
-			# if not sessionId: 
-			# print("sup\n")
-			# sessionId = await self.get_session_id();
-			# print(":" + sessionId)
-			# print(sessionId)
-			# await self.move(direction, sessionId)
-
-			# await self.channel_layer.group_send(
-			# 	self.game_group_name,
-			# 	{
-			# 		'type': 'game_message',
-			# 		'direction': direction
-			# 	}
-			# )
-			
-			# await self.send(text_data=json.dumps({
-			# 	'message': 'position updated'
-			# }))
 		except Exception as e:
 			print(e)
 			await self.send(text_data=json.dumps({
 				'error': 'Invalid message'
 			}))
-
-	# async def game_message(self, event):
-	# 	direction = event['direction']
-
-	# 	await self.send(text_data=json.dumps({
-	# 		'direction': direction
-	# 	}))
-
-	# @sync_to_async
-	# def game_to_dict(self, game):
-	# 	dict = model_to_dict(game)
-	# 	dict['players'] = [model_to_dict(player) for player in game.players.all()]
-	# 	return dict
-	
-
-	# @sync_to_async
-	# def pong2(self, game):
-	# 	game.pong()
-
-	# async def pong(self):
-	# 	while True:
-	# 		game_id = int(self.game_group_name.split('_')[-1])
-	# 		game = await sync_to_async(Game.objects.get)(id=game_id)
-
-	# 		await self.pong2(game)
-	# 		# await asyncio.sleep(0.1)
-
-	# async def get_game_state(self):
-	# 	# while True:
-	# 	game_id = int(self.game_group_name.split('_')[-1])
-	# 	game = await sync_to_async(Game.objects.get)(id=game_id)
-	# 	# Fetch the game state
-	# 	game_dict = await self.game_to_dict(game)
-
-	# 	return game_dict
-
-	# 		# # Send the game state to the client
-	# 		# await self.send(text_data=json.dumps(game_dict))
-	# 		# await asyncio.sleep(0.1)
-
-
-
-	# async def send_game_state(self):
-	# 	while True:
-	# 		# update game
-	# 		# self.pong();
-	# 		# Get the game state
-	# 		game_state = await self.get_game_state()
-
-	# 		# Send the game state to all channels in the group
-	# 		await self.channel_layer.group_send(
-	# 			self.game_group_name,
-	# 			{
-	# 				'type': 'game_state',
-	# 				'game_state': game_state
-	# 			}
-	# 		)
-	# 		await asyncio.sleep(0.2)
-
-	# async def game_state(self, event):
-	# 	# Send t.he game state to the WebSocket
-	# 	await self.send(text_data=json.dumps(event['game_state']))
-
-	# Replace your existing send_game_state() call with this:
-	# self.send_game_state_task = asyncio.create_task(self.send_game_state())
 		

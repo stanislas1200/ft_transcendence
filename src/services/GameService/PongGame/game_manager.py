@@ -1,4 +1,5 @@
-from .models import Game, Player, Score, PongPlayer, GameType, PlayerGameTypeStats, GameHistory
+from .models import Game, PongPlayer, GameType, PlayerGameTypeStats, GameHistory
+from django.contrib.auth.models import User
 from django.db.models import F
 from asgiref.sync import sync_to_async
 import asyncio
@@ -140,7 +141,7 @@ class Party:
 
 	def get_player_info(self, player):
 		return {
-			'name': player.player.name,
+			'name': player.player.username,
 			'id': player.id,
 			'score': player.score,
 			'token': player.token,
@@ -163,14 +164,15 @@ class Party:
 		try:
 			game = Game.objects.get(id=self.game_id)  # Get the game
 			for player in self.players:
-				print(player)
+				if player['name'] == 'AI': # TODO : other
+					continue
 				# save player score
 				p = PongPlayer.objects.get(id=player['id'])
 				p.score = player['score']
 				p.save()
 
 				# save player stats
-				p = Player.objects.get(name=player['name'])
+				p = User.objects.get(username=player['name'])
 				game_type = GameType.objects.get(name="pong")
 
 				stats, created = PlayerGameTypeStats.objects.get_or_create(player=p, game_type=game_type)
@@ -187,11 +189,8 @@ class Party:
 				GameHistory.objects.get_or_create(player=p, game=pong, score=player['score'])
 				# delete game
 			game.delete()
-			print('saved')	
 		except Exception as e:
 			game.delete()
-			print(e)
-			print('error saving')
 
 party_list = {}
 
