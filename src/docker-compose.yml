@@ -27,6 +27,21 @@ services:
       - db
     restart: on-failure:3
 
+ user_interface:
+    build: ./services/User_interface
+    volumes:
+      - ./services/User_interface:/usr/src/app
+    ports:
+      - "8002:8000"
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: example
+      DB_HOST: db
+    depends_on:
+      - db
+    restart: on-failure:3
+
   db:
     image: postgres
     restart: unless-stopped

@@ -1,5 +1,5 @@
 COMPOSE=docker-compose -f src/docker-compose.yml
-BUILD=$(COMPOSE) build --parallel --no-cache
+BUILD=$(COMPOSE) build --no-cache --parallel
 UP=$(COMPOSE) up -d
 DOWN=$(COMPOSE) down
 RESTART=$(COMPOSE) down && $(COMPOSE) up -d
