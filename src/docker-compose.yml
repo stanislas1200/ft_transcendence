@@ -4,6 +4,7 @@ services:
     build: ./services/AuthenticationService
     volumes:
       - ./services/AuthenticationService:/usr/src/app
+      - media_volume:/var/www/transcendence/media
     ports:
       - "8000:8000"
     environment:
@@ -32,3 +33,6 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: example
+
+volumes:
+  media_volume:

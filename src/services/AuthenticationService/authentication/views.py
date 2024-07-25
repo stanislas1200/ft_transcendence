@@ -1,22 +1,20 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password, password_changed
+from django.core.validators import validate_email, validate_unicode_slug, validate_image_file_extension
 from django.contrib.sessions.models import Session
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.decorators import login_required
 import requests, secrets, os
 from .models import UserToken
 
-def check_username(username):
-	if not username:
-		return 1
-	return 0
-
-def validate_password(password):
-	if password and len(password) < 1:
-		return JsonResponse({'error': 'Password must be at least 1 characters long'}, status=400)
-	return None
+# def check_username(username): # TODO : username policy
+# 	if not username:
+# 		return 1
+# 	return 0
 
 @csrf_exempt
 def get_avatar(request, user_id):
@@ -39,68 +37,87 @@ def get_avatar(request, user_id):
 	return JsonResponse({'error': 'User not found'}, status=404)
 
 @csrf_exempt
+@login_required
 def update_user(request, user_id): # TODO : PATCH ?
-	# try:
-	# Check login
-	if request.user.is_authenticated:
-		user = request.user
-	else:
-		auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-		token = auth_header.split(' ')[1] if ' ' in auth_header else ''
-		if not (UserToken.objects.filter(token=token).exists()):
-			return JsonResponse({'error': 'User is not logged in'}, status=400)
-		user = UserToken.objects.get(token=token).User
+	try:
+		# Check login
+		if request.user.is_authenticated:
+			user = request.user
+		else:
+			auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+			token = auth_header.split(' ')[1] if ' ' in auth_header else ''
+			if not (UserToken.objects.filter(token=token).exists()):
+				return JsonResponse({'error': 'User is not logged in'}, status=400)
+			user = UserToken.objects.get(token=token).User
 
-	# Check Input
-	username = request.POST.get('username')
-	email = request.POST.get('email')
-	first_name = request.POST.get('first_name')
-	last_name = request.POST.get('last_name')
-	current_password = request.POST.get('current_password')
-	new_password = request.POST.get('new_password')
-	avatar = request.FILES.getlist("avatar")
-	
-	if check_username(username): # TODO : check all user info
-		return JsonResponse({'error': 'Bad username'}, status=400)
-	
-	ret = validate_password(new_password)
-	if ret:
-		return ret
+		# Check authorisation
+		if user_id != user.id:
+			if not request.user.is_staff: # TODO user.is_staff ? so token accepted ?
+				return JsonResponse({'error': 'Unauthorized'}, status=403)
+			if not User.objects.filter(id=user_id).exists():
+				return JsonResponse({'error': 'User not found'}, status=404)
+			user = User.objects.get(id=user_id)
 
-	# Update User TODO : all user info
-	if username: 
-		if User.objects.filter(username=username).exists():
-			return JsonResponse({'error': 'Username already taken'}, status=400)
-		user.username = username
-	if email: # TODO : use password ??
-		if User.objects.filter(email=email).exists():
-			return JsonResponse({'error': 'Email already taken'}, status=400)
-		user.email = email
-	if first_name:
-		user.first_name = first_name
-	if last_name:
-		user.last_name = last_name
 
-	user.save()
-	if avatar:
-		if (UserToken.objects.filter(user=user).exists()):
-			profile = UserToken.objects.get(user=user)
-			if profile.avatar:
-				profile.avatar.delete(save=True)
-			profile.avatar = avatar[0]
-			profile.save()
+		# Get Input
+		username = request.POST.get('username')
+		email = request.POST.get('email')
+		first_name = request.POST.get('first_name')
+		last_name = request.POST.get('last_name')
+		current_password = request.POST.get('current_password')
+		new_password = request.POST.get('new_password') # TODO : password for 42 account 
+		avatar = request.FILES.getlist("avatar")
 		
-	if new_password:
-		if not check_password(current_password, user.password):
-			return JsonResponse({'error': 'Current password is incorrect'}, status=400)
-		user.set_password(new_password) # TODO : change token ?
-	user.save()
-	return JsonResponse({'message': f'Successfully updated profile'})
+		
 
-	# except:
-	# 	return JsonResponse({'error': 'Failed to update user'}, status=400)
+		# Update User TODO : all user info
+		if username: 
+			# if check_username(username): # TODO : check all user info
+			# 	return JsonResponse({'error': 'Bad username'}, status=400)
+			validate_unicode_slug(username)
+			if User.objects.filter(username=username).exists():
+				return JsonResponse({'error': 'Username already taken'}, status=400)
+			user.username = username
+		if email: # TODO : use password ??
+			validate_email(email)
+			if User.objects.filter(email=email).exists():
+				return JsonResponse({'error': 'Email already taken'}, status=400)
+			user.email = email
+
+		if first_name:
+			user.first_name = first_name
+
+		if last_name:
+			user.last_name = last_name
+
+		user.save()
+		if avatar:
+			validate_image_file_extension(avatar[0])
+			if (UserToken.objects.filter(user=user).exists()):
+				profile = UserToken.objects.get(user=user)
+				if profile.avatar:
+					profile.avatar.delete(save=True)
+				profile.avatar = avatar[0]
+				profile.save()
+			
+		if new_password:
+			try :
+				if not check_password(current_password, user.password):
+					return JsonResponse({'error': 'Current password is incorrect'}, status=400)
+				validate_password(new_password, user)
+				user.set_password(new_password) # TODO : change token ?
+				password_changed(new_password, user)
+			except Exception as e:
+				return JsonResponse({'error': str(e)}, status=400)
+		user.save()
+		return JsonResponse({'message': f'Successfully updated profile'})
+	except Exception as e:
+		return JsonResponse({'error': str(e)}, status=400)
+	except: # TODO : better except
+		return JsonResponse({'error': 'Failed to update user'}, status=400)
 
 # TODO : HTTPS, check django security settings
+# TODO : decorator : ex remove csrf_exempt
 
 @csrf_exempt
 # 42 auth
