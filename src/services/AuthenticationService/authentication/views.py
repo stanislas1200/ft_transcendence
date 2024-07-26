@@ -11,6 +11,20 @@ from django.contrib.auth.decorators import login_required
 import requests, secrets, os
 from .models import UserToken
 
+from django.core.files.images import get_image_dimensions
+
+def check_avatar(avatar):
+	w, h = get_image_dimensions(avatar)
+
+	# validate dimensions
+	max_width = max_height = 100
+	if w > max_width or h > max_height:
+		raise Exception(u'Please use an image that is %s x %s pixels or smaller.' % (max_width, max_height)) # TODO : cut the image ? square ? 
+
+	# validate size
+	if len(avatar) > (20 * 1024):
+		raise Exception(u'Avatar file size may not exceed 20k.')
+
 # def check_username(username): # TODO : username policy
 # 	if not username:
 # 		return 1
@@ -97,6 +111,7 @@ def update_user(request, user_id): # TODO : PATCH ?
 				profile = UserToken.objects.get(user=user)
 				if profile.avatar:
 					profile.avatar.delete(save=True)
+				check_avatar(avatar[0])
 				profile.avatar = avatar[0]
 				profile.save()
 			

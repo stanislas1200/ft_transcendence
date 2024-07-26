@@ -8,6 +8,6 @@ def user_directory_path(instance, filename):
 class UserToken(models.Model): # TODO : Social service ?: use ws to get online/offline +- and for notification db notif on connect send all if read delete from db. Add friends
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     token = models.CharField(max_length=255)
-    avatar = models.ImageField(upload_to=user_directory_path, blank=True, null=True)
+    avatar = models.ImageField(upload_to=user_directory_path, default='default.png', blank=True, null=True)
 
 # Authorized ? : https://github.com/revsys/django-friendship
