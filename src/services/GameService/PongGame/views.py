@@ -208,7 +208,7 @@ def record_move(request):
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         token = auth_header.split(' ')[1] if ' ' in auth_header else ''
 
-        player = get_player(session_key, token)
+        player = get_player(session_key, token) # FIXME : TypeError: get_player() missing 1 required positional argument: 'user_id'
         if player == None:
             return JsonResponse({'error': 'Failed to get player'}, status=400)
         
@@ -239,7 +239,7 @@ def record_move(request):
         return JsonResponse({'message': 'Move recorded', 'game_id': game_id})
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
-    except Player.DoesNotExist:
+    except Player.DoesNotExist: # FIXME : NameError: name 'Player' is not defined
         return JsonResponse({'error': 'Player not found'}, status=404)
 
 @require_GET

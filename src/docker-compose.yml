@@ -9,6 +9,10 @@ services:
       - "8000:8000"
     environment:
       PGPASSWORD: ${PGPASSWORD} # TODO : docker secret ?
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
       CLIENT_UID_42: ${CLIENT_UID_42}
       CLIENT_SECRET_42: ${CLIENT_SECRET_42}
       OAUTH_REDIRECT_URI: ${OAUTH_REDIRECT_URI}
@@ -24,6 +28,10 @@ services:
       - "8001:8001"
     environment:
       PGPASSWORD: ${PGPASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
     depends_on:
       - db
     restart: on-failure:3
@@ -32,7 +40,7 @@ services:
     image: postgres
     restart: unless-stopped
     environment:
-      POSTGRES_PASSWORD: example
+      POSTGRES_PASSWORD: ${PGPASSWORD}
 
 volumes:
   media_volume:

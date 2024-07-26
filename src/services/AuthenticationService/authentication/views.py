@@ -19,7 +19,7 @@ from .models import UserToken
 @csrf_exempt
 def get_avatar(request, user_id):
 	# Check login
-	if request.user.is_authenticated:
+	if request.user.is_authenticated: # TODO : need login ? or anyone can access ?
 		user = request.user
 	else:
 		auth_header = request.META.get('HTTP_AUTHORIZATION', '')
@@ -30,7 +30,7 @@ def get_avatar(request, user_id):
 
 	if (UserToken.objects.filter(user=user).exists()):
 		profile = UserToken.objects.get(user=user)
-		if not hasattr(profile, 'avatar') and profile.avatar:
+		if not hasattr(profile, 'avatar') or not profile.avatar:
 			return JsonResponse({'error': 'Avatar not found'}, status=404)
 		return HttpResponseRedirect(profile.avatar.url)
 
@@ -201,9 +201,8 @@ def login_view(request):
 		if not username or not password:
 			return JsonResponse({'error': 'Missing required fields'}, status=400)
 		user = authenticate(request, username=username, password=password) # slow
-		if not user: # TODO : handle email
+		if not user:
 			username = User.objects.get(email=username).username
-			print(username)
 			user = authenticate(request, username=username, password=password)
 		if user is not None:
 			login(request, user)
