@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Game, Player, Score, Pong, PongPlayer, PlayerGameTypeStats, GameHistory
+from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, GameHistory
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST, require_GET
 from django.forms.models import model_to_dict
@@ -11,17 +11,19 @@ from django.core.cache import cache
 
 
 # service comunication
-def get_player(session_key, token):
-    response = requests.get('http://auth_service:8000/get_user/', params={'session_key': session_key, 'token': token})
+def get_player(session_key, token, user_id):
+    response = requests.get('http://auth_service:8000/get_user/', params={'session_key': session_key, 'token': token, 'UserId': user_id}) # TODO verify token instead
     if response.status_code == 200:
-        user = response.json()
+        # user = response.json()
+        user = User.objects.get(id=user_id)
+        return user
 
         # Check if player exist
-        if Player.objects.filter(name=user['username'], email=user['email']).exists(): # TODO : check not empty
-            player = Player.objects.get(name=user['username'], email=user['email'])
-        else:
-            player = Player.objects.create(name=user['username'], email=user['email'])
-        return player
+        # if Player.objects.filter(name=user['username'], email=user['email']).exists(): # TODO : check not empty
+        #     player = Player.objects.get(name=user['username'], email=user['email'])
+        # else:
+        #     player = Player.objects.create(name=user['username'], email=user['email'])
+        return user
     return None
 
 @csrf_exempt # Disable CSRF protection for this view
@@ -33,8 +35,9 @@ def leave_game(request):
         game_id = request.GET.get('gameId')
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         token = auth_header.split(' ')[1] if ' ' in auth_header else ''
+        user_id = request.GET.get('UserId')
 
-        player = get_player(session_key, token)
+        player = get_player(session_key, token, user_id)
         if player == None:
             return JsonResponse({'error': 'Failed to get player'}, status=400)
 
@@ -67,6 +70,14 @@ def list_game(request):
     game_list = ['pong', 'idk']
     return JsonResponse(game_list, safe=False)
 
+def user_to_dict(user):
+    return {
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'last_login': user.last_login
+    }
+
 @require_GET # return a list of party
 def get_party(request): #TODO : send party detail but not all
     try:
@@ -78,7 +89,7 @@ def get_party(request): #TODO : send party detail but not all
         game_list = []
         for game in games:
             game_dict = model_to_dict(game)
-            game_dict['players'] = [model_to_dict(player) for player in game.players.all()]
+            game_dict['players'] = [user_to_dict(player) for player in game.players.all()]
             game_list.append(game_dict)
         return JsonResponse(game_list, safe=False)
     except Game.DoesNotExist:
@@ -95,8 +106,9 @@ def join_game(request):
         game_id = request.GET.get('gameId')
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         token = auth_header.split(' ')[1] if ' ' in auth_header else ''
+        user_id = request.GET.get('UserId')
 
-        player = get_player(session_key, token)
+        player = get_player(session_key, token, user_id)
         if player == None:
             return JsonResponse({'error': 'Failed to get player'}, status=400)
         
@@ -127,7 +139,7 @@ def join_game(request):
         return JsonResponse({'message': 'Player joined', 'game_id': game.id})
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
-    except Player.DoesNotExist:
+    except User.DoesNotExist:
         return JsonResponse({'error': 'Player not found'}, status=404)
 
 def startPong(request, player, token, gameType):
@@ -143,7 +155,8 @@ def startPong(request, player, token, gameType):
     game.players.add(player)
     player = PongPlayer.objects.create(player=player, score=0, n=1, token=token)
     game.gameProperty.players.add(player)
-    game.status = 'waiting'
+
+    game.status = 'waiting' if int(playerNumber) > 1 else 'playing'
 
     if (gameType == 'custom'):
         # pong.width = request.POST.get('width', 800)
@@ -165,8 +178,9 @@ def start_game(request):
     session_key = request.session.session_key
     auth_header = request.META.get('HTTP_AUTHORIZATION', '')
     token = auth_header.split(' ')[1] if ' ' in auth_header else ''
+    user_id = request.POST.get('UserId')
     
-    player = get_player(session_key, token)
+    player = get_player(session_key, token, user_id)
     if player == None:
         return JsonResponse({'error': 'Failed to get player'}, status=400)
     
@@ -194,7 +208,7 @@ def record_move(request):
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         token = auth_header.split(' ')[1] if ' ' in auth_header else ''
 
-        player = get_player(session_key, token)
+        player = get_player(session_key, token) # FIXME : TypeError: get_player() missing 1 required positional argument: 'user_id'
         if player == None:
             return JsonResponse({'error': 'Failed to get player'}, status=400)
         
@@ -225,7 +239,7 @@ def record_move(request):
         return JsonResponse({'message': 'Move recorded', 'game_id': game_id})
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
-    except Player.DoesNotExist:
+    except Player.DoesNotExist: # FIXME : NameError: name 'Player' is not defined
         return JsonResponse({'error': 'Player not found'}, status=404)
 
 @require_GET
@@ -233,26 +247,26 @@ def record_move(request):
 def get_stats(request):
     # Get the stats for the player
     try:
-        user_id = request.GET.get('id') # id different from auth service
-        user_name = request.GET.get('name')
-        if user_name:
-            if not Player.objects.filter(name=user_name).exists():
-                return JsonResponse({'error': 'Player not found'}, status=404)
-            player = Player.objects.get(name=user_name)
-            if not PlayerGameTypeStats.objects.filter(player=player).exists():
-                return JsonResponse({'error': 'No stats found'}, status=404)
-            stats = PlayerGameTypeStats.objects.filter(player=player)
-            all_stats_dict = {}
-            for stat in stats:
-                stat_dict = model_to_dict(stat)
-                stat_dict.pop('player')
-                stat_dict.pop('game_type')
-                stat_dict.pop('id')
-                if stat.game_type.name == 'pong':
-                    all_stats_dict['pong'] = stat_dict
-            return JsonResponse(all_stats_dict, safe=False)
-        else:
-            JsonResponse({'error': 'Missing id'}, status=400)
+        user_id = request.GET.get('UserId')
+
+        if not user_id:
+            return JsonResponse({'error': 'Missing id'}, status=400)
+        
+        if not User.objects.filter(id=user_id).exists():
+            return JsonResponse({'error': 'Player not found'}, status=404)
+        
+        stats = PlayerGameTypeStats.objects.filter(player_id=user_id)
+
+        all_stats_dict = {}
+        for stat in stats:
+            stat_dict = model_to_dict(stat)
+            stat_dict.pop('player')
+            stat_dict.pop('game_type')
+            stat_dict.pop('id')
+            if stat.game_type.name == 'pong':
+                all_stats_dict['pong'] = stat_dict
+        return JsonResponse(all_stats_dict, safe=False)
+    
     except:
         return JsonResponse({'error': 'Error'}, status=500)
  
@@ -261,37 +275,21 @@ def get_stats(request):
 def get_history(request):
     # Get the history for the player
     try:
-        user_id = request.GET.get('id') # id different from auth service
-        user_name = request.GET.get('name')
-        if user_name:
-            player = Player.objects.get(name=user_name)
-            history = GameHistory.objects.filter(player=player)
-            history_list = []
-            for hist in history:
-                hist_dict = model_to_dict(hist)
-                hist_dict.pop('player')
-                history_list.append(hist_dict)
-            return JsonResponse(history_list, safe=False)
-        else:
-            JsonResponse({'error': 'Missing id'}, status=400)
+        user_id = request.GET.get('UserId')
+        if not user_id:
+            return JsonResponse({'error': 'Missing id'}, status=400)
+        
+        if not User.objects.filter(id=user_id).exists():
+            return JsonResponse({'error': 'Player not found'}, status=404)
+        
+        history = GameHistory.objects.filter(player_id=user_id)
+
+        history_list = []
+        for hist in history:
+            hist_dict = model_to_dict(hist)
+            hist_dict.pop('player')
+            history_list.append(hist_dict)
+        return JsonResponse(history_list, safe=False)
+    
     except:
         return JsonResponse({'error': 'Error'}, status=500)
-
-    
-# Endpoints:
-# POST /game/start: Start a new game.
-# POST /game/{game_id}/move: Record a move in the game.
-# GET /game/{game_id}/state: Get the current state of the game.
-# POST /game/{game_id}/end: End a game.
-
-
-# list of games
-# list of players online
-
-# game state: waiting, playing, finished
-
-# create, join
-# create game: create a new game with the player as player1 add option
-# join game: join an existing game as player2 or a tournament
-
-
