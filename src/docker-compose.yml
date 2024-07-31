@@ -1,10 +1,11 @@
 version: '3.5'
 services:
-  auth_service:
+  auth-service:
     build: ./services/AuthenticationService
     volumes:
       - ./services/AuthenticationService:/usr/src/app
       - media_volume:/var/www/transcendence/media
+      - ssl_cert_volume:/etc/ssl/certs:ro
     ports:
       - "8000:8000"
     environment:
@@ -20,10 +21,11 @@ services:
       - db
     restart: on-failure:3
 
-  game_service:
+  game-service:
     build: ./services/GameService
     volumes:
       - ./services/GameService:/usr/src/app
+      - ssl_cert_volume:/etc/ssl/certs
     ports:
       - "8001:8001"
     environment:
@@ -36,7 +38,7 @@ services:
       - db
     restart: on-failure:3
 
-  db:
+  db: # TODO : ssl 
     image: postgres
     restart: unless-stopped
     environment:
@@ -44,3 +46,4 @@ services:
 
 volumes:
   media_volume:
+  ssl_cert_volume:
