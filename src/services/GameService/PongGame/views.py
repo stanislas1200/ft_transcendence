@@ -12,7 +12,7 @@ from django.core.cache import cache
 
 # service comunication
 def get_player(session_key, token, user_id):
-    response = requests.get('http://auth_service:8000/get_user/', params={'session_key': session_key, 'token': token, 'UserId': user_id}) # TODO verify token instead
+    response = requests.get('https://auth-service:8000/get_user/', params={'session_key': session_key, 'token': token, 'UserId': user_id}, verify=False) # TODO verify token instead #verify false for self signed
     if response.status_code == 200:
         # user = response.json()
         user = User.objects.get(id=user_id)
@@ -205,10 +205,11 @@ def record_move(request):
     try:    
         session_key = request.session.session_key
         game_id = request.GET.get('gameId')
+        user_id = request.GET.get('userId')
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         token = auth_header.split(' ')[1] if ' ' in auth_header else ''
 
-        player = get_player(session_key, token) # FIXME : TypeError: get_player() missing 1 required positional argument: 'user_id'
+        player = get_player(session_key, token, user_id) # FIXME : TypeError: get_player() missing 1 required positional argument: 'user_id'
         if player == None:
             return JsonResponse({'error': 'Failed to get player'}, status=400)
         

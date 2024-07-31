@@ -66,6 +66,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8001",
 	"http://auth_service:8000",
+	
+    "https://localhost:8000",
+    "https://127.0.0.1:8001",
+	"https://auth_service:8000",
 ]
 
 
@@ -135,3 +139,9 @@ DATABASES = {
         'PORT': os.environ['DB_PORT'],
     }
 }
+
+# ssl
+SECURE_SSL_REDIRECT = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
