@@ -5,6 +5,8 @@ CERT_FILE=$CERT_DIR/cert.pem
 KEY_FILE=$CERT_DIR/key.pem
 DAYS_THRESHOLD=30
 
+# use mkcert for locally-trusted development certificates. ?
+
 check_cert_expiration() {
     END_DATE=$(openssl x509 -enddate -noout -in "$CERT_FILE" | cut -d= -f2)
     END_DATE_EPOCH=$(date -d "$END_DATE" +%s)

@@ -66,6 +66,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8001",
 	"http://auth_service:8000",
+	
+    "https://localhost:8000",
+    "https://127.0.0.1:8001",
+	"https://auth_service:8000",
 ]
 
 

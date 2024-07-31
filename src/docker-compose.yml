@@ -1,6 +1,6 @@
 version: '3.5'
 services:
-  auth_service:
+  auth-service:
     build: ./services/AuthenticationService
     volumes:
       - ./services/AuthenticationService:/usr/src/app
@@ -21,7 +21,7 @@ services:
       - db
     restart: on-failure:3
 
-  game_service:
+  game-service:
     build: ./services/GameService
     volumes:
       - ./services/GameService:/usr/src/app

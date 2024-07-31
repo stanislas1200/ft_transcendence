@@ -4,10 +4,9 @@ import os
 import sys
 
 # Fix for the error: "django.http.request.host_validation_re = _lazy_re_compile(r"[a-zA-z0-9.:]*")"
-from django.utils.regex_helper import _lazy_re_compile
-import django.http.request
-
-django.http.request.host_validation_re = _lazy_re_compile(r"[a-zA-z0-9.:]*")
+# from django.utils.regex_helper import _lazy_re_compile
+# import django.http.request
+# django.http.request.host_validation_re = _lazy_re_compile(r"[a-zA-z0-9.:]*")
 #
 
 def main():
