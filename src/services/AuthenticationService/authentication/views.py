@@ -17,12 +17,15 @@ def check_avatar(avatar):
 	w, h = get_image_dimensions(avatar)
 
 	# validate dimensions
-	max_width = max_height = 100
-	if w > max_width or h > max_height:
-		raise Exception(u'Please use an image that is %s x %s pixels or smaller.' % (max_width, max_height)) # TODO : cut the image ? square ? 
+	max_width = max_height = 500
+	# if w != h:
+		# TODO : square
+	# if w > max_width or h > max_height:
+		# TODO : cut
+		# raise Exception(u'Please use an image that is %s x %s pixels or smaller.' % (max_width, max_height)) # TODO : cut the image ? square ? 
 
 	# validate size
-	if len(avatar) > (20 * 1024):
+	if len(avatar) > (2000 * 1024):
 		raise Exception(u'Avatar file size may not exceed 20k.')
 
 # def check_username(username): # TODO : username policy
@@ -32,16 +35,7 @@ def check_avatar(avatar):
 
 @csrf_exempt
 def get_avatar(request, user_id):
-	# Check login
-	if request.user.is_authenticated: # TODO : need login ? or anyone can access ?
-		user = request.user
-	else:
-		auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-		token = auth_header.split(' ')[1] if ' ' in auth_header else ''
-		if not (UserToken.objects.filter(token=token).exists()):
-			return JsonResponse({'error': 'User is not logged in'}, status=400)
-		user = UserToken.objects.get(token=token).User
-
+	user = User.objects.get(id=user_id)
 	if (UserToken.objects.filter(user=user).exists()):
 		profile = UserToken.objects.get(user=user)
 		if not hasattr(profile, 'avatar') or not profile.avatar:
@@ -57,7 +51,7 @@ def update_user(request, user_id): # TODO : PATCH ?
 		# Check login
 		if request.user.is_authenticated:
 			user = request.user
-		else:
+		else: # FIXME : token not working ? 
 			auth_header = request.META.get('HTTP_AUTHORIZATION', '')
 			token = auth_header.split(' ')[1] if ' ' in auth_header else ''
 			if not (UserToken.objects.filter(token=token).exists()):
@@ -66,7 +60,7 @@ def update_user(request, user_id): # TODO : PATCH ?
 
 		# Check authorisation
 		if user_id != user.id:
-			if not request.user.is_staff: # TODO user.is_staff ? so token accepted ?
+			if not user.is_staff: # TODO accept token accepted
 				return JsonResponse({'error': 'Unauthorized'}, status=403)
 			if not User.objects.filter(id=user_id).exists():
 				return JsonResponse({'error': 'User not found'}, status=404)
@@ -85,14 +79,14 @@ def update_user(request, user_id): # TODO : PATCH ?
 		
 
 		# Update User TODO : all user info
-		if username: 
+		if username: # TODO : use password ?? 
 			# if check_username(username): # TODO : check all user info
 			# 	return JsonResponse({'error': 'Bad username'}, status=400)
 			validate_unicode_slug(username)
 			if User.objects.filter(username=username).exists():
 				return JsonResponse({'error': 'Username already taken'}, status=400)
 			user.username = username
-		if email: # TODO : use password ??
+		if email: # TODO : use password
 			validate_email(email)
 			if User.objects.filter(email=email).exists():
 				return JsonResponse({'error': 'Email already taken'}, status=400)
@@ -120,7 +114,7 @@ def update_user(request, user_id): # TODO : PATCH ?
 				if not check_password(current_password, user.password):
 					return JsonResponse({'error': 'Current password is incorrect'}, status=400)
 				validate_password(new_password, user)
-				user.set_password(new_password) # TODO : change token ?
+				user.set_password(new_password) # TODO : change token ??
 				password_changed(new_password, user)
 			except Exception as e:
 				return JsonResponse({'error': str(e)}, status=400)
@@ -131,7 +125,6 @@ def update_user(request, user_id): # TODO : PATCH ?
 	except: # TODO : better except
 		return JsonResponse({'error': 'Failed to update user'}, status=400)
 
-# TODO : HTTPS, check django security settings
 # TODO : decorator : ex remove csrf_exempt
 
 @csrf_exempt
