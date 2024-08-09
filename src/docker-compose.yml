@@ -38,6 +38,17 @@ services:
       - db
     restart: on-failure:3
 
+  front-service:
+    build: ./services/frontendservice
+    volumes:
+      - ./services/frontendservice:/usr/src/app
+      - ssl_cert_volume:/etc/ssl/certs
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    restart: on-failure:3
+
   db: # TODO : ssl 
     image: postgres
     restart: unless-stopped
