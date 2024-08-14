@@ -13,20 +13,84 @@ from .models import UserToken
 
 from django.core.files.images import get_image_dimensions
 
-def check_avatar(avatar):
-	w, h = get_image_dimensions(avatar)
+from PIL import Image, ImageSequence
+from io import BytesIO
+from django.core.files.base import ContentFile
+
+
+def compress_gif(avatar):
+	with Image.open(avatar) as img:
+		# 'P' mode for palette
+		img = img.convert('P', palette=Image.ADAPTIVE, colors=128)  # Reducing colors to 128
+
+		img_byte_arr = BytesIO()
+		img.save(img_byte_arr, format='GIF', optimize=True)
+		img_byte_arr = img_byte_arr.getvalue()
+
+	compressed_avatar = ContentFile(img_byte_arr, name=avatar.name)
+	return compressed_avatar
+
+def crop_gif(avatar, crop_area, name):
+	
+	with Image.open(avatar) as img:
+		frames = []
+		duration = img.info.get('duration', 100)
+		loop = img.info.get('loop', 0)
+
+		for frame in ImageSequence.Iterator(img):
+			cropped_frame = frame.crop(crop_area)
+			frame = frame.resize((frame.size[0] // 2, frame.size[1] // 2))
+			frames.append(cropped_frame)
+
+		gif_bytes_io = BytesIO()
+		frames[0].save(gif_bytes_io, format='GIF', save_all=True, append_images=frames[1:], optimize=True, duration=duration, loop=loop)
+		gif_bytes_io.seek(0)
+		compressed_avatar = ContentFile(gif_bytes_io.getvalue(), name=name)
+
+		return compressed_avatar
+
+def process_avatar(avatar, content_type):
+	image = Image.open(avatar)
+	w, h = image.size
+
+	# compatible if convert to jpeg 
+	# if image.mode in ('RGBA', 'LA', 'P'):
+	# 	image = image.convert('RGB')
+
+	buffer = BytesIO()
 
 	# validate dimensions
-	max_width = max_height = 500
-	# if w != h:
-		# TODO : square
-	# if w > max_width or h > max_height:
-		# TODO : cut
-		# raise Exception(u'Please use an image that is %s x %s pixels or smaller.' % (max_width, max_height)) # TODO : cut the image ? square ? 
+	if w != h:
+		new_size = min(w, h)
+		# TODO : use Middle ?
+		left = (w - new_size)/2
+		top = (h - new_size)/2
+		right = (w + new_size)/2
+		bottom = (h + new_size)/2
+		if content_type == 'image/gif':
+			avatar = crop_gif(avatar, (0, 0, new_size, new_size), avatar.name)
+		else:
+			image = image.crop((0, 0, new_size, new_size))
+			image.save(buffer, format="PNG")
 
-	# validate size
-	if len(avatar) > (2000 * 1024):
-		raise Exception(u'Avatar file size may not exceed 20k.')
+
+
+	# Compress the image if it's larger than 500KB
+	if avatar.size > (500 * 1024):
+		if content_type == 'image/gif':
+			avatar = compress_gif(avatar)
+		else:
+			image.save(buffer, format="PNG", compress_level=9)
+			# image.save(buffer, format="JPEG", quality=85)  # Adjust quality for further compression
+	
+	# Save
+	fileName = 'avatar.gif' if content_type == 'image/gif' else 'avatar.png'
+	if buffer.tell():
+		buffer.seek(0)
+		img_byte_arr = buffer.getvalue()
+		avatar = ContentFile(img_byte_arr, name=fileName)
+	
+	return avatar
 
 # def check_username(username): # TODO : username policy
 # 	if not username:
@@ -105,8 +169,7 @@ def update_user(request, user_id): # TODO : PATCH ?
 				profile = UserToken.objects.get(user=user)
 				if profile.avatar:
 					profile.avatar.delete(save=True)
-				check_avatar(avatar[0])
-				profile.avatar = avatar[0]
+				profile.avatar = process_avatar(avatar[0], request.FILES['avatar'].content_type)
 				profile.save()
 			
 		if new_password:
