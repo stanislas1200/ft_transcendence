@@ -31,7 +31,7 @@ clean:
 .PHONY: fclean
 fclean:
 	$(DOWN) --volumes
-	docker builder prune -a
+	docker builder prune -a -f
 	docker rmi $(docker images -a -q)
 
 .PHONY: logs
