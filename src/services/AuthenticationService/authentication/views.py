@@ -53,6 +53,11 @@ def process_avatar(avatar, content_type):
 	image = Image.open(avatar)
 	w, h = image.size
 
+	if hasattr(avatar, 'size'):
+		avatar_size = avatar.size
+	else:
+		avatar_size = avatar.getbuffer().nbytes
+
 	# compatible if convert to jpeg 
 	# if image.mode in ('RGBA', 'LA', 'P'):
 	# 	image = image.convert('RGB')
@@ -76,7 +81,7 @@ def process_avatar(avatar, content_type):
 
 
 	# Compress the image if it's larger than 500KB
-	if avatar.size > (500 * 1024):
+	if avatar_size > (500 * 1024):
 		if content_type == 'image/gif':
 			avatar = compress_gif(avatar)
 		else:
@@ -221,10 +226,11 @@ def oauth42(request):
 			return JsonResponse({'error': 'Failed to fetch user data'}, status=response.status_code)
 
 		data = response.json()
-		print(data['image']['link'])
+		avatarLink = data['image']['link']
 		username = data['login']
 		email = data['email']
 
+		make_avatar = False
 		# Check if a user with this email already exists
 		if not User.objects.filter(email=email).exists():
 			if User.objects.filter(username=username).exists():
@@ -232,7 +238,8 @@ def oauth42(request):
 				if User.objects.filter(username=username).exists(): # TODO : improve
 					return JsonResponse({'error': 'Username already taken'}, status=400)
 			# Create a new user
-			User.objects.create_user(username=username, email=email)
+			profile = User.objects.create_user(username=username, email=email)
+			make_avatar = True
 
 		user = User.objects.get(email=email)
 		login(request, user)
@@ -240,12 +247,25 @@ def oauth42(request):
 		hashed_token = make_password(token)
 		UserToken.objects.update_or_create(user=user, defaults={'token': hashed_token})
 
+		if make_avatar:
+			profile = UserToken.objects.get(token=hashed_token)
+			response = requests.get(avatarLink)
+			if response.status_code == 200:
+				avatar = response.content
+				avatar = BytesIO(avatar)
+				content_type = response.headers['Content-Type']
+
+				if profile.avatar:
+					profile.avatar.delete(save=True)
+				profile.avatar = process_avatar(avatar, content_type)
+				profile.save()
+
 		response = JsonResponse({'message': f'Logged in successfully as {username}'}, status=201)
 		response.set_cookie(key='token', value=token, secure=True) # max_age=??
 		response.set_cookie(key='userId', value=user.id)
 		return response
 	
-	except:
+	except Exception as e:
 		return JsonResponse({'error': 'An error occurred while processing your request'}, status=500)
 
 @csrf_exempt # Disable CSRF protection for this view
