@@ -221,6 +221,7 @@ def oauth42(request):
 			return JsonResponse({'error': 'Failed to fetch user data'}, status=response.status_code)
 
 		data = response.json()
+		print(data['image']['link'])
 		username = data['login']
 		email = data['email']
 
@@ -239,7 +240,10 @@ def oauth42(request):
 		hashed_token = make_password(token)
 		UserToken.objects.update_or_create(user=user, defaults={'token': hashed_token})
 
-		return JsonResponse({'message': f'Logged in successfully as {username}'}, status=201)
+		response = JsonResponse({'message': f'Logged in successfully as {username}'}, status=201)
+		response.set_cookie(key='token', value=token, secure=True) # max_age=??
+		response.set_cookie(key='userId', value=user.id)
+		return response
 	
 	except:
 		return JsonResponse({'error': 'An error occurred while processing your request'}, status=500)
@@ -280,7 +284,11 @@ def login_view(request):
 			token = secrets.token_hex(16)
 			hashed_token = make_password(token)
 			UserToken.objects.update_or_create(user=user, defaults={'token': hashed_token})
-			return JsonResponse({'token': token, 'UserId': user.id})
+			response = JsonResponse({'message': f'Logged in successfully as {user.username}'}, status=201)
+			response.set_cookie(key='token', value=token, secure=True) # max_age=?? # TODO : cookie
+			response.set_cookie(key='userId', value=user.id) # max_age=??
+			return response
+			# return JsonResponse({'message': f'Logged in successfully as {user.username}', 'token': token, 'UserId': user.id}, status=201)
 		else:
 			return JsonResponse({'error': 'Invalid login credentials'}, status=400)
 	except:
