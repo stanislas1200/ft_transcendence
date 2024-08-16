@@ -120,12 +120,16 @@ def update_user(request, user_id): # TODO : PATCH ?
 		# Check login
 		if request.user.is_authenticated:
 			user = request.user
-		else: # FIXME : token not working ? 
-			auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-			token = auth_header.split(' ')[1] if ' ' in auth_header else ''
-			if not (UserToken.objects.filter(token=token).exists()):
-				return JsonResponse({'error': 'User is not logged in'}, status=400)
-			user = UserToken.objects.get(token=token).User
+		else:
+			status = verify_token(request)
+			if (status == 200):
+				u_id = request.GET.get('UserId')
+				if not u_id:
+					u_id = request.COOKIES.get('userId')
+
+				user = User.objects.get(id=u_id)
+			else:
+				return JsonResponse({'error': 'User is not logged in'}, status=401)
 
 		# Check authorisation
 		if user_id != user.id:
@@ -142,7 +146,7 @@ def update_user(request, user_id): # TODO : PATCH ?
 		first_name = request.POST.get('first_name')
 		last_name = request.POST.get('last_name')
 		current_password = request.POST.get('current_password')
-		new_password = request.POST.get('new_password') # TODO : password for 42 account 
+		new_password = request.POST.get('new_password')
 		avatar = request.FILES.getlist("avatar")
 		
 		
@@ -261,8 +265,8 @@ def oauth42(request):
 				profile.save()
 
 		response = JsonResponse({'message': f'Logged in successfully as {username}'}, status=201)
-		response.set_cookie(key='token', value=token, secure=True) # max_age=??
-		response.set_cookie(key='userId', value=user.id)
+		response.set_cookie(key='token', value=token, secure=True, samesite='Strict') # max_age=??
+		response.set_cookie(key='userId', value=user.id, samesite='None') 
 		return response
 	
 	except Exception as e:
@@ -305,8 +309,8 @@ def login_view(request):
 			hashed_token = make_password(token)
 			UserToken.objects.update_or_create(user=user, defaults={'token': hashed_token})
 			response = JsonResponse({'message': f'Logged in successfully as {user.username}'}, status=201)
-			response.set_cookie(key='token', value=token, secure=True) # max_age=?? # TODO : cookie
-			response.set_cookie(key='userId', value=user.id) # max_age=??
+			response.set_cookie(key='token', value=token, secure=True, samesite='Strict') # max_age=?? # TODO : cookie
+			response.set_cookie(key='userId', value=user.id, secure=True, samesite='None') # max_age=??
 			return response
 			# return JsonResponse({'message': f'Logged in successfully as {user.username}', 'token': token, 'UserId': user.id}, status=201)
 		else:
@@ -333,12 +337,12 @@ def user_to_dict(user):
 	}
 
 def verify_token(request, token=None):
-	user_id = request.GET.get('UserId')
+	user_id = request.GET.get('UserId') # need to be in url to work
 
 	if not token:
-		auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-		token = auth_header.split(' ')[1] if ' ' in auth_header else ''
-
+		token = request.COOKIES.get('token')
+	if not user_id:
+		user_id = request.COOKIES.get('userId')
 	try:
 		user_token = UserToken.objects.get(user_id=user_id)
 		if check_password(token, user_token.token):
@@ -351,13 +355,17 @@ def verify_token(request, token=None):
 @csrf_exempt # Disable CSRF protection for this view
 @require_GET
 def me(request):
-	# session_key = request.session.session_key
+	session_key = request.session.session_key
 	if request.user.is_authenticated:
 		return JsonResponse(user_to_dict(request.user))
-	
+
 	status = verify_token(request)
 	if (status == 200):
-		user = User.objects.get(id=request.GET.get('UserId'))
+		user_id = request.GET.get('UserId') # need to be in url to work
+		if not user_id:
+			user_id = request.COOKIES.get('userId')
+
+		user = User.objects.get(id=user_id)
 		return JsonResponse(user_to_dict(user))
 	elif (status == 401):
 		return JsonResponse({'error': 'Invalid token'}, status=401)
@@ -367,7 +375,7 @@ def me(request):
 # service comunication
 def get_user_from_session(request): # TODO : remove and use /me ?
 	session_key = request.GET.get('session_key')
-	token = request.GET.get('token') # TODO : HTTP_AUTHORIZATION
+	token = request.GET.get('token') # TODO : HTTP_AUTHORIZATION or cookie 
 	if not session_key:
 		status = verify_token(request, token)
 		if (status == 200):

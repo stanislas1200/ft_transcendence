@@ -38,9 +38,8 @@ def leave_game(request):
     try:
         session_key = request.session.session_key
         game_id = request.GET.get('gameId')
-        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-        token = auth_header.split(' ')[1] if ' ' in auth_header else ''
-        user_id = request.GET.get('UserId')
+        token = request.COOKIES.get('token')
+        user_id = request.COOKIES.get('userId')
 
         player = get_player(session_key, token, user_id)
         if player == None:
@@ -109,9 +108,8 @@ def join_game(request):
     try:
         session_key = request.session.session_key
         game_id = request.GET.get('gameId')
-        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-        token = auth_header.split(' ')[1] if ' ' in auth_header else ''
-        user_id = request.GET.get('UserId')
+        token = request.COOKIES.get('token')
+        user_id = request.COOKIES.get('userId')
 
         player = get_player(session_key, token, user_id)
         if player == None:
@@ -131,7 +129,6 @@ def join_game(request):
         if game.status != 'waiting':
             return JsonResponse({'error': 'Game is not waiting for players'}, status=400)
 
-        print(player.name);
         game.players.add(player)  # Add the player to the game
         player = PongPlayer.objects.create(player=player, score=0, n=game.players.count(), token=token)
         game.gameProperty.players.add(player)
@@ -181,10 +178,9 @@ def start_game(request):
     # try:
     # get user
     session_key = request.session.session_key
-    auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-    token = auth_header.split(' ')[1] if ' ' in auth_header else ''
-    user_id = request.POST.get('UserId')
-    
+    token = request.COOKIES.get('token')
+    user_id = request.COOKIES.get('userId')
+
     player = get_player(session_key, token, user_id)
     if player == None:
         return JsonResponse({'error': 'Failed to get player'}, status=400)
@@ -210,11 +206,10 @@ def record_move(request):
     try:    
         session_key = request.session.session_key
         game_id = request.GET.get('gameId')
-        user_id = request.GET.get('userId')
-        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-        token = auth_header.split(' ')[1] if ' ' in auth_header else ''
+        token = request.COOKIES.get('token')
+        user_id = request.COOKIES.get('userId')
 
-        player = get_player(session_key, token, user_id) # FIXME : TypeError: get_player() missing 1 required positional argument: 'user_id'
+        player = get_player(session_key, token, user_id)
         if player == None:
             return JsonResponse({'error': 'Failed to get player'}, status=400)
         
