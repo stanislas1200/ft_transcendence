@@ -58,7 +58,7 @@ class Tournament(models.Model):
     gameName = models.CharField(max_length=255)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField(null=True, blank=True)
-    players = models.ManyToManyField(User)
+    players = models.ManyToManyField(PongPlayer)
     max_player = models.PositiveIntegerField(default=10)
 
 class Match(models.Model):

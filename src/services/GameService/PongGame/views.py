@@ -72,11 +72,12 @@ def join_tournament(request, tournament_id):
 
     tournament = Tournament.objects.get(id=tournament_id)
     if tournament.players.count() < tournament.max_player:
+        player = PongPlayer.objects.create(player=player, n=1, token=token)
         tournament.players.add(player)
         message = "Joined tournament"
         if tournament.players.count() == tournament.max_player:
             make_matches(tournament)
-            message = " and matchmaking started"
+            message += " and matchmaking started"
     else:
         return JsonResponse({"success": False, "message": "Tournament is full"})
     return JsonResponse({"success": True, "message": message})
@@ -93,12 +94,10 @@ def make_matches(tournament):
 def make_pong_tournament_game(player1, player2):
     pong = Pong.objects.create(playerNumber=2, mapId=0)
     game = Game.objects.create(gameName='pong', gameProperty=pong)
-    game.players.add(player1)
-    game.players.add(player2)
-    player = PongPlayer.objects.create(player=player1, n=1, token="remove")
-    game.gameProperty.players.add(player)
-    player = PongPlayer.objects.create(player=player2, n=1, token="remove")
-    game.gameProperty.players.add(player)
+    game.players.add(player1.player)
+    game.players.add(player2.player)
+    game.gameProperty.players.add(player1)
+    game.gameProperty.players.add(player2)
     return game
 
 
