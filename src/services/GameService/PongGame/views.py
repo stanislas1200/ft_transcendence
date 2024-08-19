@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, GameHistory
+from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, GameHistory, Tournament, Match
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST, require_GET
 from django.forms.models import model_to_dict
@@ -8,6 +8,8 @@ import requests
 from django.shortcuts import render
 from .game_manager import update_pong, get_pong_state, move_pong
 from django.core.cache import cache
+import random
+from django.utils import timezone
 
 
 # service comunication
@@ -30,6 +32,105 @@ def get_player(session_key, token, user_id):
         #     player = Player.objects.create(name=user['username'], email=user['email'])
         return user
     return None
+
+@csrf_exempt
+@require_POST
+def create_tournament(request):
+    try:
+        session_key = request.session.session_key
+        token = request.COOKIES.get('token')
+        user_id = request.COOKIES.get('userId')
+        player = get_player(session_key, token, user_id)
+        if player == None:
+            return JsonResponse({'error': 'Failed to get player'}, status=400)
+    except:
+        return JsonResponse({'error': 'Failed to get player'}, status=500)
+
+    try:
+        name = request.POST.get('name')
+        start_date = request.POST.get('start_date')
+        game_name = request.POST.get('game')
+
+        if not all([name, start_date, game_name]):
+            return JsonResponse({"success": False, "message": "Missing required fields."}, status=400)
+        
+        tournament = Tournament.objects.create(max_player= 2, name=name, gameName=game_name, start_date=start_date)
+        return JsonResponse({"success": True, "message": "Tournament created " + str(tournament.id)})
+
+    except Exception as e:
+        return JsonResponse({"success": False, "message": "Failed to create tournament. Error: " + str(e)}, status=500)
+
+@csrf_exempt
+@require_POST
+def join_tournament(request, tournament_id):
+    session_key = request.session.session_key
+    token = request.COOKIES.get('token')
+    user_id = request.COOKIES.get('userId')
+    player = get_player(session_key, token, user_id)
+    if player == None:
+        return JsonResponse({'error': 'Failed to get player'}, status=400)
+
+    tournament = Tournament.objects.get(id=tournament_id)
+    if tournament.players.count() < tournament.max_player:
+        tournament.players.add(player)
+        message = "Joined tournament"
+        if tournament.players.count() == tournament.max_player:
+            make_matches(tournament)
+            message = " and matchmaking started"
+    else:
+        return JsonResponse({"success": False, "message": "Tournament is full"})
+    return JsonResponse({"success": True, "message": message})
+
+def make_matches(tournament):
+    players = list(tournament.players.all())
+    random.shuffle(players)
+    for i in range(0, len(players), 2):
+        if tournament.gameName == 'pong':
+            game = make_pong_tournament_game(players[i], players[i+1])
+        Match.objects.create(tournament=tournament, game=game, match_date=timezone.now())
+
+
+def make_pong_tournament_game(player1, player2):
+    pong = Pong.objects.create(playerNumber=2, mapId=0)
+    game = Game.objects.create(gameName='pong', gameProperty=pong)
+    game.players.add(player1)
+    game.players.add(player2)
+    player = PongPlayer.objects.create(player=player1, n=1, token="remove")
+    game.gameProperty.players.add(player)
+    player = PongPlayer.objects.create(player=player2, n=1, token="remove")
+    game.gameProperty.players.add(player)
+    return game
+
+
+@csrf_exempt
+@require_GET
+def get_tournament(request):
+    tournament_id = request.GET.get('id')
+    if not tournament_id:
+        return JsonResponse({'error': 'Tournament ID is required'}, status=400)
+
+    try:
+        tournament = Tournament.objects.get(id=tournament_id)
+    except Tournament.DoesNotExist:
+        return JsonResponse({'error': 'Tournament not found'}, status=404)
+
+    matches = Match.objects.filter(tournament=tournament)
+    matches_data = [{
+        'id': match.id,
+        'player_one': match.game.players.first().id if match.game.players.exists() else None,
+        'player_two': match.game.players.last().id if match.game.players.exists() and match.game.players.count() > 1 else None,
+        'winner': match.winner.id if match.winner else None,
+    } for match in matches]
+
+    tournament_data = {
+        'id': tournament.id,
+        'name': tournament.name,
+        'start_date': tournament.start_date.strftime('%Y-%m-%d %H:%M:%S'),
+        'end_date': tournament.end_date.strftime('%Y-%m-%d %H:%M:%S') if tournament.end_date else None,
+        'matches': matches_data,
+    }
+    
+    return JsonResponse(tournament_data)
 
 @csrf_exempt # Disable CSRF protection for this view
 @require_POST
