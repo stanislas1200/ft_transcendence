@@ -45,6 +45,7 @@ class Game(models.Model):
     players = models.ManyToManyField(User)
     status = models.CharField(max_length=20, default='waiting')  # pending, ongoing, finished
     gameName = models.CharField(max_length=255)
+    start_date = models.DateTimeField()
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
@@ -66,3 +67,5 @@ class Match(models.Model):
     game = models.ForeignKey(Game, related_name='party', on_delete=models.CASCADE)
     winner = models.ForeignKey(User, related_name='won_matches', on_delete=models.SET_NULL, null=True, blank=True)
     match_date = models.DateTimeField()
+    round_number = models.PositiveIntegerField()
+    next_match = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='previous_matches')

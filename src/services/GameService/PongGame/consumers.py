@@ -13,14 +13,6 @@ from django.core.cache import cache
 class GameConsumer(AsyncWebsocketConsumer):
 	connected_users = 0
 	async def connect(self):
-		# self.game_group_name = 'pong_game'
-		# self.session_id = self.scope['session'].session_key
-		# print(f'Session ID: {self.session_id}')
-
-		# await self.channel_layer.group_add(
-		# 	self.game_group_name,
-		# 	self.channel_name
-		# )None
 		
 		self.game_id = self.scope['url_route']['kwargs']['game_id']
 		self.token = self.scope['url_route']['kwargs']['token'] # TODO : token in header 
@@ -37,6 +29,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		await self.accept()
 
 		if player:
+			# TODO : check game time or tournament 
 			setting = await sync_to_async(setup)(self.game_id, player)
 			data = {
 				"message": "Setup",
@@ -130,6 +123,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				}
 			)
 			if ret:
+				# TODO : add winner to next match if tournament
 				break
 			await asyncio.sleep(1/60)
 

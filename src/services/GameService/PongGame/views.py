@@ -10,6 +10,7 @@ from .game_manager import update_pong, get_pong_state, move_pong
 from django.core.cache import cache
 import random
 from django.utils import timezone
+from django.db import transaction
 
 
 # service comunication
@@ -85,19 +86,40 @@ def join_tournament(request, tournament_id):
 def make_matches(tournament):
     players = list(tournament.players.all())
     random.shuffle(players)
-    for i in range(0, len(players), 2):
-        if tournament.gameName == 'pong':
-            game = make_pong_tournament_game(players[i], players[i+1])
-        Match.objects.create(tournament=tournament, game=game, match_date=timezone.now())
+    total_players = len(players)
+    current_round = 1
+    matches_to_create = total_players // 2
 
+    with transaction.atomic(): # all in db operation
+        while matches_to_create > 0:
+            for _ in range(matches_to_create):
+                if current_round < total_players:
+                    game = make_pong_tournament_game(players[current_round-1], players[current_round])
+                else:
+                    game = make_pong_tournament_game(None, None)
+                Match.objects.create(tournament=tournament, round_number=current_round, game=game, match_date=timezone.now())
+            
+            current_round += 1
+            matches_to_create //= 2
+
+        # Link matches for progression
+        matches_to_link = total_players // 2
+        round_number = 1
+        for i in range(1, matches_to_link):
+            next_round = Match.objects.filter(tournament=tournament, round_number=matches_to_link + i)
+            for _ in range(0, 1):
+                current_round = Match.objects.filter(tournament=tournament, round_number=round_number)
+                current_round.next_match = next_round
+                round_number += 1
 
 def make_pong_tournament_game(player1, player2):
     pong = Pong.objects.create(playerNumber=2, mapId=0)
-    game = Game.objects.create(gameName='pong', gameProperty=pong)
-    game.players.add(player1.player)
-    game.players.add(player2.player)
-    game.gameProperty.players.add(player1)
-    game.gameProperty.players.add(player2)
+    game = Game.objects.create(gameName='pong', gameProperty=pong, start_date=timezone.now())
+    if player1 and player2:
+        game.players.add(player1.player)
+        game.players.add(player2.player)
+        game.gameProperty.players.add(player1)
+        game.gameProperty.players.add(player2)
     return game
 
 
