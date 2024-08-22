@@ -55,7 +55,7 @@ def create_tournament(request):
         if not all([name, start_date, game_name]):
             return JsonResponse({"success": False, "message": "Missing required fields."}, status=400)
         
-        tournament = Tournament.objects.create(max_player= 2, name=name, gameName=game_name, start_date=start_date)
+        tournament = Tournament.objects.create(max_player=4, name=name, gameName=game_name, start_date=start_date)
         return JsonResponse({"success": True, "message": "Tournament created " + str(tournament.id)})
 
     except Exception as e:
@@ -73,7 +73,7 @@ def join_tournament(request, tournament_id):
 
     tournament = Tournament.objects.get(id=tournament_id)
     if tournament.players.count() < tournament.max_player:
-        player = PongPlayer.objects.create(player=player, n=1, token=token)
+        player = PongPlayer.objects.create(player=player, score=0, n=1, token=token)
         tournament.players.add(player)
         message = "Joined tournament"
         if tournament.players.count() == tournament.max_player:
@@ -88,13 +88,18 @@ def make_matches(tournament):
     random.shuffle(players)
     total_players = len(players)
     current_round = 1
-    matches_to_create = total_players // 2
+    print(players[0], flush=True)
+    matches_to_create = total_players // 2 # TODO : check
+    # matches_to_create = 2
 
     with transaction.atomic(): # all in db operation
         while matches_to_create > 0:
-            for _ in range(matches_to_create):
+            for i in range(matches_to_create):
                 if current_round < total_players:
+                # if matches_to_create == 2 and i == 0:
                     game = make_pong_tournament_game(players[current_round-1], players[current_round])
+                    # print("ok", flush=True)
+                    # game = make_pong_tournament_game(players[0], None)
                 else:
                     game = make_pong_tournament_game(None, None)
                 Match.objects.create(tournament=tournament, round_number=current_round, game=game, match_date=timezone.now())
@@ -104,17 +109,26 @@ def make_matches(tournament):
 
         # Link matches for progression
         matches_to_link = total_players // 2
+        # matches_to_link = 1
         round_number = 1
         for i in range(1, matches_to_link):
             next_round = Match.objects.filter(tournament=tournament, round_number=matches_to_link + i)
             for _ in range(0, 1):
                 current_round = Match.objects.filter(tournament=tournament, round_number=round_number)
                 current_round.next_match = next_round
+                # current_round.save()
                 round_number += 1
 
 def make_pong_tournament_game(player1, player2):
-    pong = Pong.objects.create(playerNumber=2, mapId=0)
+    pong = Pong.objects.create(playerNumber=1, mapId=0)
     game = Game.objects.create(gameName='pong', gameProperty=pong, start_date=timezone.now())
+    # if player1:
+    #     print("okok", flush=True)
+    #     game.players.add(player1.player)
+    #     game.gameProperty.players.add(player1)
+    #     game.status = 'playing'
+    #     game.save()
+
     if player1 and player2:
         game.players.add(player1.player)
         game.players.add(player2.player)
@@ -275,7 +289,7 @@ def startPong(request, player, token, gameType):
     if int(playerNumber) < 1:
         return JsonResponse({'error': 'Invalid player number'}, status=400)
     pong = Pong.objects.create(playerNumber=playerNumber, mapId=map)
-    game = Game.objects.create(gameName='pong', gameProperty=pong)
+    game = Game.objects.create(gameName='pong', gameProperty=pong, start_date=timezone.now())
     game.players.add(player)
     player = PongPlayer.objects.create(player=player, score=0, n=1, token=token)
     game.gameProperty.players.add(player)

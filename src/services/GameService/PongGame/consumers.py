@@ -41,56 +41,11 @@ class GameConsumer(AsyncWebsocketConsumer):
 					"error": "Game not found"
 				}
 			await self.send(text_data=json.dumps(data))
-			# game = await sync_to_async(Game.objects.filter(players__in=[player]).first)()
-			# # game = Game.objects.filter(players__in=[player])
-			# if game:
-			# 	# prop = game.gameProperty
-			# 	prop = await sync_to_async(getattr)(game, 'gameProperty')
-			# 	# party = {
-			# 	# 	'ball': {'x': prop.ball.x, 'y': 600/2, 'dx': 5, 'dy': 5},
-			# 	# 	'p1' : {'y': 250},
-			# 	# 	'p2' : {'y': 250}
-			# 	# }
-			# 	if not prop.ball: # TODO : add var + function to setup party
-			# 		prop.ball = {'x': 800/2, 'y': 600/2, 'dx': 5, 'dy': 5}
-			# 	add_party(prop, self.game_id)
-				
 			if not hasattr(self.channel_layer, "players"):
 				self.channel_layer.players = {}
 			if self.game_group_name not in self.channel_layer.players:
 				self.channel_layer.players[self.game_group_name] = {}
-				# new_party(self.game_id)
 				asyncio.create_task(self.game_loop())
-
-			# player = 'temp'
-
-			# save player auth
-			# if 'p1' not in self.channel_layer.players[self.game_group_name]:
-			# 	print(f"player 1 joined: {player.name} {self.token}")
-			# 	self.channel_layer.players[self.game_group_name]['p1'] = {
-			# 		'user': player,
-			# 		'token': self.token
-			# 	}
-			# elif 'p2' not in self.channel_layer.players[self.game_group_name]:
-			# 	print(f"player 2 joined: {player.name} {self.token}")
-			# 	self.channel_layer.players[self.game_group_name]['p2'] = {
-			# 		'user': player,
-			# 		'token': self.token
-			# 	}
-			# cache.set('players', self.channel_layer.players)# TODO: change all this no cache layer and store player in game_manager.py
-
-
-		# GameConsumer.connected_users += 1
-		# while (True):
-		# 	self.game = await sync_to_async(Game.objects.get)(id=self.game_id)
-		# 	print(self.game.status)
-		# 	if self.game.status != 'waiting':
-		# 		break
-		# print(self.game)
-		# print(GameConsumer.connected_users)
-		# if (GameConsumer.connected_users == 1):
-		# 	self.send_game_state_task = asyncio.create_task(self.send_game_state())
-		# 	self.send_game_play_task = asyncio.create_task(self.pong())
 
 	async def disconnect(self, close_code):
 		await self.channel_layer.group_discard(
@@ -98,21 +53,9 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.channel_name
 		)
 
-		# game_id = int(self.game_group_name.split('_')[-1])
-		# print(f'Disconnected from game {game_id}')
-		# GameConsumer.connected_users -= 1
-		# # if (GameConsumer.connected_users == 0):
-		# try:
-		# 	self.send_game_state_task.cancel()
-		# except:
-		# 	pass
-		# try:
-		# 	self.send_game_play_task.cancel()
-		# except:
-		# 	pass
 	async def game_loop(self):
 		while True:
-			ret = await update_pong(self.game_id)
+			ret, game_id = await update_pong(self.game_id) or (None, None)
 			game_state = get_pong_state(self.game_id)
 
 			await self.channel_layer.group_send(
@@ -123,13 +66,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 				}
 			)
 			if ret:
-				# TODO : add winner to next match if tournament
 				break
 			await asyncio.sleep(1/60)
 
 	async def update_game_state(self, event):
 		await self.send(text_data=json.dumps(event['game_state']))
 
+# TODO : + timezone.timedelta(seconds=60)
 	async def receive(self, text_data):
 		try:
 			data = json.loads(text_data)
