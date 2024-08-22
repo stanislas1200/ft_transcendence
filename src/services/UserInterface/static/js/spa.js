@@ -1,7 +1,12 @@
 /********************************* GESTION SPA *********************************/
 
 function loadPage(page) {
-    fetch('/' + page + '/')
+    fetch('/' + page + '/', {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'  // Add this header to indicate an AJAX request
+        }
+    })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
