@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Lexend Deca', sans-serif;
+}
+
+/* :root[data-theme="light"] {
+	--text: #050724;
+	--background: #ffffff;
+	--primary: #121c78;
+	--secondary: #d47aeb;
+	--accent: #bf1da9;
+} */
+
+/* :root[data-theme="dark"] { */
+:root {
+	--text: #dbddfa;
+	--background: #050724;
+	--primary: #8791ed;
+	--secondary: #6e1485;
+	--accent: #e240cd;
+	--black: #000000;
+	--blue: #1B77F3;
+	--red: #CF3C3F;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--background);
+}
+
+.login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 500px;
+  min-height: 100vh;
+  padding: clamp(35px, 8%, 70px);
+}
+
+.wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.login__logo {
+  width: 130px;
+  margin-bottom: 80px;
+}
+
+.login__title {
+  color: var(--secondary);
+  font-size: 1.5em;
+  margin-bottom: 30px;
+}
+
+.login__label {
+  display: block;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.input {
+  width: 100%;
+  background-color: var(--primary);
+  border: 2px solid rgba(0, 0, 0, 0);
+  border-radius: 5px;
+  outline: none;
+  font-size: 0.9em;
+  padding: 25px 10px 10px;
+  font-weight: 600;
+  color: var(--secondary);
+}
+
+.login__label span {
+  position: absolute;
+  font-size: 0.8em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--secondary);
+  margin: 20px;
+  cursor: text;
+  transition: all 200ms ease;
+}
+
+.input:focus {
+  background-color: var(--text);
+  border: 2px solid var(--secondary);
+}
+
+.login__label .span-active {
+  font-size: 0.7em;
+  margin: 8px 10px;
+}
+
+
+.login__button {
+  width: 60px;
+  height: 60px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--red);
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 60px;
+}
+
+.login__button svg {
+  fill: white;
+}
+
+.login__button:disabled {
+  cursor: auto;
+  background-color: white;
+  border: 2px solid var(--primary);
+}
+
+.login__button:disabled svg {
+  fill: var(--grey)
+}
