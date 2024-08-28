@@ -7,15 +7,17 @@
 }
 :root[data-theme="dark"] {
   --text: #dbddfa;
-  --background: #000000;
+  --background: #050724;
   --primary: #8791ed;
   --secondary: #6e1485;
   --accent: #e240cd;
 }
 
 body {
-  background-color: #838383;
+  background-color: var(--background);
 }
+
+
 
 .themeToggle {
   color: #bbb;
