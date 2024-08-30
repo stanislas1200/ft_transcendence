@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.decorators import login_required
 import requests, secrets, os
-from .models import UserToken
+from .models import UserToken, Friendship, FriendRequest
 
 from django.core.files.images import get_image_dimensions
 
@@ -17,6 +17,113 @@ from PIL import Image, ImageSequence
 from io import BytesIO
 from django.core.files.base import ContentFile
 
+from django.shortcuts import get_object_or_404
+
+def send_friend_request(request, user_id):
+	if request.user.is_authenticated:
+		sender = request.user
+	else:
+		status = verify_token(request)
+		if (status == 200):
+			u_id = request.GET.get('UserId')
+			if not u_id:
+				u_id = request.COOKIES.get('userId')
+
+			sender = User.objects.get(id=u_id)
+		else:
+			return JsonResponse({'error': 'User is not logged in'}, status=401)
+		
+	receiver = get_object_or_404(User, id=user_id)
+	if sender == receiver:
+		return JsonResponse({'error': 'Users cannot send requests to themselves'}, status=403)
+	
+	if Friendship.objects.filter(user1=sender, user2=receiver).exists() or Friendship.objects.filter(user1=receiver, user2=sender).exists():
+		return JsonResponse({'error': 'Users are already friends'}, status=409)
+	
+	friend_request, created = FriendRequest.objects.get_or_create(sender=sender, receiver=receiver)
+	
+	if created:
+		return JsonResponse({'message': 'Successfully sent request'})
+	else:
+		return JsonResponse({'error': 'Friend request already exists'}, status=409)
+	
+def accept_friend_request(request, request_id):
+	if request.user.is_authenticated:
+		user = request.user
+	else:
+		status = verify_token(request)
+		if (status == 200):
+			u_id = request.GET.get('UserId')
+			if not u_id:
+				u_id = request.COOKIES.get('userId')
+
+			user = User.objects.get(id=u_id)
+		else:
+			return JsonResponse({'error': 'User is not logged in'}, status=401)
+	
+	friend_request = get_object_or_404(FriendRequest, id=request_id)
+	if friend_request.receiver == user:
+		Friendship.objects.create(user1=friend_request.sender, user2=friend_request.receiver)
+		friend_request.delete()
+		return JsonResponse({'message': 'Successfully accepted request'})
+		
+	return JsonResponse({'error': "You can't accept this request"}, status=403)
+
+def decline_friend_request(request, request_id):
+	if request.user.is_authenticated:
+		user = request.user
+	else:
+		status = verify_token(request)
+		if (status == 200):
+			u_id = request.GET.get('UserId')
+			if not u_id:
+				u_id = request.COOKIES.get('userId')
+
+			user = User.objects.get(id=u_id)
+		else:
+			return JsonResponse({'error': 'User is not logged in'}, status=401)
+		
+	friend_request = get_object_or_404(FriendRequest, id=request_id)
+	if friend_request.receiver == user:
+		friend_request.delete()
+		return JsonResponse({'message': 'Successfully declined request'})
+		
+	return JsonResponse({'error': "You can't decline this request"}, status=403)
+
+def list_friends(request, user_id):
+	# TODO: private ??
+	user = get_object_or_404(User, id=user_id)
+	# friendships = Friendship.objects.filter(user1=user) | Friendship.objects.filter(user2=user)
+	# friends = []
+	# for friendship in friendships:
+	# 	if friendship.user1 == user:
+	# 		friends.append(friendship.user2)
+	# 	else:
+	# 		friends.append(friendship.user1)
+
+	friends = user.friends
+	return JsonResponse({'friends': [{'id': friend.id, 'username': friend.username} for friend in friends]})
+
+def list_friend_requests(request):
+	if request.user.is_authenticated:
+		user = request.user
+	else:
+		status = verify_token(request)
+		if (status == 200):
+			u_id = request.GET.get('UserId')
+			if not u_id:
+				u_id = request.COOKIES.get('userId')
+
+			user = User.objects.get(id=u_id)
+		else:
+			return JsonResponse({'error': 'User is not logged in'}, status=401)
+		
+	received_requests = FriendRequest.objects.filter(receiver=user)
+	sent_requests = FriendRequest.objects.filter(sender=user)
+	return JsonResponse({
+		'received_requests': [{'id': request.id, 'sender': request.sender.username} for request in received_requests],
+		'sent_requests': [{'id': request.id, 'receiver': request.receiver.username} for request in sent_requests]
+	})
 
 def compress_gif(avatar):
 	with Image.open(avatar) as img:
