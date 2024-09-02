@@ -412,3 +412,8 @@ body {
 .error__close path {
   fill: #fff;
 }
+
+a {
+  font-size: small;
+  color: black;
+}
