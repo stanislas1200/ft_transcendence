@@ -81,6 +81,13 @@
   text-decoration-line: underline;
 }
 
+.login-buttons {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+  margin-top: 60px;
+}
+
 .login__button {
   width: 60px;
   height: 60px;
@@ -92,11 +99,11 @@
   border-radius: 20px;
   border: none;
   cursor: pointer;
-  margin-top: 60px;
 }
 
 .login__button svg {
   fill: white;
+  transform: scale(1.25);
 }
 
 .login__button:disabled {
@@ -107,4 +114,22 @@
 
 .login__button:disabled svg {
   fill: var(--secondary)
+}
+
+.ft-button {
+  width: 60px;
+  height: 60px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--secondary);
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+.ft-button img {
+  width: 150%;
+  height: 150%;
 }
