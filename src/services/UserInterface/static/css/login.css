@@ -36,7 +36,7 @@
 
 .input {
   width: 100%;
-  background-color: var(--background);
+  background-color: transparent;
   border: 2px solid var(--secondary);
   border-radius: 5px;
   outline: none;
@@ -54,11 +54,7 @@
   color: var(--secondary);
   margin: 20px;
   cursor: text;
-  transition: all 200ms ease;
-}
-
-.input:focus {
-  background-color: transparent;
+  transition: font-size 200ms ease, margin 200ms ease;
 }
 
 .login__label .span-active {
