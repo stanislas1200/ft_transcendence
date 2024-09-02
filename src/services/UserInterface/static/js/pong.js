@@ -1,4 +1,4 @@
-document.getElementById('loginForm').addEventListener('submit', function(event) {
+document.getElementById('loginForm').addEventListener('submit', function (event) {
 	event.preventDefault(); // Prevent the form from submitting the traditional way
 
 	var username = document.getElementById('username').value;
@@ -67,8 +67,8 @@ function connect() {
 	socket.addEventListener('error', function (event) {
 		console.log('Error: ', event);
 	});
-	
-	document.addEventListener('keydown', function(event) {
+
+	document.addEventListener('keydown', function (event) {
 		var direction;
 		if (event.key === "ArrowUp") {
 			direction = "up";
@@ -84,22 +84,22 @@ function connect() {
 		}
 	});
 }
-c=document.getElementById('c').getContext('2d')
-c.fillStyle="#FFF"
-c.font="60px monospace"
-w=s=1
-p=q=a=b=0
-m=n=190
-x=400;y=300
-u=-5;v=3
+c = document.getElementById('c').getContext('2d')
+c.fillStyle = "#FFF"
+c.font = "60px monospace"
+w = s = 1
+p = q = a = b = 0
+m = n = 190
+x = 400; y = 300
+u = -5; v = 3
 function draw() {
 
-	c.clearRect(0,0,800,600)
-	for(i=5;i<600;i+=20)c.fillRect(400,i,4,10)
-	c.fillText(a+" "+b,350,60)
-	c.fillRect(20,m,10,80)
-	c.fillRect(770,n,10,80)
-	c.fillRect(x,y,10,10)
+	c.clearRect(0, 0, 800, 600)
+	for (i = 5; i < 600; i += 20)c.fillRect(400, i, 4, 10)
+	c.fillText(a + " " + b, 350, 60)
+	c.fillRect(20, m, 10, 80)
+	c.fillRect(770, n, 10, 80)
+	c.fillRect(x, y, 10, 10)
 }
 
 function gameLoop() {

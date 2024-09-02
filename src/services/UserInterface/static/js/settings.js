@@ -1,42 +1,42 @@
-document.getElementById('updateInfo').addEventListener('click', function(event) {
-	console.log("wesh on passe ici");
-	event.preventDefault(); // Prevent the default form submission
+document.getElementById('updateInfo').addEventListener('click', function (event) {
+    console.log("wesh on passe ici");
+    event.preventDefault(); // Prevent the default form submission
 
 
-	//Verif Of Email
-	const email = document.getElementById('inputEmail').value;
-	if (!validateEmail(email)) {
-		addErrorSettings("Adresse e-mail invalide.");
-		return ;
-	}
+    //Verif Of Email
+    const email = document.getElementById('inputEmail').value;
+    if (!validateEmail(email)) {
+        addErrorSettings("Adresse e-mail invalide.");
+        return;
+    }
 
-	const formData = new FormData();
-	const userId = getCookie('userId');
-	// Append form data
-	formData.append('username', document.getElementById('inputUsername').value);
-	formData.append('email', document.getElementById('inputEmail').value);
-	formData.append('current_password', document.getElementById('inputOldPass').value);
-	formData.append('new_password', document.getElementById('inputNewPass').value);
-	// formData.append('avatar', document.getElementById('avatar').files[0]);
+    const formData = new FormData();
+    const userId = getCookie('userId');
+    // Append form data
+    formData.append('username', document.getElementById('inputUsername').value);
+    formData.append('email', document.getElementById('inputEmail').value);
+    formData.append('current_password', document.getElementById('inputOldPass').value);
+    formData.append('new_password', document.getElementById('inputNewPass').value);
+    // formData.append('avatar', document.getElementById('avatar').files[0]);
 
-	// Create a new XMLHttpRequest
-	const xhr = new XMLHttpRequest();
-	xhr.open('POST', `https://localhost:8000/users/${userId}/edit`, true);
+    // Create a new XMLHttpRequest
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `https://localhost:8000/users/${userId}/edit`, true);
 
-	xhr.onload = function() {
-		if (xhr.status === 200) {
-			console.log('Success:', xhr.responseText);
-		} else {
-			console.error('Error:', xhr.statusText);
-		}
-	};
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            console.log('Success:', xhr.responseText);
+        } else {
+            console.error('Error:', xhr.statusText);
+        }
+    };
 
-	xhr.onerror = function() {
-		console.error('Request Error');
-	};
+    xhr.onerror = function () {
+        console.error('Request Error');
+    };
 
-	// Send the FormData
-	xhr.send(formData);
+    // Send the FormData
+    xhr.send(formData);
 });
 
 
