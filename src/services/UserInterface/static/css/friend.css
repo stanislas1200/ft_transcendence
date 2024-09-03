@@ -1,0 +1,134 @@
+/* Styles de base */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Container pour la SPA */
+.spa-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    border: 1px solid #ddd;
+}
+
+/* Colonne de gauche pour la liste des amis */
+.sidebar {
+    width: 30%;
+    background-color: #f4f4f4;
+    border-right: 1px solid #ddd;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Liste des amis */
+#friend-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+#friend-list li {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#friend-list li:hover {
+    background-color: #e0e0e0;
+}
+
+.friend-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.last-message-preview {
+    color: #666;
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    align-self: flex-end;
+    margin-top: auto;
+    text-align: right;
+    /* Aligne le texte à droite */
+}
+
+/* Zone de chat */
+.chat-area {
+    flex: 1;
+    padding: 10px;
+    background-color: #fff;
+    border-left: 1px solid #ddd;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Style des messages */
+.message {
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.received {
+    background-color: #f1f0f0;
+    align-self: flex-start;
+}
+
+.sent {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end;
+}
+
+/* Barre de saisie pour les messages */
+.message-input {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    background-color: #f4f4f4;
+}
+
+#message-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    resize: none;
+    /* Empêche le redimensionnement */
+    margin-right: 10px;
+    font-size: 1em;
+    outline: none;
+}
+
+#message-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+#send-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+#send-button:hover {
+    background-color: #0056b3;
+}
