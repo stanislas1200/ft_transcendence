@@ -288,11 +288,23 @@ def startPong(request, player, token, gameType):
         return JsonResponse({'error': 'Missing setting'}, status=400)
     if int(playerNumber) < 1:
         return JsonResponse({'error': 'Invalid player number'}, status=400)
+
     pong = Pong.objects.create(playerNumber=playerNumber, mapId=map)
     game = Game.objects.create(gameName='pong', gameProperty=pong, start_date=timezone.now())
     game.players.add(player)
     player = PongPlayer.objects.create(player=player, score=0, n=1, token=token)
     game.gameProperty.players.add(player)
+
+    # Ai user
+    if int(playerNumber) == 1:
+        if not User.objects.filter(username='AI').exists():
+            player = User.objects.create_user(username='AI')
+        else:
+            player = User.objects.get(username='AI')
+
+        game.players.add(player)
+        player = PongPlayer.objects.create(player=player, score=0, n=2, token='AI')
+        game.gameProperty.players.add(player)
 
     game.status = 'waiting' if int(playerNumber) > 1 else 'playing'
 
@@ -322,8 +334,8 @@ def start_game(request):
         return JsonResponse({'error': 'Failed to get player'}, status=400)
     
     # Check if player is already in a game
-    if Game.objects.filter(players__in=[player]).exists():
-        return JsonResponse({'error': 'Player already in a game'}, status=400)
+    # if Game.objects.filter(players__in=[player]).exists():
+    #     return JsonResponse({'error': 'Player already in a game'}, status=400)
     
     # get requested game:
     gameName = request.POST.get('game')
@@ -413,12 +425,26 @@ def get_history(request):
     # Get the history for the player
     try:
         user_id = request.GET.get('UserId')
+        game_id = request.GET.get('GameId')
         if not user_id:
             return JsonResponse({'error': 'Missing id'}, status=400)
         
         if not User.objects.filter(id=user_id).exists():
             return JsonResponse({'error': 'Player not found'}, status=404)
         
+        if game_id:
+            game = Game.objects.filter(id=game_id).first()
+            ret = []
+            ret.append(game.gameName)
+            game = game.gameProperty
+            for p in game.players.all():
+                info = {}
+                info['id'] = p.player.id
+                info['name'] = p.player.username
+                info['score'] = p.score
+                ret.append(info)
+            return JsonResponse(ret, safe=False)
+
         history = GameHistory.objects.filter(player_id=user_id)
 
         history_list = []
@@ -428,5 +454,6 @@ def get_history(request):
             history_list.append(hist_dict)
         return JsonResponse(history_list, safe=False)
     
-    except:
+    except Exception as e:
+        print(e, flush=True)
         return JsonResponse({'error': 'Error'}, status=500)

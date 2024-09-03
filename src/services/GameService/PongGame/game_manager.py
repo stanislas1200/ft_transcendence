@@ -153,23 +153,23 @@ class Party:
 		}
 
 	def add_ai_player(self):
-		self.players.append({
-			'name': 'AI',
-			'id': 0,
-			'score': 0,
-			'n': 2,
-			'token': 'AI',
-			'hit': 0,
-			'ai': True
-		})
+		# self.players.append({
+		# 	'name': 'AI',
+		# 	'id': 0,
+		# 	'score': 0,
+		# 	'n': 2,
+		# 	'token': 'AI',
+		# 	'hit': 0,
+		# 	'ai': True
+		# })
 		threading.Thread(target=ai_play, args=(self,)).start()
 	
 	def save(self):
 		try:
 			game = Game.objects.get(id=self.game_id)  # Get the game
 			for player in self.players:
-				if player['ai']:
-					continue
+				# if player['ai']:
+					# continue
 				# save player score
 				p = PongPlayer.objects.get(id=player['id'])
 				p.score = player['score']
@@ -189,8 +189,7 @@ class Party:
 				stats.save()
 
 				# save history
-				pong = game.gameProperty
-				GameHistory.objects.get_or_create(player=p, game=pong, score=player['score'])
+				GameHistory.objects.get_or_create(player=p, game=game, score=player['score'])
 			# if tournament add winner to next match # TODO : check if tournament
 			if Match.objects.filter(game=game).exists():
 				print("ok", flush=True)
@@ -206,7 +205,7 @@ class Party:
 			else:
 				print("ko", flush=True)
 			# delete game
-			game.delete()
+			# game.delete()
 		except Exception as e:
 			print(e, flush=True)
 			game.delete()
@@ -235,7 +234,7 @@ def setup(game_id, player):
 		party = Party(prop, game_id)
 		if party.player_number == 1:
 			party.add_ai_player()
-		if party.player_number == prop.players.count():
+		if party.player_number <= prop.players.count():
 			party.state = 'playing'
 		party_list[game_id] = party
 		
