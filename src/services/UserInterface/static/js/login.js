@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const handleChange = () => {
       const [username, password] = inputs;
 
-      if (username.value && password.value.length) {
+      if (username.value && password.value) {
           button.removeAttribute('disabled');
       } else {
           button.setAttribute('disabled', '');

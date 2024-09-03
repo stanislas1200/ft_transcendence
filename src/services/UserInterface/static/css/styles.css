@@ -9,11 +9,11 @@
 
 :root[data-theme="light"] {
 	--text: #050724;
-	--background: white;
+	--background: #fafafa;
 	--primary: #8791ed;
-	--primary: #121c78;
+	/* --primary: #121c78; */
 	--secondary: #d47aeb;
-	--accent: #bf1da9;
+	--accent: red;
 }
 
 :root[data-theme="dark"] {
@@ -21,7 +21,7 @@
 	--background: #050724;
 	--primary: #8791ed;
 	--secondary: #7b1b93;
-	--accent: #e240cd;
+	--accent: #e24091;
 }
 
 main {

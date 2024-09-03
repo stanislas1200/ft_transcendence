@@ -1,0 +1,87 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+
+<head>
+	<meta charset="UTF">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/themeToggle.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/register.css' %}">
+	<script src="{% static 'js/themeToggle.js' %}"></script>
+	<script src="{% static 'js/register.js' %}"></script>
+	<title>Register</title>
+</head>
+
+<body>
+	<main>
+		<label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn" type="checkbox">
+			<input type="checkbox" id="themeToggle" class="themeToggleInput" />
+			<svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" stroke="none">
+				<mask id="moon-mask">
+					<rect x="0" y="0" width="20" height="20" fill="white"></rect>
+					<circle cx="11" cy="3" r="8" fill="black"></circle>
+				</mask>
+				<circle class="sunMoon" cx="10" cy="10" r="8" mask="url(#moon-mask)"></circle>
+				<g>
+					<circle class="sunRay sunRay1" cx="18" cy="10" r="1.5"></circle>
+					<circle class="sunRay sunRay2" cx="14" cy="16.928" r="1.5"></circle>
+					<circle class="sunRay sunRay3" cx="6" cy="16.928" r="1.5"></circle>
+					<circle class="sunRay sunRay4" cx="2" cy="10" r="1.5"></circle>
+					<circle class="sunRay sunRay5" cx="6" cy="3.1718" r="1.5"></circle>
+					<circle class="sunRay sunRay6" cx="14" cy="3.1718" r="1.5"></circle>
+				</g>
+			</svg>
+		</label>
+		<section class="register">
+			<div class="wrapper">
+				<h1 class="register-title">Register</h1>
+				<div class="names-label">
+					<label class="register-label">
+						<span>first name</span>
+						<input type="text" name="first-name" class="input">
+					</label>
+					<label class="register-label">
+						<span>last name</span>
+						<input type="text" name="last-name" class="input">
+					</label>
+				</div>
+				<label class="register-label">
+					<span>username</span>
+					<input type="text" name="username" class="input">
+				</label>
+				<label class="register-label">
+					<span>email</span>
+					<input type="email" name="email" class="input">
+				</label>
+				<label class="register-label">
+					<span>password</span>
+					<input type="password" name="password" class="input">
+				</label>
+				<label class="register-label">
+					<span id="password-confirm-span">confirm password</span>
+					<input type="password" name="password-confirm" class="input">
+				</label>
+				<label class="text-buttons">
+					<a href="https://localhost:8003/lologin/" class="text-button">Go back to login page</a>
+				</label>
+				<label class="register-buttons">
+					<button type="button" class="ft-button">
+						<img alt="42"
+							src="https://profile.intra.42.fr/assets/42_logo-7dfc9110a5319a308863b96bda33cea995046d1731cebb735e41b16255106c12.svg">
+					</button>
+					<button type="button" class="register-button" disabled>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+							<path
+								d="M438.6 278.6l-160 160C272.4 444.9 264.2 448 256 448s-16.38-3.125-22.62-9.375c-12.5-12.5-12.5-32.75 0-45.25L338.8 288H32C14.33 288 .0016 273.7 .0016 256S14.33 224 32 224h306.8l-105.4-105.4c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0l160 160C451.1 245.9 451.1 266.1 438.6 278.6z" />
+						</svg>
+					</button>
+				</label>
+			</div>
+		</section>
+	</main>
+</body>
+
+</html>

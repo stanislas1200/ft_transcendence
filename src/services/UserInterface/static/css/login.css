@@ -17,11 +17,6 @@
   justify-content: center;
 }
 
-.login__logo {
-  width: 130px;
-  margin-bottom: 80px;
-}
-
 .login__title {
   color: var(--secondary);
   font-size: 1.5em;

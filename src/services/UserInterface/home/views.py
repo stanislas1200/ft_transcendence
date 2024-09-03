@@ -12,6 +12,9 @@ def master(request):
 # def game(request):
 #     return render(request, 'home/game.html')
 
+def register(request):
+    return render(request, 'home/register.html')
+
 def lologin(request):
     return render(request, 'home/lologin.html')
 
