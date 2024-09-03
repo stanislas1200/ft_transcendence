@@ -259,14 +259,14 @@ def update_user(request, user_id): # TODO : PATCH ?
 		
 
 		# Update User TODO : all user info
-		if username: # TODO : use password ?? 
+		if username and username != user.username: # TODO : use password ?? 
 			# if check_username(username): # TODO : check all user info
 			# 	return JsonResponse({'error': 'Bad username'}, status=400)
 			validate_unicode_slug(username)
 			if User.objects.filter(username=username).exists():
 				return JsonResponse({'error': 'Username already taken'}, status=400)
 			user.username = username
-		if email: # TODO : use password
+		if email and email != user.email: # TODO : use password
 			validate_email(email)
 			if User.objects.filter(email=email).exists():
 				return JsonResponse({'error': 'Email already taken'}, status=400)
@@ -383,16 +383,21 @@ def oauth42(request):
 @require_POST
 def register(request): # TODO : login at same time ?
 	try:
+		first_name = request.POST.get('first_name')
+		last_name = request.POST.get('last_name')
 		username = request.POST.get('username')
 		password = request.POST.get('password')
+		cpassword = request.POST.get('c_password')
 		email = request.POST.get('email')
-		if not username or not password or not email:
+		if not username or not password or not email or not first_name or not last_name or not cpassword:
 			return JsonResponse({'error': 'Missing required fields'}, status=400)
 		if User.objects.filter(username=username).exists():
 			return JsonResponse({'error': 'Username already taken'}, status=400)
 		if User.objects.filter(email=email).exists():
 			return JsonResponse({'error': 'Email already taken'}, status=400)
-		User.objects.create_user(username=username, password=password, email=email)
+		if cpassword != password:
+			return JsonResponse({'error': 'password not same'})
+		User.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name)
 		return JsonResponse({'message': 'User registered successfully'})
 	except:
 		return JsonResponse({'error': 'Failed to register user'}, status=400)
