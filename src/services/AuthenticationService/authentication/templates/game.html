@@ -1,73 +1,279 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-    <link rel="stylesheet" type="text/css" href="main.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGODIN Test</title>
+    <style>
+        :root {
+            --text: #dbddfa;
+            --background: #050724;
+            --primary: #8791ed;
+            --secondary: #6e1485;
+            --accent: #e240cd;
+
+            color: var(--text);
+            background-color: var(--background);
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--background);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        canvas {
+            margin-top: 20px;
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-gap: 20px;
+            padding: 20px;
+            height: 100%;
+            width: 100%;
+        }
+
+        .container2 {
+            display: flex;
+            grid-gap: 20px;
+            padding: 20px;
+            height: 100%;
+            width: 100%;
+        }
+
+        .box {
+            background-color: var(--background);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px var(--secondary);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 350px;
+        }
+
+        .box h2 {
+            margin-top: 0;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .box form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .box input[type="text"],
+        .box input[type="password"],
+        .box input[type="email"] {
+            padding: 10px;
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            flex: 1;
+        }
+
+        .box button {
+            padding: 10px;
+            background-color: var(--primary);
+            color: var(--text);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            flex: 1;
+        }
+
+        .box button:hover {
+            background-color: var(--secondary);
+        }
+
+        .response {
+            background-color: var(--background);
+            border: 2px solid var(--accent);
+            border-radius: 4px;
+            margin-top: 20px;
+            width: 100%;
+            height: 600px;
+        }
+    </style>
 </head>
-<body></body>
-<div class="app-container">
 
-	<div class="app-content">
-	  
-	  <div class="game-flex">
-		<div class="game-item">
-			<canvas id="c" width="800" height="600" style="background:#000"></canvas>
-		</div>
-		<div class="game-item">
-			<form id="loginForm">
-				<input type="text" id="username" name="username" placeholder="Username" required />
-				<input type="password" id="password" name="password" placeholder="Password" required />
-				<button type="submit">Login</button>
-			</form>
-
-            <div>
-                Register
-            </div>
-
-            <form id="registerForm">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="usernameR" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="passwordR" name="password" required>
-                </div>
-                <div class="form-group">
-                    <label for="confirmPassword">Confirm Password</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" required>
-                </div>
-                <div class="form-group">
-                    <button type="submit">Register</button>
-                </div>
-                <div class="error" id="error"></div>
+<body>
+    <div class="container2">
+        <div style="width: 800px">
+            <canvas id="c" width="800" height="600" style="background:#000"></canvas>
+        </div>
+        <div class="response" id="responseBox"></div>
+    </div>
+    <input type="text" id="partyId" name="partyId"><br>
+    <input type="button" value="Connect" onclick="connect()">
+    <div class="container">
+        <div class="box">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit">Submit</button>
             </form>
+        </div>
+        <div class="box">
+            <h2>Register</h2>
+            <form id="registerForm">
+                <input type="text" id="usernameR" placeholder="Username" required>
+                <input type="password" id="passwordR" placeholder="Password" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div class="box">
+            <h2>Create Tournament</h2>
+            <form id="createT">
+                <input type="text" id="name" placeholder="Name" required>
+                <input type="text" id="game" placeholder="Game" required>
+                <!-- Uncomment and adjust as needed -->
+                <!-- <input type="datetime-local" id="time" name="time" required> -->
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div class="box">
+            <h2>Join Tournament</h2>
+            <form id="joinT">
+                <input type="text" id="TID" placeholder="TID" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div class="box">
+            <h2>Get Tournament</h2>
+            <form id="getT">
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
 
-            <input type="button" value="stats" onclick="getStats()">
+    <script src="pong.js"></script>
+    <script>
+        function formatDate(date) {
+            // Get components of the date
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+
+            // Construct the formatted date string
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+        }
 
 
-    <h1>Update User</h1>
-    <form id="updateForm" enctype="multipart/form-data">
-        <!-- <input type="text" id="usernameEdit" name="username" placeholder="Username" required><br>
-        <input type="email" id="email" name="email" placeholder="Email" required><br> -->
-        <input type="file" id="avatar" name="avatar" accept="image/*"><br>
-        <button type="submit">Submit</button>
-    </form>
+        document.getElementById('joinT').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
 
-			<h2>Enter Party ID</h2>
+            tid = document.getElementById('TID').value;
 
-			<form id="partyForm">
-				<label for="partyId">Party ID:</label><br>
-				<input type="text" id="partyId" name="partyId"><br>
-				<input type="button" value="Connect" onclick="connect()">
-			</form>
-		</div>
-	  </div>
-	</div>
-  </div>
-  <script src="pong.js"></script>
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', `https://localhost:8001/game/join_tournament/${tid}`, true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.withCredentials = true;
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        console.log('Login Success:', xhr.responseText);
+                        document.getElementById('responseBox').textContent = JSON.stringify(xhr.responseText, null, 2);
+                    } else {
+                        console.error('Login Error:', xhr.responseText);
+                        document.getElementById('responseBox').textContent = JSON.stringify(xhr.responseText, null, 2);
+                    }
+                }
+            };
+            xhr.send();
+        });
+        document.getElementById('createT').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+
+            name = document.getElementById('game').value;
+            // time = document.getElementById('time').value;
+            const time = formatDate(new Date());
+            game = document.getElementById('game').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://localhost:8001/game/create_tournament', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.withCredentials = true;
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        console.log('Login Success:', xhr.responseText);
+                        document.getElementById('responseBox').textContent = JSON.stringify(xhr.responseText, null, 2);
+                    } else {
+                        console.error('Login Error:', xhr.responseText);
+                        document.getElementById('responseBox').textContent = JSON.stringify(xhr.responseText, null, 2);
+                    }
+                }
+            };
+            xhr.send('name=' + encodeURIComponent(name) + '&start_date=' + encodeURIComponent(time) + '&game=' + encodeURIComponent(game));
+        });
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://localhost:8000/login', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 201) {
+                        console.log('Login Success:', xhr.responseText);
+                        document.getElementById('responseBox').textContent = JSON.stringify(xhr.responseText, null, 2);
+                    } else {
+                        console.error('Login Error:', xhr.responseText);
+                        document.getElementById('responseBox').textContent = JSON.stringify(xhr.responseText, null, 2);
+                    }
+                }
+            };
+            xhr.send('username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password));
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+
+            // Get form data
+            const username = document.getElementById('usernameR').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('passwordR').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://localhost:8000/register', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        console.log(xhr.responseText)
+                        document.getElementById('responseBox').textContent = JSON.stringify(response.json(), null, 2);
+                        return response.json();
+                    } else {
+                        document.getElementById('responseBox').textContent = JSON.stringify(response.json(), null, 2);
+                        throw new Error('Failed to register');
+                    }
+                }
+            };
+            xhr.send('username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password) + '&email=' + encodeURIComponent(email));
+        });
+    </script>
+
 </body>
+
 </html>

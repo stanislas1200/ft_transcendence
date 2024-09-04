@@ -1,23 +1,4 @@
-document.getElementById('loginForm').addEventListener('submit', function (event) {
-	event.preventDefault(); // Prevent the form from submitting the traditional way
 
-	var username = document.getElementById('username').value;
-	var password = document.getElementById('password').value;
-
-	var xhr = new XMLHttpRequest();
-	xhr.open('POST', 'https://localhost:8000/login', true);
-	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-	xhr.onreadystatechange = function () {
-		if (xhr.readyState === 4) {
-			if (xhr.status === 201) {
-				console.log('Login Success:', xhr.responseText);
-			} else {
-				console.error('Login Error:', xhr.responseText);
-			}
-		}
-	};
-	xhr.send('username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password));
-});
 
 function getStats() {
 	var userId = getCookie('userId');
@@ -36,67 +17,6 @@ function getStats() {
 	xhr.send();
 }
 
-document.getElementById('updateForm').addEventListener('submit', function(event) {
-	event.preventDefault(); // Prevent the default form submission
-	
-	const formData = new FormData();
-	const userId = getCookie('userId');
-	// Append form data
-	// formData.append('username', document.getElementById('usernameEdit').value);
-	// formData.append('email', document.getElementById('email').value);
-	formData.append('avatar', document.getElementById('avatar').files[0]);
-
-	// Create a new XMLHttpRequest
-	const xhr = new XMLHttpRequest();
-	xhr.open('POST', `https://localhost:8000/users/${userId}/edit`, true);
-
-	xhr.onload = function() {
-		if (xhr.status === 200) {
-			console.log('Success:', xhr.responseText);
-		} else {
-			console.error('Error:', xhr.statusText);
-		}
-	};
-
-	xhr.onerror = function() {
-		console.error('Request Error');
-	};
-
-	// Send the FormData
-	xhr.send(formData);
-});
-
-
-document.getElementById('registerForm').addEventListener('submit', function (event) {
-	event.preventDefault(); // Prevent the form from submitting the traditional way
-
-	// Get form data
-	const username = document.getElementById('usernameR').value;
-	const email = document.getElementById('email').value;
-	const password = document.getElementById('passwordR').value;
-	const confirmPassword = document.getElementById('confirmPassword').value;
-	const errorDiv = document.getElementById('error');
-
-	// Basic client-side validation
-	if (password !== confirmPassword) {
-		errorDiv.textContent = "Passwords do not match!";
-		return;
-	}
-	var xhr = new XMLHttpRequest();
-	xhr.open('POST', 'https://localhost:8000/register', true);
-	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-	xhr.onreadystatechange = function () {
-		if (xhr.readyState === 4) {
-			if (xhr.status === 200) {
-				return response.json();
-			} else {
-				throw new Error('Failed to register');
-			}
-		}
-	};
-	xhr.send('username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password) + '&email=' + encodeURIComponent(email));
-});
-
 function getCookie(name) {
 	var value = "; " + document.cookie;
 	var parts = value.split("; " + name + "=");
@@ -107,9 +27,10 @@ function connect() {
 	let sessionId = getCookie('sessionid');
 	console.log(sessionId)
 	let partyId = document.getElementById('partyId').value;
-	let token = localStorage.getItem('token');
+	let token = getCookie('token');
+	let userId = getCookie('userId');
 	console.log(token);
-	let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/5/5`;
+	let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/${token}/${userId}`;
 
 	let socket = new WebSocket(wsUrl);
 
@@ -130,8 +51,8 @@ function connect() {
 		// Update ball position and direction
 		x = serverMessage.x;
 		y = serverMessage.y;
-		m = serverMessage.p1; // Assuming player 0 is the player on the left
-		n = serverMessage.p2; // Assuming player 1 is the player on the right
+		m = serverMessage.positions[0]; // Assuming player 0 is the player on the left
+		n = serverMessage.positions[1]; // Assuming player 1 is the player on the right
 	});
 
 	socket.addEventListener('close', function (event) {

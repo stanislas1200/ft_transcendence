@@ -192,7 +192,6 @@ class Party:
 				GameHistory.objects.get_or_create(player=p, game=game, score=player['score'])
 			# if tournament add winner to next match # TODO : check if tournament
 			if Match.objects.filter(game=game).exists():
-				print("ok", flush=True)
 				m = Match.objects.get(game=game)
 				winner = self.players[0] if self.players[0]['score'] >= self.score else self.players[1]
 				# winner = self.players[0]
@@ -200,7 +199,10 @@ class Party:
 				# print(winner['id'], flush=True)
 				winner = players.get(id=winner['id'])
 				# print(winner, flush=True)
-				m.next_match.game.players.add(winner.player) # TODO : check if work
+				print("ok", flush=True)
+				print(m.next_match)
+				m.next_match.game.players.add(winner.player) # TODO : check if work : 'NoneType' object has no attribute 'game' : if 1-2 . players so no match where made
+				print("whut", flush=True)
 				m.next_match.game.gameProperty.players.add(winner)
 			else:
 				print("ko", flush=True)

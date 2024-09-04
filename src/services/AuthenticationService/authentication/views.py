@@ -389,15 +389,17 @@ def register(request): # TODO : login at same time ?
 		password = request.POST.get('password')
 		cpassword = request.POST.get('c_password')
 		email = request.POST.get('email')
-		if not username or not password or not email or not first_name or not last_name or not cpassword:
-			return JsonResponse({'error': 'Missing required fields'}, status=400)
+		#TODO : uncoment
+		# if not username or not password or not email or not first_name or not last_name or not cpassword:
+		# 	return JsonResponse({'error': 'Missing required fields'}, status=400)
 		if User.objects.filter(username=username).exists():
 			return JsonResponse({'error': 'Username already taken'}, status=400)
 		if User.objects.filter(email=email).exists():
 			return JsonResponse({'error': 'Email already taken'}, status=400)
-		if cpassword != password:
-			return JsonResponse({'error': 'password not same'})
-		User.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name)
+		# if cpassword != password:
+		# 	return JsonResponse({'error': 'password not same'}, status=400)
+		# User.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name)
+		User.objects.create_user(username=username, password=password, email=email)
 		return JsonResponse({'message': 'User registered successfully'})
 	except:
 		return JsonResponse({'error': 'Failed to register user'}, status=400)
