@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Données d'exemple pour les amis
     const friends = [
-        { id: 'chat1', name: 'Alice', lastMessage: 'Hello Alice!' },
+        { id: 'chat1', name: 'Alice', lastMessage: 'How are you?' },
         { id: 'chat2', name: 'Bob', lastMessage: 'What’s up?' },
         { id: 'chat3', name: 'Charlie', lastMessage: 'Long time no see!' }
     ];

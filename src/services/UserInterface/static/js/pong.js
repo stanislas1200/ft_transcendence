@@ -1,41 +1,82 @@
-document.getElementById('loginForm').addEventListener('submit', function (event) {
-	event.preventDefault(); // Prevent the form from submitting the traditional way
+let ballX;
+let ballY;
+let player1Y;
+let player2Y;
 
-	var username = document.getElementById('username').value;
-	var password = document.getElementById('password').value;
+document.addEventListener('DOMContentLoaded', function () {
+	const canvas = document.getElementById('pongCanvas');
 
-	var xhr = new XMLHttpRequest();
-	xhr.open('POST', 'http://localhost:8000/login/', true);
-	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-	xhr.onreadystatechange = function () {
-		if (xhr.readyState === 4) {
-			if (xhr.status === 200) {
-				console.log('Login Success:', xhr.responseText);
-				var response = JSON.parse(xhr.responseText);
-				localStorage.setItem('token', response.token);
-				// Here you can store the session ID or token if needed
-			} else {
-				console.error('Login Error:', xhr.responseText);
-			}
+	// Vérifiez que le canvas existe avant de continuer
+	if (canvas) {
+		const ctx = canvas.getContext('2d');
+
+		// Définir la taille du canvas
+		canvas.width = 800;
+		canvas.height = 600;
+
+		const paddleWidth = 10;
+		const paddleHeight = 100;
+		const ballRadius = 10;
+
+		// Positions initiales
+		player1Y = (canvas.height - paddleHeight) / 2;
+		player2Y = (canvas.height - paddleHeight) / 2;
+		ballX = canvas.width / 2;
+		ballY = canvas.height / 2;
+		// let ballSpeedX = 5;
+		// let ballSpeedY = 5;
+
+		// Fonction de dessin
+		function draw() {
+			// Efface le canvas
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			// Dessine les raquettes
+			ctx.fillStyle = 'white';
+			ctx.fillRect(0, player1Y, paddleWidth, paddleHeight);
+			ctx.fillRect(canvas.width - paddleWidth, player2Y, paddleWidth, paddleHeight);
+
+			// Dessine la balle
+			ctx.beginPath();
+			ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+			ctx.fillStyle = 'white';
+			ctx.fill();
+			ctx.closePath();
+
+			// Déplacement de la balle
+			// ballX += ballSpeedX;
+			// ballY += ballSpeedY;
+
+			// Vérifie les collisions avec les murs
+			// if (ballY + ballRadius > canvas.height || ballY - ballRadius < 0) {
+			// 	ballSpeedY = -ballSpeedY;
+			// }
+
+			// if (ballX + ballRadius > canvas.width || ballX - ballRadius < 0) {
+			// 	ballSpeedX = -ballSpeedX;
+			// }
+
+			requestAnimationFrame(draw);
 		}
-	};
-	xhr.send('username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password));
+
+		// Lancer l'animation
+		draw();
+	} else {
+		console.error('Canvas not found');
+	}
 });
 
-function getCookie(name) {
-	console.log(document.cookie);
-	var value = "; " + document.cookie;
-	var parts = value.split("; " + name + "=");
-	if (parts.length == 2) return parts.pop().split(";").shift();
-}
-
 function connect() {
-	let sessionId = getCookie('sessionid');
-	console.log(sessionId)
-	let partyId = document.getElementById('partyId').value;
+	let sessionId = 1; // getCookie('sessionid');
+	console.log(sessionId);
+	let partyId = 1; // document.getElementById('partyId').value;
 	let token = localStorage.getItem('token');
 	console.log(token);
-	let wsUrl = `wss://fu-r9-p5:8001/ws/pong/${partyId}/5/5`;
+
+	let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/5/5`;
+	wsUrl = wsUrl.replace("localhost", window.location.hostname);
+
+	// let wsUrl = `wss://fu-r9-p5:8001/ws/pong/${partyId}/5/5`;
 
 	let socket = new WebSocket(wsUrl);
 
@@ -54,10 +95,11 @@ function connect() {
 		}
 
 		// Update ball position and direction
-		x = serverMessage.x;
-		y = serverMessage.y;
-		m = serverMessage.p1; // Assuming player 0 is the player on the left
-		n = serverMessage.p2; // Assuming player 1 is the player on the right
+		ballX = serverMessage.x;
+		ballY = serverMessage.y;
+		player1Y = serverMessage.p1; // Assuming player 0 is the player on the left
+		player2Y = serverMessage.p2; // Assuming player 1 is the player on the right
+		console.log(player1Y);
 	});
 
 	socket.addEventListener('close', function (event) {
@@ -84,27 +126,3 @@ function connect() {
 		}
 	});
 }
-c = document.getElementById('c').getContext('2d')
-c.fillStyle = "#FFF"
-c.font = "60px monospace"
-w = s = 1
-p = q = a = b = 0
-m = n = 190
-x = 400; y = 300
-u = -5; v = 3
-function draw() {
-
-	c.clearRect(0, 0, 800, 600)
-	for (i = 5; i < 600; i += 20)c.fillRect(400, i, 4, 10)
-	c.fillText(a + " " + b, 350, 60)
-	c.fillRect(20, m, 10, 80)
-	c.fillRect(770, n, 10, 80)
-	c.fillRect(x, y, 10, 10)
-}
-
-function gameLoop() {
-	draw();
-	requestAnimationFrame(gameLoop);
-}
-
-gameLoop();
