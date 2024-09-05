@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 	# 'PongGame',
     # 'corsheaders',
-    # 'channels',
+    'channels',
 ]
 
 MIDDLEWARE = [
