@@ -3,8 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const button = document.querySelector('.login__button');
     const loginButton = document.getElementById("loginButton");
   
-    loginButton.disabled = false;
-  
     const handleFocus = ({ target }) => {
         const span = target.previousElementSibling;
         if (span) {
@@ -42,11 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
       var username = document.getElementById('username').value;
       var password = document.getElementById('password').value;
   
-      let url = "http://localhost:8000/login";
+      let url = "https://localhost:8000/login";
       url = url.replace("localhost", window.location.hostname);
   
       var xhr = new XMLHttpRequest();
-      xhr.open('POST', 'https://localhost:8000/login', true);
+      xhr.open('POST', url, true);
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
       xhr.onreadystatechange = function () {
           if (xhr.readyState === 4) {
