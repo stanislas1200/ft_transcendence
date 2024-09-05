@@ -91,8 +91,8 @@
   align-items: center;
   justify-content: center;
   background-color: var(--secondary);
+  border: 3px solid var(--secondary);
   border-radius: 20px;
-  border: none;
   cursor: pointer;
 }
 
@@ -104,11 +104,10 @@
 .login__button:disabled {
   cursor: auto;
   background-color: var(--background);
-  border: 3px solid var(--secondary);
 }
 
 .login__button:disabled svg {
-  fill: var(--secondary)
+  fill: var(--secondary);
 }
 
 .ft-button {
