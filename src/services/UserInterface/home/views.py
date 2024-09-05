@@ -3,20 +3,14 @@ from django.shortcuts import render
 def master(request):
     return render(request, 'home/master.html')
 
-# def index(request):
-#     return render(request, 'home/index.html')
-
-# def login(request):
-#     return render(request, 'home/login.html')
-
-# def game(request):
-#     return render(request, 'home/game.html')
-
 def register(request):
     return render(request, 'home/register.html')
 
 def lologin(request):
     return render(request, 'home/lologin.html')
+
+def bootstrap(request):
+    return render(request, 'home/bootstrap.html')
 
 def load_page(request, page):
     # Determine if the request is an AJAX request (for SPA)

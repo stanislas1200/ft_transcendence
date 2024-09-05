@@ -24,9 +24,12 @@
 	--accent: #e24091;
 }
 
+body {
+	background-color: var(--background);
+}
+
 main {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: var(--background);
 }
