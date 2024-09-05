@@ -146,7 +146,8 @@ class Party:
 			'score': player.score,
 			'token': player.token,
 			'n': player.n,
-			'hit': 0
+			'hit': 0,
+			'ai': False
 		}
 
 	def add_ai_player(self):
@@ -156,7 +157,8 @@ class Party:
 			'score': 0,
 			'n': 2,
 			'token': 'AI',
-			'hit': 0
+			'hit': 0,
+			'ai': True
 		})
 		threading.Thread(target=ai_play, args=(self,)).start()
 	
@@ -164,7 +166,7 @@ class Party:
 		try:
 			game = Game.objects.get(id=self.game_id)  # Get the game
 			for player in self.players:
-				if player['name'] == 'AI': # TODO : other
+				if player['ai']:
 					continue
 				# save player score
 				p = PongPlayer.objects.get(id=player['id'])

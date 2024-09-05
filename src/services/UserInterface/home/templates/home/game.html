@@ -1,0 +1,69 @@
+<div id="game-lobby-container">
+    <!-- Partie gauche supérieure: Rejoindre une partie par nom -->
+    <div id="join-game">
+        <h2>Rejoindre une partie</h2>
+        <label for="join-game-name">Nom de la partie:</label>
+        <input type="text" id="join-game-name" placeholder="Entrez le nom de la partie" />
+        <button id="join-game-button">Rejoindre</button>
+    </div>
+
+    <!-- Partie gauche inférieure: Trouver une partie aléatoire -->
+    <div id="random-game">
+        <h2>Trouver une partie aléatoire</h2>
+        <label for="max-players">Nombre de joueurs max:</label>
+        <select id="max-players">
+            <option value="2">2</option>
+            <option value="4">4</option>
+        </select>
+        <label for="game-mode">Mode de jeu:</label>
+        <select id="game-mode">
+            <option value="ffa">FFA</option>
+            <option value="team">Team</option>
+        </select>
+        <button id="random-game-button">Rechercher une partie</button>
+    </div>
+
+    <!-- Partie droite: Créer une partie -->
+    <div id="create-game">
+        <h2>Créer une partie</h2>
+        <label for="game-name">Nom de la partie:</label>
+        <input type="text" id="game-name" placeholder="Entrez le nom de la partie" />
+
+        <label for="max-players">Nombre de joueurs max:</label>
+        <select id="max-players">
+            <option value="2">2</option>
+            <option value="4">4</option>
+        </select>
+
+        <label for="game-mode">Mode de jeu:</label>
+        <select id="game-mode">
+            <option value="ffa">FFA</option>
+            <option value="team">Team</option>
+        </select>
+
+        <label for="map-choice">Carte:</label>
+        <select id="map-choice">
+            <option value="1">Carte 1</option>
+            <option value="2">Carte 2</option>
+            <option value="3">Carte 3</option>
+        </select>
+
+        <label for="ball-speed">Vitesse de la balle:</label>
+        <input type="number" id="ball-speed" value="10" min="1" max="50" />
+
+        <label for="paddle-speed">Vitesse des raquettes:</label>
+        <input type="number" id="paddle-speed" value="30" min="10" max="100" />
+
+        <button id="create-game-button">Créer</button>
+    </div>
+    <!-- Écran de chargement -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div id="loading-text">Chargement... 0/4</div>
+            <div id="player-positions" class="player-positions">
+                <!-- Les positions des joueurs seront insérées ici -->
+            </div>
+        </div>
+    </div>
+
+</div>

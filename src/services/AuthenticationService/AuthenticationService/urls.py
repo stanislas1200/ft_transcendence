@@ -10,11 +10,15 @@ urlpatterns = [
     path('register', views.register),
     path('login', views.login_view),
     path('logout', views.logout_view),
-    path('oauth42/', views.oauth42),
+    path('oauth42', views.oauth42),
     path('me', views.me),
     path('get_user/', views.get_user_from_session),
     path('users/<int:user_id>/edit', views.update_user),
-    path('users/<int:user_id>/avatar', views.get_avatar)
+    path('users/<int:user_id>/avatar', views.get_avatar),
+
+	path('game/main.css', views.get_css, name='views_game'),
+	path('game/', views.get_game_page, name='views_game'),
+	path('game/pong.js', views.get_js)
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # urlpatterns = [

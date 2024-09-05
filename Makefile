@@ -26,17 +26,17 @@ restart:
 .PHONY: clean
 clean:
 	$(DOWN) --volumes
-	docker rmi $(docker images -a -q)
+	docker rmi $$(docker images -a -q)
 
 .PHONY: fclean
 fclean:
 	$(DOWN) --volumes
-	docker builder prune -a
-	docker rmi $(docker images -a -q)
+	docker builder prune -a -f
+	docker rmi $$(docker images -a -q)
 
 .PHONY: logs
 logs:
 	$(COMPOSE) logs -f
 
 .PHONY: re
-re: clean all
+re: fclean all

@@ -12,7 +12,12 @@ from django.core.cache import cache
 
 # service comunication
 def get_player(session_key, token, user_id):
-    response = requests.get('https://auth-service:8000/get_user/', params={'session_key': session_key, 'token': token, 'UserId': user_id}, verify=False) # TODO verify token instead #verify false for self signed
+    try:
+        response = requests.get('https://auth-service:8000/get_user/', params={'session_key': session_key, 'token': token, 'UserId': user_id}, verify=False) # TODO verify token instead #verify false for self signed
+    except requests.exceptions.RequestException as e: # TODO : remove http (used for processing)
+        print(f"HTTPS request failed: {e}, trying HTTP")
+        response = requests.get('http://auth-service:8000/get_user/', params={'session_key': session_key, 'token': token, 'UserId': user_id})
+    
     if response.status_code == 200:
         # user = response.json()
         user = User.objects.get(id=user_id)

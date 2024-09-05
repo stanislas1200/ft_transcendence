@@ -13,17 +13,84 @@ from .models import UserToken
 
 from django.core.files.images import get_image_dimensions
 
-def check_avatar(avatar):
-	w, h = get_image_dimensions(avatar)
+from PIL import Image, ImageSequence
+from io import BytesIO
+from django.core.files.base import ContentFile
+
+
+def compress_gif(avatar):
+	with Image.open(avatar) as img:
+		# 'P' mode for palette
+		img = img.convert('P', palette=Image.ADAPTIVE, colors=128)  # Reducing colors to 128
+
+		img_byte_arr = BytesIO()
+		img.save(img_byte_arr, format='GIF', optimize=True)
+		img_byte_arr = img_byte_arr.getvalue()
+
+	compressed_avatar = ContentFile(img_byte_arr, name=avatar.name)
+	return compressed_avatar
+
+def crop_gif(avatar, crop_area, name):
+	
+	with Image.open(avatar) as img:
+		frames = []
+		duration = img.info.get('duration', 100)
+		loop = img.info.get('loop', 0)
+
+		for frame in ImageSequence.Iterator(img):
+			cropped_frame = frame.crop(crop_area)
+			frame = frame.resize((frame.size[0] // 2, frame.size[1] // 2))
+			frames.append(cropped_frame)
+
+		gif_bytes_io = BytesIO()
+		frames[0].save(gif_bytes_io, format='GIF', save_all=True, append_images=frames[1:], optimize=True, duration=duration, loop=loop)
+		gif_bytes_io.seek(0)
+		compressed_avatar = ContentFile(gif_bytes_io.getvalue(), name=name)
+
+		return compressed_avatar
+
+def process_avatar(avatar, content_type):
+	image = Image.open(avatar)
+	w, h = image.size
+
+	# compatible if convert to jpeg 
+	# if image.mode in ('RGBA', 'LA', 'P'):
+	# 	image = image.convert('RGB')
+
+	buffer = BytesIO()
 
 	# validate dimensions
-	max_width = max_height = 100
-	if w > max_width or h > max_height:
-		raise Exception(u'Please use an image that is %s x %s pixels or smaller.' % (max_width, max_height)) # TODO : cut the image ? square ? 
+	if w != h:
+		new_size = min(w, h)
+		# TODO : use Middle ?
+		left = (w - new_size)/2
+		top = (h - new_size)/2
+		right = (w + new_size)/2
+		bottom = (h + new_size)/2
+		if content_type == 'image/gif':
+			avatar = crop_gif(avatar, (0, 0, new_size, new_size), avatar.name)
+		else:
+			image = image.crop((0, 0, new_size, new_size))
+			image.save(buffer, format="PNG")
 
-	# validate size
-	if len(avatar) > (20 * 1024):
-		raise Exception(u'Avatar file size may not exceed 20k.')
+
+
+	# Compress the image if it's larger than 500KB
+	if avatar.size > (500 * 1024):
+		if content_type == 'image/gif':
+			avatar = compress_gif(avatar)
+		else:
+			image.save(buffer, format="PNG", compress_level=9)
+			# image.save(buffer, format="JPEG", quality=85)  # Adjust quality for further compression
+	
+	# Save
+	fileName = 'avatar.gif' if content_type == 'image/gif' else 'avatar.png'
+	if buffer.tell():
+		buffer.seek(0)
+		img_byte_arr = buffer.getvalue()
+		avatar = ContentFile(img_byte_arr, name=fileName)
+	
+	return avatar
 
 # def check_username(username): # TODO : username policy
 # 	if not username:
@@ -32,16 +99,7 @@ def check_avatar(avatar):
 
 @csrf_exempt
 def get_avatar(request, user_id):
-	# Check login
-	if request.user.is_authenticated: # TODO : need login ? or anyone can access ?
-		user = request.user
-	else:
-		auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-		token = auth_header.split(' ')[1] if ' ' in auth_header else ''
-		if not (UserToken.objects.filter(token=token).exists()):
-			return JsonResponse({'error': 'User is not logged in'}, status=400)
-		user = UserToken.objects.get(token=token).User
-
+	user = User.objects.get(id=user_id)
 	if (UserToken.objects.filter(user=user).exists()):
 		profile = UserToken.objects.get(user=user)
 		if not hasattr(profile, 'avatar') or not profile.avatar:
@@ -57,7 +115,7 @@ def update_user(request, user_id): # TODO : PATCH ?
 		# Check login
 		if request.user.is_authenticated:
 			user = request.user
-		else:
+		else: # FIXME : token not working ? 
 			auth_header = request.META.get('HTTP_AUTHORIZATION', '')
 			token = auth_header.split(' ')[1] if ' ' in auth_header else ''
 			if not (UserToken.objects.filter(token=token).exists()):
@@ -66,7 +124,7 @@ def update_user(request, user_id): # TODO : PATCH ?
 
 		# Check authorisation
 		if user_id != user.id:
-			if not request.user.is_staff: # TODO user.is_staff ? so token accepted ?
+			if not user.is_staff: # TODO accept token accepted
 				return JsonResponse({'error': 'Unauthorized'}, status=403)
 			if not User.objects.filter(id=user_id).exists():
 				return JsonResponse({'error': 'User not found'}, status=404)
@@ -85,14 +143,14 @@ def update_user(request, user_id): # TODO : PATCH ?
 		
 
 		# Update User TODO : all user info
-		if username: 
+		if username: # TODO : use password ?? 
 			# if check_username(username): # TODO : check all user info
 			# 	return JsonResponse({'error': 'Bad username'}, status=400)
 			validate_unicode_slug(username)
 			if User.objects.filter(username=username).exists():
 				return JsonResponse({'error': 'Username already taken'}, status=400)
 			user.username = username
-		if email: # TODO : use password ??
+		if email: # TODO : use password
 			validate_email(email)
 			if User.objects.filter(email=email).exists():
 				return JsonResponse({'error': 'Email already taken'}, status=400)
@@ -111,8 +169,7 @@ def update_user(request, user_id): # TODO : PATCH ?
 				profile = UserToken.objects.get(user=user)
 				if profile.avatar:
 					profile.avatar.delete(save=True)
-				check_avatar(avatar[0])
-				profile.avatar = avatar[0]
+				profile.avatar = process_avatar(avatar[0], request.FILES['avatar'].content_type)
 				profile.save()
 			
 		if new_password:
@@ -120,7 +177,7 @@ def update_user(request, user_id): # TODO : PATCH ?
 				if not check_password(current_password, user.password):
 					return JsonResponse({'error': 'Current password is incorrect'}, status=400)
 				validate_password(new_password, user)
-				user.set_password(new_password) # TODO : change token ?
+				user.set_password(new_password) # TODO : change token ??
 				password_changed(new_password, user)
 			except Exception as e:
 				return JsonResponse({'error': str(e)}, status=400)
@@ -131,7 +188,6 @@ def update_user(request, user_id): # TODO : PATCH ?
 	except: # TODO : better except
 		return JsonResponse({'error': 'Failed to update user'}, status=400)
 
-# TODO : HTTPS, check django security settings
 # TODO : decorator : ex remove csrf_exempt
 
 @csrf_exempt
@@ -165,6 +221,7 @@ def oauth42(request):
 			return JsonResponse({'error': 'Failed to fetch user data'}, status=response.status_code)
 
 		data = response.json()
+		print(data['image']['link'])
 		username = data['login']
 		email = data['email']
 
@@ -183,7 +240,10 @@ def oauth42(request):
 		hashed_token = make_password(token)
 		UserToken.objects.update_or_create(user=user, defaults={'token': hashed_token})
 
-		return JsonResponse({'message': f'Logged in successfully as {username}'}, status=201)
+		response = JsonResponse({'message': f'Logged in successfully as {username}'}, status=201)
+		response.set_cookie(key='token', value=token, secure=True) # max_age=??
+		response.set_cookie(key='userId', value=user.id)
+		return response
 	
 	except:
 		return JsonResponse({'error': 'An error occurred while processing your request'}, status=500)
@@ -224,7 +284,11 @@ def login_view(request):
 			token = secrets.token_hex(16)
 			hashed_token = make_password(token)
 			UserToken.objects.update_or_create(user=user, defaults={'token': hashed_token})
-			return JsonResponse({'token': token, 'UserId': user.id})
+			response = JsonResponse({'message': f'Logged in successfully as {user.username}'}, status=201)
+			response.set_cookie(key='token', value=token, secure=True) # max_age=?? # TODO : cookie
+			response.set_cookie(key='userId', value=user.id) # max_age=??
+			return response
+			# return JsonResponse({'message': f'Logged in successfully as {user.username}', 'token': token, 'UserId': user.id}, status=201)
 		else:
 			return JsonResponse({'error': 'Invalid login credentials'}, status=400)
 	except:
