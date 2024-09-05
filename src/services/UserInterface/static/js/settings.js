@@ -1,7 +1,7 @@
 document.getElementById('updateInfo').addEventListener('click', function (event) {
     console.log("wesh on passe ici");
     event.preventDefault(); // Prevent the default form submission
-
+    
 
     //Verif Of Email
     const email = document.getElementById('inputEmail').value;
