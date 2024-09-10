@@ -44,11 +44,9 @@
 	padding: 25px 10px 10px;
 	font-weight: 600;
 	color: var(--secondary);
-	transition: 200ms ease;
 }
 
 .input.error {
-	/* background-color: var(--secondary); */
 	border: 2px solid var(--accent);
 	color: var(--accent);
 	text-decoration-line: underline;
