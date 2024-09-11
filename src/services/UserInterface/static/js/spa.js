@@ -1,7 +1,7 @@
 /********************************* GESTION SPA *********************************/
 
-function loadPage(page) {
-    fetch('/' + page + '/', {
+async function loadPage(page) {
+    await fetch('/' + page + '/', {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest'  // Add this header to indicate an AJAX request
@@ -11,6 +11,7 @@ function loadPage(page) {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
+            console.log("aurevoir");
             return response.text();
         })
         .then(html => {
@@ -23,6 +24,8 @@ function loadPage(page) {
             console.error('There was a problem with the fetch operation:', error);
             // Optionally load an error page or show an error message
         });
+    if (page == 'friend')
+        getElementFriend();
 }
 
 // window.onpopstate = function () {
