@@ -77,7 +77,7 @@ TEMPLATES = [
 ]
 
 # WSGI_APPLICATION = 'GameService.wsgi.application'
-# ASGI_APPLICATION = 'GameService.asgi.application'
+ASGI_APPLICATION = 'Tchat.asgi.application'
 
 
 CHANNEL_LAYERS = {
