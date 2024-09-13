@@ -199,11 +199,13 @@ class Party:
 				# print(winner['id'], flush=True)
 				winner = players.get(id=winner['id'])
 				# print(winner, flush=True)
-				print("ok", flush=True)
 				print(m.next_match)
-				m.next_match.game.players.add(winner.player) # TODO : check if work : 'NoneType' object has no attribute 'game' : if 1-2 . players so no match where made
-				print("whut", flush=True)
-				m.next_match.game.gameProperty.players.add(winner)
+				if (not m.next_match):
+					return
+
+				player = PongPlayer.objects.create(player=winner.player, score=0, n=1, token=winner.token) # TODO : n
+				m.next_match.game.players.add(player.player)
+				m.next_match.game.gameProperty.players.add(player)
 			else:
 				print("ko", flush=True)
 			# delete game
@@ -221,7 +223,8 @@ def setup(game_id, player):
 			'obstacles': party.map,
 		}
 	
-	if party and party.state == 'playing':
+	# if party and party.state == 'playing':
+	if party:
 		return setting
 
 	game = Game.objects.filter(id=game_id).first()
@@ -361,7 +364,7 @@ async def update_pong(game_id):
 		return
 	game = party_list[game_id]
 	if game.state != 'playing':
-		# print(f"Game ID {game_id} not playing.")
+		# print(f"Game ID {game_id} not playing.", flush=True)
 		return
 	
 	# move ball
