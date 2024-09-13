@@ -51,8 +51,12 @@ function connect() {
 		// Update ball position and direction
 		x = serverMessage.x;
 		y = serverMessage.y;
+		name1 = serverMessage.usernames[0];
+		name2 = serverMessage.usernames[1];
 		m = serverMessage.positions[0]; // Assuming player 0 is the player on the left
 		n = serverMessage.positions[1]; // Assuming player 1 is the player on the right
+		s1 = serverMessage.scores[0];
+		s2 = serverMessage.scores[1];
 	});
 
 	socket.addEventListener('close', function (event) {
@@ -72,9 +76,9 @@ function connect() {
 		}
 
 		if (direction && socket) {
+			console.log(direction)
 			var sessionId = getCookie('sessionid');
-			var token = localStorage.getItem('token');
-			console.log(sessionId)
+			var token = getCookie('token');
 			socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', player: 'p1', direction: direction, token: token }));
 		}
 	});
@@ -83,18 +87,32 @@ c = document.getElementById('c').getContext('2d')
 c.fillStyle = "#FFF"
 c.font = "60px monospace"
 w = s = 1
-p = q = a = b = 0
-m = n = 190
+p = q = s1 = s2 = 0
+name1 = name2 = null
+m = n = 250
 x = 400; y = 300
-u = -5; v = 3
+r = 5; v = 3
 function draw() {
 
-	c.clearRect(0, 0, 800, 600)
+	// c.clearRect(0, 0, 800, 600)
+	c.fillStyle = "rgb(0 0 0 / 20%)";
+	c.fillRect(0, 0, 800, 600);
+	c.fillStyle = "#8791ed";
 	for (i = 5; i < 600; i += 20)c.fillRect(400, i, 4, 10)
-	c.fillText(a + " " + b, 350, 60)
-	c.fillRect(20, m, 10, 80)
-	c.fillRect(770, n, 10, 80)
-	c.fillRect(x, y, 10, 10)
+	c.fillStyle = "#FFFFFF";
+	c.fillText(name1, 0, 60)
+	c.fillText(name2, 800 - c.measureText(name2).width, 60)
+	c.fillText(s1 + " " + s2 , 350, 60)
+	c.fillRect(40, m - 100/2, 10, 100)
+	c.fillRect(800 - 40 - 10, n - 100/2, 10, 100)
+	// c.fillRect(x, y, 10, 10)
+	
+	// c.fillStyle = "#e24091";
+    c.beginPath();
+    c.moveTo(x, y);
+    c.arc(x, y, r, 0, Math.PI * 2, true); // Left eye
+    c.stroke();
+    c.fill()
 }
 
 function gameLoop() {
