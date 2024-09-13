@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			confirmSpan.style.color = 'var(--secondary)';
 			button.removeAttribute('disabled');
 		}
-		if (email.value && validateEmail(email)) {
+		if (email.value && validateEmail(email.value)) {
 			email.classList.remove('error');
 			document.getElementById('email-span').style.color = 'var(--secondary)';
 			button.removeAttribute('disabled');
@@ -59,18 +59,20 @@ document.addEventListener('DOMContentLoaded', () => {
 		const [firstName, lastName, username, email, password, passwordConfirm] = inputs;
 
 		// debut verif des donnees
-		if (!validateEmail(email)) {
+		if (!validateEmail(emailInput)) {
 			email.classList.add('error');
 			emailSpan.style.color = 'var(--accent)';
+			button.setAttribute('disabled', '');
 			if (passwordInput !== confirmPasswordInput) {
 				passwordConfirm.classList.add('error');
 				confirmSpan.style.color = 'var(--accent)';
 			}
 			return ;
-		}
+		} 
 		if (passwordInput !== confirmPasswordInput) {
 			passwordConfirm.classList.add('error');
 			confirmSpan.style.color = 'var(--accent)';
+			button.setAttribute('disabled', '');
 			return ;
 		}
 
@@ -89,8 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
 					localStorage.setItem('token', response.token);
 					// Here you can store the session ID or token if needed
 					// window.location.replace("/login");
+					return;
 				} else {
-					alert('Login Error:', xhr.responseText);
+					alert('Login Error: ' + JSON.parse(xhr.responseText).error);
 				}
 			}
 		};
@@ -102,9 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function validateEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
+	var re = /\S+@\S+\.\S+/;
+	return re.test(email);
+  }
 
 function errorButton(button) {
 	const span = document.getElementById(button);
