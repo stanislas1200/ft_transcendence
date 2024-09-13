@@ -199,8 +199,9 @@ class Party:
 				# print(winner['id'], flush=True)
 				winner = players.get(id=winner['id'])
 				# print(winner, flush=True)
-				print(m.next_match)
-				if (not m.next_match):
+				m.winner = winner.player
+				m.save() # TODO : check if need but seem
+				if (not m.next_match): #TODO : end tournament
 					return
 
 				player = PongPlayer.objects.create(player=winner.player, score=0, n=1, token=winner.token) # TODO : n

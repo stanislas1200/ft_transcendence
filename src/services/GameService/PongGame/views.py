@@ -88,11 +88,9 @@ def make_matches(tournament):
     random.shuffle(players)
     total_players = len(players)
     current_round = 1
-    print(total_players, flush=True)
     matches_to_create = total_players // 2
 
     with transaction.atomic(): # all in db operation
-        print(matches_to_create, flush=True)
         p = current_round
         while matches_to_create > 0:
             for i in range(matches_to_create):
@@ -109,17 +107,12 @@ def make_matches(tournament):
         matches_to_link = total_players // 2
         # matches_to_link = 1
         round_number = 1
-        print("Link", flush=True)
         for i in range(1, matches_to_link): #FIXME : linking match
             next_round = Match.objects.filter(tournament=tournament, round_number=matches_to_link + i).first()
             for j in range(0, 2):
-                print(j, flush=True)
                 current_round = Match.objects.filter(tournament=tournament, round_number=round_number + j).first()
                 current_round.next_match = next_round
-                print(current_round, flush=True)
-                print(current_round.next_match, flush=True)
                 current_round.save()
-        print("Stop", flush=True)
 
 def make_pong_tournament_game(player1, player2):
     pong = Pong.objects.create(playerNumber=1, mapId=0)
@@ -141,8 +134,7 @@ def make_pong_tournament_game(player1, player2):
 
 @csrf_exempt
 @require_GET
-def get_tournament(request):
-    tournament_id = request.GET.get('id')
+def get_tournament(request, tournament_id):
     if not tournament_id:
         return JsonResponse({'error': 'Tournament ID is required'}, status=400)
 
