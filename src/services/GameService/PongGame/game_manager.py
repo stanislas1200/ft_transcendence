@@ -1,8 +1,9 @@
-from .models import Game, PongPlayer, GameType, PlayerGameTypeStats, GameHistory
+from .models import Game, PongPlayer, GameType, PlayerGameTypeStats, GameHistory, Match
 from django.contrib.auth.models import User
 from django.db.models import F
 from asgiref.sync import sync_to_async
 import asyncio
+from django.utils import timezone
 
 party_list = {}
 
@@ -138,6 +139,7 @@ class Party:
 		self.map = maps[prop.mapId]
 
 		self.players = sorted(self.players, key=lambda x: x['n'])
+		self.date = prop.start_date
 
 	def get_player_info(self, player):
 		return {
@@ -146,26 +148,28 @@ class Party:
 			'score': player.score,
 			'token': player.token,
 			'n': player.n,
-			'hit': 0
+			'hit': 0,
+			'ai': False
 		}
 
 	def add_ai_player(self):
-		self.players.append({
-			'name': 'AI',
-			'id': 0,
-			'score': 0,
-			'n': 2,
-			'token': 'AI',
-			'hit': 0
-		})
+		# self.players.append({
+		# 	'name': 'AI',
+		# 	'id': 0,
+		# 	'score': 0,
+		# 	'n': 2,
+		# 	'token': 'AI',
+		# 	'hit': 0,
+		# 	'ai': True
+		# })
 		threading.Thread(target=ai_play, args=(self,)).start()
 	
 	def save(self):
 		try:
 			game = Game.objects.get(id=self.game_id)  # Get the game
 			for player in self.players:
-				if player['name'] == 'AI': # TODO : other
-					continue
+				# if player['ai']:
+					# continue
 				# save player score
 				p = PongPlayer.objects.get(id=player['id'])
 				p.score = player['score']
@@ -185,32 +189,58 @@ class Party:
 				stats.save()
 
 				# save history
-				pong = game.gameProperty
-				GameHistory.objects.get_or_create(player=p, game=pong, score=player['score'])
-				# delete game
-			game.delete()
+				GameHistory.objects.get_or_create(player=p, game=game, score=player['score'])
+			# if tournament add winner to next match # TODO : check if tournament
+			if Match.objects.filter(game=game).exists():
+				m = Match.objects.get(game=game)
+				winner = self.players[0] if self.players[0]['score'] >= self.score else self.players[1]
+				# winner = self.players[0]
+				players = m.tournament.players.all()
+				# print(winner['id'], flush=True)
+				winner = players.get(id=winner['id'])
+				# print(winner, flush=True)
+				m.winner = winner.player
+				m.save() # TODO : check if need but seem
+				if (not m.next_match): #TODO : end tournament
+					return
+
+				player = PongPlayer.objects.create(player=winner.player, score=0, n=1, token=winner.token) # TODO : n
+				m.next_match.game.players.add(player.player)
+				m.next_match.game.gameProperty.players.add(player)
+			else:
+				print("ko", flush=True)
+			# delete game
+			# game.delete()
 		except Exception as e:
+			print(e, flush=True)
 			game.delete()
 
 party_list = {}
 
 def setup(game_id, player):
-	game = Game.objects.filter(id=game_id).first()
 	party = party_list.get(game_id)
 	if party:
 		setting = {
 			'obstacles': party.map,
 		}
-	if party and party.state == 'playing':
+	
+	# if party and party.state == 'playing':
+	if party:
 		return setting
+
+	game = Game.objects.filter(id=game_id).first()
+	if timezone.now() < game.start_date:
+		return None # TODO : error message
+	
 	if game:
 		prop = game.gameProperty
+		prop.start_date = game.start_date
 		if not prop.ball:
 			prop.ball = {'x': prop.width/2, 'y': prop.height/2, 'dx': prop.ballSpeed, 'dy': prop.ballSpeed}
 		party = Party(prop, game_id)
 		if party.player_number == 1:
 			party.add_ai_player()
-		if party.player_number == prop.players.count():
+		if party.player_number <= prop.players.count():
 			party.state = 'playing'
 		party_list[game_id] = party
 		
@@ -335,7 +365,7 @@ async def update_pong(game_id):
 		return
 	game = party_list[game_id]
 	if game.state != 'playing':
-		# print(f"Game ID {game_id} not playing.")
+		# print(f"Game ID {game_id} not playing.", flush=True)
 		return
 	
 	# move ball
@@ -359,7 +389,7 @@ async def update_pong(game_id):
 		game.state = 'finished'
 		await sync_to_async(game.save)()
 		# del party_list[game_id]  # remove party from party_list
-		return game.state
+		return game.state, game.game_id
 
 	# check collision player 1
 	paddleVertices = [
