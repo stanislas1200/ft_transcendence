@@ -4,7 +4,6 @@ let messageInput;
 let sendButton;
 
 function getElementFriend() {
-    console.log("bonjour");
     friendList = document.getElementById('friend-list');
     chatArea = document.getElementById('chat-area');
     messageInput = document.getElementById('message-input');

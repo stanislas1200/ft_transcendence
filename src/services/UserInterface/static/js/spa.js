@@ -11,7 +11,6 @@ async function loadPage(page) {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            console.log("aurevoir");
             return response.text();
         })
         .then(html => {
@@ -26,6 +25,11 @@ async function loadPage(page) {
         });
     if (page == 'friend')
         getElementFriend();
+    else if (page == 'pong')
+        getElementPong();
+    else if (page == 'game') {
+        getElementGame();
+    }
 }
 
 // window.onpopstate = function () {

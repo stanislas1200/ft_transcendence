@@ -103,7 +103,6 @@ function draw() {
 }
 
 function gameLoop() {
-	console.log("bonjour");
 	draw();
 	requestAnimationFrame(gameLoop);
 }
