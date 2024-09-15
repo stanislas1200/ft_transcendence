@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					var response = JSON.parse(xhr.responseText);
 					localStorage.setItem('token', response.token);
 					// Here you can store the session ID or token if needed
-					// window.location.replace("/login");
+					// window.location.replace("/index");
 					return;
 				} else {
 					alert('Login Error: ' + JSON.parse(xhr.responseText).error);
