@@ -23,12 +23,19 @@ async function loadPage(page) {
             console.error('There was a problem with the fetch operation:', error);
             // Optionally load an error page or show an error message
         });
-    if (page == 'friend')
-        getElementFriend();
-    else if (page == 'pong')
-        getElementPong();
-    else if (page == 'game') {
-        getElementGame();
+
+    switch (page) {
+        case 'friend':
+            getElementFriend();
+            break;
+        case 'pong':
+            getElementPong();
+            break;
+        case 'game':
+            getElementGame();
+            break;
+        default:
+            break;
     }
 }
 
