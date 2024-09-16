@@ -1,4 +1,5 @@
-let maxPlayersSelect;
+let maxPlayersSelectRandom;
+let maxPlayersSelectCreate;
 let gameModeSelect;
 let joinGameButton;
 let joinGameName;
@@ -16,7 +17,8 @@ let paddleSpeed;
 
 function getElementGame() {
     console.log('game');
-    maxPlayersSelect = document.getElementById('max-players');
+    maxPlayersSelectRandom = document.getElementById('max-players-random');
+    maxPlayersSelectCreate = document.getElementById('max-players-create');
     gameModeSelect = document.getElementById('game-mode');
     gameModeSelect.disabled = true;
     joinGameButton = document.getElementById('join-game-button');
@@ -40,7 +42,7 @@ function getElementGame() {
 
 function twoPlayer() {
     // Désactive le choix du mode de jeu si 2 joueurs sont sélectionnés
-    maxPlayersSelect.addEventListener('change', function () {
+    maxPlayersSelectRandom.addEventListener('change', function () {
         if (this.value === '2') {
             gameModeSelect.value = 'ffa';
             gameModeSelect.disabled = true;
@@ -49,6 +51,14 @@ function twoPlayer() {
         }
     });
 
+    maxPlayersSelectCreate.addEventListener('change', function () {
+        if (this.value === '2') {
+            gameModeSelect.value = 'ffa';
+            gameModeSelect.disabled = true;
+        } else {
+            gameModeSelect.disabled = false;
+        }
+    });
 
 
     // Gestion de la jonction de partie
