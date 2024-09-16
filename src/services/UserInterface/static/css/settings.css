@@ -106,6 +106,7 @@ button:hover {
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: background-color 0.2s ease-in-out;
 }
 
 .profile-picture img {
@@ -115,7 +116,32 @@ button:hover {
     border-radius: 50%;
 }
 
-.profile-picture input {
+.profile-picture input[type="file"] {
     display: none;
     /* Cache le bouton de sélection de fichier */
+}
+
+.profile-picture .-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    text-align: center;
+    border-radius: 50%;
+    z-index: 1000;
+    transition: background-color 0.2s ease-in-out;
+    visibility: hidden;
+    /* Cache l'étiquette par défaut */
+}
+
+.profile-picture:hover .-label {
+    visibility: visible;
+    /* Affiche l'étiquette au survol */
 }
