@@ -1,6 +1,7 @@
 let maxPlayersSelectRandom;
 let maxPlayersSelectCreate;
 let gameModeSelect;
+let gameModeSelectCreate;
 let joinGameButton;
 let joinGameName;
 let randomGameButton;
@@ -9,7 +10,6 @@ let loadingText;
 let playerPositions;
 let createGameButton;
 let gameName;
-let maxPlayers;
 let gameMode;
 let mapChoice;
 let ballSpeed;
@@ -21,6 +21,8 @@ function getElementGame() {
     maxPlayersSelectCreate = document.getElementById('max-players-create');
     gameModeSelect = document.getElementById('game-mode');
     gameModeSelect.disabled = true;
+    gameModeSelectCreate = document.getElementById('game-mode-create');
+    gameModeSelectCreate.disabled = true;
     joinGameButton = document.getElementById('join-game-button');
     joinGameName = document.getElementById('join-game-name').value;
     randomGameButton = document.getElementById('random-game-button');
@@ -30,7 +32,6 @@ function getElementGame() {
     createGameButton = document.getElementById('create-game-button');
 
     gameName = document.getElementById('game-name').value;
-    maxPlayers = document.getElementById('max-players').value;
     gameMode = document.getElementById('game-mode').value;
     mapChoice = document.getElementById('map-choice').value;
     ballSpeed = parseInt(document.getElementById('ball-speed').value);
@@ -53,10 +54,10 @@ function twoPlayer() {
 
     maxPlayersSelectCreate.addEventListener('change', function () {
         if (this.value === '2') {
-            gameModeSelect.value = 'ffa';
-            gameModeSelect.disabled = true;
+            gameModeSelectCreate.value = 'ffa';
+            gameModeSelectCreate.disabled = true;
         } else {
-            gameModeSelect.disabled = false;
+            gameModeSelectCreate.disabled = false;
         }
     });
 
@@ -72,7 +73,6 @@ function twoPlayer() {
         console.log("Tentative de rejoindre la partie:", joinGameName);
 
         // Simulez la jonction de la partie (intégration backend nécessaire)
-        alert("Vous avez rejoint la partie !");
     });
 
     // Gestion de la recherche d'une partie aléatoire
@@ -138,6 +138,7 @@ function waitingRoom() {
     // Gestion de la création de partie
     createGameButton.addEventListener('click', function () {
         // console.log('je suis occupe de creer une game!');
+        const maxPlayers = maxPlayersSelectCreate.value;
         gameName = document.getElementById('game-name').value;
         if (!gameName) {
             alert("Veuillez entrer un nom pour la partie.");
