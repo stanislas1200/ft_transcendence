@@ -1,3 +1,5 @@
+{% load static %}
+
 <div class="container">
     <div class="form-container">
         <h2>Modifier les informations du compte</h2>
@@ -45,7 +47,7 @@
 
     <div class="profile-container">
         <div class="profile-picture" onclick="triggerFileInput()">
-            <img id="profileImage" src="default-profile.png" alt="Photo de profil">
+            <img id="profileImage" src="{% static 'images/pp.png' %}" alt="">
             <input type="file" id="profilePic" name="profilePic" accept="image/*" onchange="previewImage(event)">
         </div>
     </div>

@@ -58,7 +58,15 @@ function previewImage(event) {
     reader.readAsDataURL(event.target.files[0]);
 }
 
-// Fonction pour déclencher le champ de fichier lorsque l'on clique sur l'image
 function triggerFileInput() {
-    document.getElementById('profilePic').click();
+    document.getElementById('profilePic').click(); // Simule un clic sur l'input
+}
+
+function previewImage(event) {
+    const reader = new FileReader();
+    reader.onload = function () {
+        const output = document.getElementById('profileImage');
+        output.src = reader.result;
+    };
+    reader.readAsDataURL(event.target.files[0]);
 }

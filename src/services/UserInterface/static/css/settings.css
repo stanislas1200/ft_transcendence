@@ -112,12 +112,10 @@ button:hover {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* Permet à l'image de remplir le cercle sans être déformée */
     border-radius: 50%;
 }
 
-
 .profile-picture input {
-    display: block;
-    margin: 0 auto;
+    display: none;
+    /* Cache le bouton de sélection de fichier */
 }
