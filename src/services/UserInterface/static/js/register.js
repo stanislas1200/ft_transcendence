@@ -86,11 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		xhr.onreadystatechange = function () {
 			if (xhr.readyState === 4) {
 				if (xhr.status === 200 || xhr.status === 201) {
-					console.log('Login Success:', xhr.responseText);
-					var response = JSON.parse(xhr.responseText);
-					localStorage.setItem('token', response.token);
-					// Here you can store the session ID or token if needed
-					window.location.replace("/home");
+					login(usernameInput, passwordInput);
 					return;
 				} else {
 					alert('Error: ' + JSON.parse(xhr.responseText).error);
@@ -111,4 +107,29 @@ function validateEmail(email) {
 
 function errorButton(button) {
 	const span = document.getElementById(button);
+}
+
+function login(username, password) {
+    let url = "https://localhost:8000/login";
+    url = url.replace("localhost", window.location.hostname);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	xhr.withCredentials = true;
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200 || xhr.status === 201) {
+                console.log('Login Success:', xhr.responseText);
+                var response = JSON.parse(xhr.responseText);
+				console.log(response);
+                // localStorage.setItem('token', response.token);
+                // Here you can store the session ID or token if needed
+                // window.location.replace("/");
+            } else {
+                alert('Error: ' + JSON.parse(xhr.responseText).error);
+            }
+        }
+    };
+    xhr.send('username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password));
 }
