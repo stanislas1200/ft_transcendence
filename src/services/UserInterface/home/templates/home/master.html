@@ -7,6 +7,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Page</title>
+    <script>testIfLoggedIn();
+        function testIfLoggedIn() {
+            let url = "https://localhost:8000/me";
+            url = url.replace("localhost", window.location.hostname);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.withCredentials = true;
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status !== 200 && xhr.status !== 201) {
+                        window.location.replace("/login");
+                    }
+                    console.log(xhr.responseText);
+                }
+            };
+            xhr.send();
+        }
+    </script>
     <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
     <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">

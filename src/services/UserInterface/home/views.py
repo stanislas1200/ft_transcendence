@@ -6,8 +6,8 @@ def master(request):
 def register(request):
     return render(request, 'home/register.html')
 
-def lologin(request):
-    return render(request, 'home/lologin.html')
+def login(request):
+    return render(request, 'home/login.html')
 
 def bootstrap(request):
     return render(request, 'home/bootstrap.html')
