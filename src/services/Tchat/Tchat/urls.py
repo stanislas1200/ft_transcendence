@@ -19,8 +19,9 @@ from . import views
 
 urlpatterns = [
     # path('', '../room/templates/room/index.html'),
-    path('room/', include('room.urls')),
     path('admin/', admin.site.urls),
     path('', views.homepage),
     path('about/', views.about),
+    path('room/', include('room.urls')),
+    path('chat', views.chatpage),
 ]
