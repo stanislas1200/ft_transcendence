@@ -349,7 +349,7 @@ def oauth42(request):
 				if User.objects.filter(username=username).exists(): # TODO : improve
 					return JsonResponse({'error': 'Username already taken'}, status=400)
 			# Create a new user
-			profile = User.objects.create_user(username=username, email=email)
+			profile = User.objects.create_user(username=username, email=email, first_name=data['first_name'], last_name=data['last_name'])
 			make_avatar = True
 
 		user = User.objects.get(email=email)
