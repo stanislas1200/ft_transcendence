@@ -398,8 +398,8 @@ def register(request): # TODO : login at same time ?
 			return JsonResponse({'error': 'Email already taken'}, status=400)
 		# if cpassword != password:
 		# 	return JsonResponse({'error': 'password not same'}, status=400)
-		# User.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name)
-		User.objects.create_user(username=username, password=password, email=email)
+		User.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name)
+		# User.objects.create_user(username=username, password=password, email=email)
 		return JsonResponse({'message': 'User registered successfully'})
 	except:
 		return JsonResponse({'error': 'Failed to register user'}, status=400)
@@ -413,24 +413,26 @@ def login_view(request):
 		password = request.POST.get('password')
 		if not username or not password:
 			return JsonResponse({'error': 'Missing required fields'}, status=400)
-		user = authenticate(request, username=username, password=password) # slow
-		if not user:
-			username = User.objects.get(email=username).username
-			user = authenticate(request, username=username, password=password)
-		if user is not None:
-			login(request, user)
+		u = authenticate(request, username=username, password=password) # slow
+		if not u:
+			if User.objects.filter(email=username).exists():
+				username = User.objects.get(email=username).username
+				u = authenticate(request, username=username, password=password)
+		if u is not None:
+			login(request, u)
 			token = secrets.token_hex(16)
 			hashed_token = make_password(token)
-			UserToken.objects.update_or_create(user=user, defaults={'token': hashed_token})
-			response = JsonResponse({'message': f'Logged in successfully as {user.username}'}, status=201)
+			UserToken.objects.update_or_create(user=u, defaults={'token': hashed_token})
+			response = JsonResponse({'message': f'Logged in successfully as {u.username}'}, status=201)
 			response.set_cookie(key='token', value=token, secure=True, samesite='Strict') # max_age=?? # TODO : cookie
-			response.set_cookie(key='userId', value=user.id, secure=True, samesite='None') # max_age=??
+			response.set_cookie(key='userId', value=u.id, secure=True, samesite='None') # max_age=??
 			return response
 			# return JsonResponse({'message': f'Logged in successfully as {user.username}', 'token': token, 'UserId': user.id}, status=201)
 		else:
 			return JsonResponse({'error': 'Invalid login credentials'}, status=400)
-	except:
-		return JsonResponse({'error': 'Failed to login'}, status=400)
+	except Exception as e:
+		print(e, flush=True)
+		return JsonResponse({'error': 'Failed to login'}, status=500)
 	
 @csrf_exempt # Disable CSRF protection for this view
 @require_POST
@@ -447,7 +449,9 @@ def user_to_dict(user):
 	return {
 		'id': user.id,
 		'username': user.username,
-		'email': user.email
+		'email': user.email,
+		'firstname': user.first_name,
+		'lastname': user.last_name
 	}
 
 def verify_token(request, token=None):
