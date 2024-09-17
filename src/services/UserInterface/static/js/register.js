@@ -19,10 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	const handleChange = () => {
-		const [firstName, lastName, username, email, password, passwordConfirm] = inputs;
+		const [firstName, lastName, email, username, password, passwordConfirm] = inputs;
 		const confirmSpan = document.getElementById('password-confirm-span');
 
-		if (passwordConfirm.value && (password.value !== passwordConfirm.value)) {
+		if (!(passwordConfirm.value && passwordConfirm.value)) {
 			// passwordConfirm.classList.add('error');
 			// confirmSpan.style.color = 'var(--accent)';
 		} else {
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		input.addEventListener('input', handleChange);
 	});
 
-    button.addEventListener("click", () => {
+	button.addEventListener("click", () => {
 		console.log("Bouton cliqué !");
 		var firstNameInput = document.getElementById('firstName').value;
 		var lastNameInput = document.getElementById('lastName').value;
@@ -56,30 +56,30 @@ document.addEventListener('DOMContentLoaded', () => {
 		var confirmPasswordInput = document.getElementById('confirmPassword').value;
 		const emailSpan = document.getElementById('email-span');
 		const confirmSpan = document.getElementById('password-confirm-span');
-		const [firstName, lastName, username, email, password, passwordConfirm] = inputs;
+		const [firstName, lastName, email, username, password, passwordConfirm] = inputs;
 
 		// debut verif des donnees
 		if (!validateEmail(emailInput)) {
 			email.classList.add('error');
 			emailSpan.style.color = 'var(--accent)';
-			button.setAttribute('disabled', '');
+			// button.setAttribute('disabled', '');
 			if (passwordInput !== confirmPasswordInput) {
 				passwordConfirm.classList.add('error');
 				confirmSpan.style.color = 'var(--accent)';
 			}
-			return ;
-		} 
+			return;
+		}
 		if (passwordInput !== confirmPasswordInput) {
 			passwordConfirm.classList.add('error');
 			confirmSpan.style.color = 'var(--accent)';
-			button.setAttribute('disabled', '');
-			return ;
+			// button.setAttribute('disabled', '');
+			return;
 		}
 
 
 		let url = "https://localhost:8000/register";
 		url = url.replace("localhost", window.location.hostname);
-	
+
 		var xhr = new XMLHttpRequest();
 		xhr.open('POST', url, true);
 		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -90,10 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
 					var response = JSON.parse(xhr.responseText);
 					localStorage.setItem('token', response.token);
 					// Here you can store the session ID or token if needed
-					// window.location.replace("/index");
+					window.location.replace("/home");
 					return;
 				} else {
-					alert('Login Error: ' + JSON.parse(xhr.responseText).error);
+					alert('Error: ' + JSON.parse(xhr.responseText).error);
 				}
 			}
 		};
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function validateEmail(email) {
 	var re = /\S+@\S+\.\S+/;
 	return re.test(email);
-  }
+}
 
 function errorButton(button) {
 	const span = document.getElementById(button);
