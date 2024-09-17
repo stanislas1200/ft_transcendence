@@ -34,6 +34,9 @@ async function loadPage(page) {
         case 'game':
             getElementGame();
             break;
+        case 'settings':
+            loadSettings();
+            break;
         default:
             break;
     }
