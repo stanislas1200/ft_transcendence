@@ -1,0 +1,15 @@
+#pong-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+}
+
+#pongCanvas {
+    border: 1px solid #fff;
+    background-color: #000;
+    width: 800px;
+    height: 600px;
+}
