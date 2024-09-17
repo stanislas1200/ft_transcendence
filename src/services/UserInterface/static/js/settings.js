@@ -22,6 +22,10 @@ function loadSettings() {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
+        email.value = response.email;
+        firstName.value = response.firstname;
+        lastName.value = response.lastname;
+        userName.value = response.username;
     };
     xhr.send();
     console.log(response);
