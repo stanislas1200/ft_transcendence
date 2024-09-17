@@ -1,0 +1,129 @@
+.login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 500px;
+  min-height: 100vh;
+  padding: clamp(35px, 8%, 70px);
+}
+
+.wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.login__title {
+  color: var(--secondary);
+  font-size: 1.5em;
+  margin-bottom: 30px;
+}
+
+.login__label {
+  display: block;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.input {
+  width: 100%;
+  background-color: transparent;
+  border: 2px solid var(--secondary);
+  border-radius: 5px;
+  outline: none;
+  font-size: 0.9em;
+  padding: 25px 10px 10px;
+  font-weight: 600;
+  color: var(--secondary);
+}
+
+.login__label span {
+  position: absolute;
+  font-size: 0.8em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--secondary);
+  margin: 20px;
+  cursor: text;
+  transition: font-size 200ms ease, margin 200ms ease;
+}
+
+.login__label .span-active {
+  font-size: 0.7em;
+  margin: 8px 10px;
+}
+
+.text-buttons {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  font-size: 0.8em;
+}
+
+.text-button {
+  margin-top: -15px;
+  cursor: pointer;
+  color: var(--secondary);
+  text-decoration: none;
+}
+
+.text-button:hover {
+  color: var(--accent);
+  text-decoration-line: underline;
+}
+
+.login-buttons {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+  margin-top: 60px;
+}
+
+.login__button {
+  width: 60px;
+  height: 60px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--secondary);
+  border: 3px solid var(--secondary);
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.login__button svg {
+  fill: white;
+  transform: scale(1.25);
+}
+
+.login__button:disabled {
+  cursor: auto;
+  background-color: var(--background);
+}
+
+.login__button:disabled svg {
+  fill: var(--secondary);
+}
+
+.ft-button {
+  width: 60px;
+  height: 60px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--secondary);
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+.ft-button img {
+  width: 150%;
+  height: 150%;
+}

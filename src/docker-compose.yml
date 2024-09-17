@@ -44,6 +44,17 @@ services:
     environment:
       POSTGRES_PASSWORD: ${PGPASSWORD}
 
+  ui-service:
+    build: ./services/UserInterface
+    volumes:
+      - ./services/UserInterface:/usr/src/app
+      - ssl_cert_volume:/etc/ssl/certs
+    ports:
+      - "8003:8003"
+    depends_on:
+      - db
+    restart: on-failure:3
+
 volumes:
   media_volume:
   ssl_cert_volume:
