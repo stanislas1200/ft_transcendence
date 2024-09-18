@@ -1,5 +1,7 @@
+let button;
+// let pp;
+
 function loadSettings() {
-    console.log('bonjour');
     const firstName = document.getElementById('firstName');
     const lastName = document.getElementById('lastName');
     const userName = document.getElementById('username');
@@ -14,7 +16,6 @@ function loadSettings() {
             if (xhr.status === 200 || xhr.status === 201) {
                 // console.log('Login Success:', xhr.responseText);
                 response = JSON.parse(xhr.responseText);
-                console.log(response);
                 // localStorage.setItem('token', response.token);
                 // Here you can store the session ID or token if needed
                 // window.location.replace("/home");
@@ -28,78 +29,117 @@ function loadSettings() {
         userName.value = response.username;
     };
     xhr.send();
-    console.log(response);
+    button = document.getElementById('saveButton');
+    // pp = document.getElementById('profilePicture');
+    validateForm();
 }
 
+function containsUpperCase(pwd) {
+    return /[A-Z]/.test(pwd);  // A-Z pour les majuscules
+}
+
+function containsLowerCase(pwd) {
+    return /[a-z]/.test(pwd);  // a-z pour les minuscules
+}
+
+function containsSpecialCharacter(pwd) {
+    return /[!@#$%^&*(),.?":{}|<>]/.test(pwd);  // Caractères spéciaux communs
+}
+
+function containsNumber(pwd) {
+    return /\d/.test(pwd);  // \d correspond à un chiffre (0-9)
+}
+
+function checkPassword(pwd) {
+    let check = 0;
+
+    if (!containsUpperCase(pwd)) {
+        document.getElementById('newPasswordError').textContent = "the password must contain at least one capital letter";
+        check++;
+    }
+    if (!containsLowerCase(pwd)) {
+        document.getElementById('newPasswordError').textContent = "password must contain at least one lowercase letter";
+        check++;
+    }
+    if (!containsNumber(pwd)) {
+        document.getElementById('newPasswordError').textContent = "password must contain at least one number";
+        check++;
+    }
+    if (!containsSpecialCharacter(pwd)) {
+        console.log(containsSpecialCharacter(pwd));
+        document.getElementById('newPasswordError').textContent = "password must contain at least one special caracter";
+        check++;
+    }
+    if (check != 0)
+        return 1;
+    return 0;
+}
+
+// function validateForm() {
 function validateForm() {
-    let valid = true;
+    button.addEventListener("click", () => {
+        console.log('button press');
+        // console.log('button press');
+        let valid = true;
 
-    // Effacer les erreurs précédentes
-    document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
+        // Effacer les erreurs précédentes
+        document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
 
-    // Vérifier le prénom (uniquement des lettres)
-    const firstName = document.getElementById('firstName').value;
-    if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(firstName)) {
-        document.getElementById('firstNameError').textContent = "Le prénom ne doit contenir que des lettres.";
-        document.getElementById('firstNameError').style.display = 'block';
-        valid = false;
-    }
+        // Vérifier le prénom (uniquement des lettres)
+        const newFirstName = document.getElementById('firstName').value;
+        if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(newFirstName)) {
+            document.getElementById('firstNameError').textContent = "Le prénom ne doit contenir que des lettres.";
+            document.getElementById('firstNameError').style.display = 'block';
+            valid = false;
+        }
 
-    // Vérifier le nom (uniquement des lettres)
-    const lastName = document.getElementById('lastName').value;
-    if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(lastName)) {
-        document.getElementById('lastNameError').textContent = "Le nom ne doit contenir que des lettres.";
-        document.getElementById('lastNameError').style.display = 'block';
-        valid = false;
-    }
+        // Vérifier le nom (uniquement des lettres)
+        const newLastName = document.getElementById('lastName').value;
+        if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(newLastName)) {
+            document.getElementById('lastNameError').textContent = "Le nom ne doit contenir que des lettres.";
+            document.getElementById('lastNameError').style.display = 'block';
+            valid = false;
+        }
 
-    // Vérifier l'adresse e-mail
-    const email = document.getElementById('email').value;
-    if (!/\S+@\S+\.\S+/.test(email)) {
-        document.getElementById('emailError').textContent = "Veuillez entrer une adresse e-mail valide.";
-        document.getElementById('emailError').style.display = 'block';
-        valid = false;
-    }
+        // Vérifier l'adresse e-mail
+        const newEmail = document.getElementById('email').value;
+        if (!/\S+@\S+\.\S+/.test(newEmail)) {
+            document.getElementById('emailError').textContent = "Veuillez entrer une adresse e-mail valide.";
+            document.getElementById('emailError').style.display = 'block';
+            valid = false;
+        }
 
-    // Vérifier le mot de passe (doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial)
-    const password = document.getElementById('password').value;
-    const passwordStrength = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordStrength.test(password)) {
-        document.getElementById('passwordError').textContent = "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.";
-        document.getElementById('passwordError').style.display = 'block';
-        valid = false;
-    }
+        const currentPassword = document.getElementById('oldPassword').value;
 
-    // Vérifier la confirmation du mot de passe
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    if (password !== confirmPassword) {
-        document.getElementById('confirmPasswordError').textContent = "Les mots de passe ne correspondent pas.";
-        document.getElementById('confirmPasswordError').style.display = 'block';
-        valid = false;
-    }
-
-    return valid;
-}
-
-// Fonction pour prévisualiser l'image téléchargée
-function previewImage(event) {
-    const reader = new FileReader();
-    reader.onload = function () {
-        const output = document.getElementById('profileImage');
-        output.src = reader.result;
-    };
-    reader.readAsDataURL(event.target.files[0]);
+        const newPassword = document.getElementById('newPassword').value;
+        if (currentPassword === newPassword) {
+            document.getElementById('newPasswordError').textContent = "password must be different from the current!";
+            valid = false;
+        }
+        else if (checkPassword(newPassword) != 0) {
+            valid = false;
+        }
+        document.getElementById('newPasswordError').style.display = 'block';
+        if (valid == true) {
+            // ajouter ici l'envoie pour le back!!
+        }
+        // return valid;
+    });
 }
 
 function triggerFileInput() {
+    console.log('click');
     document.getElementById('profilePic').click(); // Simule un clic sur l'input
 }
 
 function previewImage(event) {
+    // pp.addEventListener("click", () => {
+    console.log('ici');
     const reader = new FileReader();
     reader.onload = function () {
         const output = document.getElementById('profileImage');
         output.src = reader.result;
     };
     reader.readAsDataURL(event.target.files[0]);
+    // });
 }

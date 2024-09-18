@@ -2,8 +2,8 @@
     display: flex;
     justify-content: space-around;
     padding: 20px;
-    background-color: #f4f4f4;
-    border: 1px solid #ddd;
+    background-color: var(--background);
+    /* border: 1px solid var(--secondary); */
     border-radius: 10px;
     width: 100%;
     box-sizing: border-box;
@@ -15,8 +15,8 @@
 #create-game {
     flex: 1;
     padding: 20px;
-    background-color: #fff;
-    border: 1px solid #ddd;
+    background-color: var(--background);
+    border: 1px solid var(--secondary);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     margin: 10px;
@@ -25,13 +25,13 @@
 
 h2 {
     margin-top: 0;
-    color: #333;
 }
 
 label {
     display: block;
     margin-bottom: 8px;
     font-weight: bold;
+    color: var(--secondary);
 }
 
 input[type="text"],
@@ -40,7 +40,7 @@ select {
     width: 100%;
     padding: 10px;
     margin-bottom: 15px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--secondary);
     border-radius: 5px;
     box-sizing: border-box;
 }
@@ -48,8 +48,8 @@ select {
 button {
     width: 100%;
     padding: 10px;
-    background-color: #007bff;
-    color: white;
+    background-color: var(--background);
+    color: var(--primary);
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -57,12 +57,12 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: var(--background);
 }
 
 #game-mode[disabled],
 #game-mode-create[disabled] {
-    background-color: #f4f4f4;
+    background-color: var(--background);
     cursor: not-allowed;
 }
 
@@ -81,7 +81,7 @@ button:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    color: white;
+    color: var(--primary);
     font-size: 18px;
     z-index: 9999;
     display: none;
@@ -121,5 +121,5 @@ button:hover {
 
 .player-position span {
     font-size: 16px;
-    color: white;
+    color: var(--primary);
 }
