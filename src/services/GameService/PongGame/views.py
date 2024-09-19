@@ -40,13 +40,17 @@ def get_player(session_key, token, user_id):
 def search(request):
     try:
         query = request.GET.get('query', '')
-        page = int(request.GET.get('page', 1))
-        filters = request.GET.get('filter', '')
-
-        if page <= 0:
+        try:
+            page = int(request.GET.get('page', 1))
+            if page <= 0 or page >= 10000:
+                page = 1
+        except ValueError:
             page = 1
 
-        per_page = 2
+        filters = request.GET.get('filter', '')
+
+
+        per_page = 10
         start_index = (page - 1) * per_page
 
         results = {}
