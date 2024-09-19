@@ -1,6 +1,10 @@
 from django.http import HttpResponse
+from django.contrib.auth.models import User
 from django.shortcuts import render
 
+
+def get_user(userId):
+    return User.objects.get(id=userId)
 
 def homepage(request):
     return HttpResponse("Hello welcome to ft_transcandance chat")
