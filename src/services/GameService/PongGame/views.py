@@ -41,29 +41,36 @@ def search(request):
     try:
         query = request.GET.get('query', '')
         page = int(request.GET.get('page', 1))
+        filters = request.GET.get('filter', '')
 
         if page <= 0:
             page = 1
 
-        per_page = 10
+        per_page = 2
         start_index = (page - 1) * per_page
 
         results = {}
+        total_results = highest_total = 0
 
-        users = User.objects.filter(username__icontains=query).only('id', 'username')[start_index:start_index + per_page]
-        total_results = User.objects.filter(username__icontains=query).count()
-        results['users'] = list(users.values('id', 'username'))
+        if 'user' in filters: 
+            users = User.objects.filter(username__icontains=query).only('id', 'username')[start_index:start_index + per_page]
+            total_results = User.objects.filter(username__icontains=query).count()
+            highest_total = total_results
+            results['users'] = list(users.values('id', 'username'))
 
-        games = Game.objects.filter(gameName__icontains=query).only('id', 'gameName')[start_index:start_index + per_page]
-        total_results += Game.objects.filter(gameName__icontains=query).count()
-        results['games'] = list(games.values('id', 'gameName'))
+        if 'game' in filters:
+            games = Game.objects.filter(gameName__icontains=query).only('id', 'gameName')[start_index:start_index + per_page]
+            total_game = Game.objects.filter(gameName__icontains=query).count()
+            highest_total = total_results if total_results > total_game else total_game
+            total_results += total_game
+            results['games'] = list(games.values('id', 'gameName'))
 
         results['pagination'] = {
             'total_results': total_results,
             'current_page': page,
-            'total_pages': (total_results // per_page) + (1 if total_results % per_page > 0 else 0)
+            'total_pages': (highest_total // per_page) + (1 if highest_total % per_page > 0 else 0)
         }
-        
+
         return JsonResponse(results)
     except Exception as e:
         print(e, flush=True)
