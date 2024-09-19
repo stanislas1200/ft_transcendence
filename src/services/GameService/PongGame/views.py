@@ -156,7 +156,8 @@ def get_tournament(request, tournament_id):
         'name': tournament.name,
         'start_date': tournament.start_date.strftime('%Y-%m-%d %H:%M:%S'),
         'end_date': tournament.end_date.strftime('%Y-%m-%d %H:%M:%S') if tournament.end_date else None,
-        'matches': matches_data,
+        'player_number': tournament.max_player,
+        'matches': matches_data
     }
     
     return JsonResponse(tournament_data)
