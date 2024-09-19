@@ -21,27 +21,6 @@
     border-left: 1px solid #ccc;
 }
 
-.profile-picture {
-    position: relative;
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 3px solid #ccc;
-    cursor: pointer;
-}
-
-.profile-picture img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
-
-.profile-picture input {
-    display: none;
-}
-
 h2 {
     color: var(--primary);
     margin-bottom: 20px;
@@ -69,7 +48,7 @@ input {
 button {
     width: 100%;
     padding: 10px;
-    background-color: var(--primary);
+    background-color: var(--secondary);
     color: var(--text);
     border: none;
     border-radius: 4px;
@@ -77,7 +56,7 @@ button {
 }
 
 button:hover {
-    background-color: var(--secondary);
+    background-color: var(--primary);
 }
 
 .error {
@@ -118,7 +97,6 @@ button:hover {
 
 .profile-picture input[type="file"] {
     display: none;
-    /* Cache le bouton de sélection de fichier */
 }
 
 .profile-picture .-label {
@@ -138,10 +116,8 @@ button:hover {
     z-index: 1000;
     transition: background-color 0.2s ease-in-out;
     visibility: hidden;
-    /* Cache l'étiquette par défaut */
 }
 
 .profile-picture:hover .-label {
     visibility: visible;
-    /* Affiche l'étiquette au survol */
 }
