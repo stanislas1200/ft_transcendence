@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.decorators import login_required
 import requests, secrets, os
-from .models import UserToken
+from .models import UserToken, Friendship, FriendRequest
 
 from django.core.files.images import get_image_dimensions
 
@@ -17,6 +17,113 @@ from PIL import Image, ImageSequence
 from io import BytesIO
 from django.core.files.base import ContentFile
 
+from django.shortcuts import get_object_or_404
+
+def send_friend_request(request, user_id):
+	if request.user.is_authenticated:
+		sender = request.user
+	else:
+		status = verify_token(request)
+		if (status == 200):
+			u_id = request.GET.get('UserId')
+			if not u_id:
+				u_id = request.COOKIES.get('userId')
+
+			sender = User.objects.get(id=u_id)
+		else:
+			return JsonResponse({'error': 'User is not logged in'}, status=401)
+		
+	receiver = get_object_or_404(User, id=user_id)
+	if sender == receiver:
+		return JsonResponse({'error': 'Users cannot send requests to themselves'}, status=403)
+	
+	if Friendship.objects.filter(user1=sender, user2=receiver).exists() or Friendship.objects.filter(user1=receiver, user2=sender).exists():
+		return JsonResponse({'error': 'Users are already friends'}, status=409)
+	
+	friend_request, created = FriendRequest.objects.get_or_create(sender=sender, receiver=receiver)
+	
+	if created:
+		return JsonResponse({'message': 'Successfully sent request'})
+	else:
+		return JsonResponse({'error': 'Friend request already exists'}, status=409)
+	
+def accept_friend_request(request, request_id):
+	if request.user.is_authenticated:
+		user = request.user
+	else:
+		status = verify_token(request)
+		if (status == 200):
+			u_id = request.GET.get('UserId')
+			if not u_id:
+				u_id = request.COOKIES.get('userId')
+
+			user = User.objects.get(id=u_id)
+		else:
+			return JsonResponse({'error': 'User is not logged in'}, status=401)
+	
+	friend_request = get_object_or_404(FriendRequest, id=request_id)
+	if friend_request.receiver == user:
+		Friendship.objects.create(user1=friend_request.sender, user2=friend_request.receiver)
+		friend_request.delete()
+		return JsonResponse({'message': 'Successfully accepted request'})
+		
+	return JsonResponse({'error': "You can't accept this request"}, status=403)
+
+def decline_friend_request(request, request_id):
+	if request.user.is_authenticated:
+		user = request.user
+	else:
+		status = verify_token(request)
+		if (status == 200):
+			u_id = request.GET.get('UserId')
+			if not u_id:
+				u_id = request.COOKIES.get('userId')
+
+			user = User.objects.get(id=u_id)
+		else:
+			return JsonResponse({'error': 'User is not logged in'}, status=401)
+		
+	friend_request = get_object_or_404(FriendRequest, id=request_id)
+	if friend_request.receiver == user:
+		friend_request.delete()
+		return JsonResponse({'message': 'Successfully declined request'})
+		
+	return JsonResponse({'error': "You can't decline this request"}, status=403)
+
+def list_friends(request, user_id):
+	# TODO: private ??
+	user = get_object_or_404(User, id=user_id)
+	# friendships = Friendship.objects.filter(user1=user) | Friendship.objects.filter(user2=user)
+	# friends = []
+	# for friendship in friendships:
+	# 	if friendship.user1 == user:
+	# 		friends.append(friendship.user2)
+	# 	else:
+	# 		friends.append(friendship.user1)
+
+	friends = user.friends
+	return JsonResponse({'friends': [{'id': friend.id, 'username': friend.username} for friend in friends]})
+
+def list_friend_requests(request):
+	if request.user.is_authenticated:
+		user = request.user
+	else:
+		status = verify_token(request)
+		if (status == 200):
+			u_id = request.GET.get('UserId')
+			if not u_id:
+				u_id = request.COOKIES.get('userId')
+
+			user = User.objects.get(id=u_id)
+		else:
+			return JsonResponse({'error': 'User is not logged in'}, status=401)
+		
+	received_requests = FriendRequest.objects.filter(receiver=user)
+	sent_requests = FriendRequest.objects.filter(sender=user)
+	return JsonResponse({
+		'received_requests': [{'id': request.id, 'sender': request.sender.username} for request in received_requests],
+		'sent_requests': [{'id': request.id, 'receiver': request.receiver.username} for request in sent_requests]
+	})
 
 def compress_gif(avatar):
 	with Image.open(avatar) as img:
@@ -53,6 +160,11 @@ def process_avatar(avatar, content_type):
 	image = Image.open(avatar)
 	w, h = image.size
 
+	if hasattr(avatar, 'size'):
+		avatar_size = avatar.size
+	else:
+		avatar_size = avatar.getbuffer().nbytes
+
 	# compatible if convert to jpeg 
 	# if image.mode in ('RGBA', 'LA', 'P'):
 	# 	image = image.convert('RGB')
@@ -76,7 +188,7 @@ def process_avatar(avatar, content_type):
 
 
 	# Compress the image if it's larger than 500KB
-	if avatar.size > (500 * 1024):
+	if avatar_size > (500 * 1024):
 		if content_type == 'image/gif':
 			avatar = compress_gif(avatar)
 		else:
@@ -115,12 +227,16 @@ def update_user(request, user_id): # TODO : PATCH ?
 		# Check login
 		if request.user.is_authenticated:
 			user = request.user
-		else: # FIXME : token not working ? 
-			auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-			token = auth_header.split(' ')[1] if ' ' in auth_header else ''
-			if not (UserToken.objects.filter(token=token).exists()):
-				return JsonResponse({'error': 'User is not logged in'}, status=400)
-			user = UserToken.objects.get(token=token).User
+		else:
+			status = verify_token(request)
+			if (status == 200):
+				u_id = request.GET.get('UserId')
+				if not u_id:
+					u_id = request.COOKIES.get('userId')
+
+				user = User.objects.get(id=u_id)
+			else:
+				return JsonResponse({'error': 'User is not logged in'}, status=401)
 
 		# Check authorisation
 		if user_id != user.id:
@@ -137,20 +253,20 @@ def update_user(request, user_id): # TODO : PATCH ?
 		first_name = request.POST.get('first_name')
 		last_name = request.POST.get('last_name')
 		current_password = request.POST.get('current_password')
-		new_password = request.POST.get('new_password') # TODO : password for 42 account 
+		new_password = request.POST.get('new_password')
 		avatar = request.FILES.getlist("avatar")
 		
 		
 
 		# Update User TODO : all user info
-		if username: # TODO : use password ?? 
+		if username and username != user.username: # TODO : use password ?? 
 			# if check_username(username): # TODO : check all user info
 			# 	return JsonResponse({'error': 'Bad username'}, status=400)
 			validate_unicode_slug(username)
 			if User.objects.filter(username=username).exists():
 				return JsonResponse({'error': 'Username already taken'}, status=400)
 			user.username = username
-		if email: # TODO : use password
+		if email and email != user.email: # TODO : use password
 			validate_email(email)
 			if User.objects.filter(email=email).exists():
 				return JsonResponse({'error': 'Email already taken'}, status=400)
@@ -221,10 +337,11 @@ def oauth42(request):
 			return JsonResponse({'error': 'Failed to fetch user data'}, status=response.status_code)
 
 		data = response.json()
-		print(data['image']['link'])
+		avatarLink = data['image']['link']
 		username = data['login']
 		email = data['email']
 
+		make_avatar = False
 		# Check if a user with this email already exists
 		if not User.objects.filter(email=email).exists():
 			if User.objects.filter(username=username).exists():
@@ -232,7 +349,8 @@ def oauth42(request):
 				if User.objects.filter(username=username).exists(): # TODO : improve
 					return JsonResponse({'error': 'Username already taken'}, status=400)
 			# Create a new user
-			User.objects.create_user(username=username, email=email)
+			profile = User.objects.create_user(username=username, email=email, first_name=data['first_name'], last_name=data['last_name'])
+			make_avatar = True
 
 		user = User.objects.get(email=email)
 		login(request, user)
@@ -240,28 +358,48 @@ def oauth42(request):
 		hashed_token = make_password(token)
 		UserToken.objects.update_or_create(user=user, defaults={'token': hashed_token})
 
+		if make_avatar:
+			profile = UserToken.objects.get(token=hashed_token)
+			response = requests.get(avatarLink)
+			if response.status_code == 200:
+				avatar = response.content
+				avatar = BytesIO(avatar)
+				content_type = response.headers['Content-Type']
+
+				if profile.avatar:
+					profile.avatar.delete(save=True)
+				profile.avatar = process_avatar(avatar, content_type)
+				profile.save()
+
 		response = JsonResponse({'message': f'Logged in successfully as {username}'}, status=201)
-		response.set_cookie(key='token', value=token, secure=True) # max_age=??
-		response.set_cookie(key='userId', value=user.id)
+		response.set_cookie(key='token', value=token, secure=True, samesite='Strict') # max_age=??
+		response.set_cookie(key='userId', value=user.id, samesite='None') 
 		return response
 	
-	except:
+	except Exception as e:
 		return JsonResponse({'error': 'An error occurred while processing your request'}, status=500)
 
 @csrf_exempt # Disable CSRF protection for this view
 @require_POST
 def register(request): # TODO : login at same time ?
 	try:
+		first_name = request.POST.get('first_name')
+		last_name = request.POST.get('last_name')
 		username = request.POST.get('username')
 		password = request.POST.get('password')
+		cpassword = request.POST.get('c_password')
 		email = request.POST.get('email')
-		if not username or not password or not email:
-			return JsonResponse({'error': 'Missing required fields'}, status=400)
+		#TODO : uncoment
+		# if not username or not password or not email or not first_name or not last_name or not cpassword:
+		# 	return JsonResponse({'error': 'Missing required fields'}, status=400)
 		if User.objects.filter(username=username).exists():
 			return JsonResponse({'error': 'Username already taken'}, status=400)
 		if User.objects.filter(email=email).exists():
 			return JsonResponse({'error': 'Email already taken'}, status=400)
-		User.objects.create_user(username=username, password=password, email=email)
+		# if cpassword != password:
+		# 	return JsonResponse({'error': 'password not same'}, status=400)
+		User.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name)
+		# User.objects.create_user(username=username, password=password, email=email)
 		return JsonResponse({'message': 'User registered successfully'})
 	except:
 		return JsonResponse({'error': 'Failed to register user'}, status=400)
@@ -275,24 +413,26 @@ def login_view(request):
 		password = request.POST.get('password')
 		if not username or not password:
 			return JsonResponse({'error': 'Missing required fields'}, status=400)
-		user = authenticate(request, username=username, password=password) # slow
-		if not user:
-			username = User.objects.get(email=username).username
-			user = authenticate(request, username=username, password=password)
-		if user is not None:
-			login(request, user)
+		u = authenticate(request, username=username, password=password) # slow
+		if not u:
+			if User.objects.filter(email=username).exists():
+				username = User.objects.get(email=username).username
+				u = authenticate(request, username=username, password=password)
+		if u is not None:
+			login(request, u)
 			token = secrets.token_hex(16)
 			hashed_token = make_password(token)
-			UserToken.objects.update_or_create(user=user, defaults={'token': hashed_token})
-			response = JsonResponse({'message': f'Logged in successfully as {user.username}'}, status=201)
-			response.set_cookie(key='token', value=token, secure=True) # max_age=?? # TODO : cookie
-			response.set_cookie(key='userId', value=user.id) # max_age=??
+			UserToken.objects.update_or_create(user=u, defaults={'token': hashed_token})
+			response = JsonResponse({'message': f'Logged in successfully as {u.username}'}, status=201)
+			response.set_cookie(key='token', value=token, secure=True, samesite='Strict') # max_age=?? # TODO : cookie
+			response.set_cookie(key='userId', value=u.id, secure=True, samesite='None') # max_age=??
 			return response
 			# return JsonResponse({'message': f'Logged in successfully as {user.username}', 'token': token, 'UserId': user.id}, status=201)
 		else:
 			return JsonResponse({'error': 'Invalid login credentials'}, status=400)
-	except:
-		return JsonResponse({'error': 'Failed to login'}, status=400)
+	except Exception as e:
+		print(e, flush=True)
+		return JsonResponse({'error': 'Failed to login'}, status=500)
 	
 @csrf_exempt # Disable CSRF protection for this view
 @require_POST
@@ -309,16 +449,18 @@ def user_to_dict(user):
 	return {
 		'id': user.id,
 		'username': user.username,
-		'email': user.email
+		'email': user.email,
+		'firstname': user.first_name,
+		'lastname': user.last_name
 	}
 
 def verify_token(request, token=None):
-	user_id = request.GET.get('UserId')
+	user_id = request.GET.get('UserId') # need to be in url to work
 
 	if not token:
-		auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-		token = auth_header.split(' ')[1] if ' ' in auth_header else ''
-
+		token = request.COOKIES.get('token')
+	if not user_id:
+		user_id = request.COOKIES.get('userId')
 	try:
 		user_token = UserToken.objects.get(user_id=user_id)
 		if check_password(token, user_token.token):
@@ -331,13 +473,17 @@ def verify_token(request, token=None):
 @csrf_exempt # Disable CSRF protection for this view
 @require_GET
 def me(request):
-	# session_key = request.session.session_key
+	session_key = request.session.session_key
 	if request.user.is_authenticated:
 		return JsonResponse(user_to_dict(request.user))
-	
+
 	status = verify_token(request)
 	if (status == 200):
-		user = User.objects.get(id=request.GET.get('UserId'))
+		user_id = request.GET.get('UserId') # need to be in url to work
+		if not user_id:
+			user_id = request.COOKIES.get('userId')
+
+		user = User.objects.get(id=user_id)
 		return JsonResponse(user_to_dict(user))
 	elif (status == 401):
 		return JsonResponse({'error': 'Invalid token'}, status=401)
@@ -347,7 +493,7 @@ def me(request):
 # service comunication
 def get_user_from_session(request): # TODO : remove and use /me ?
 	session_key = request.GET.get('session_key')
-	token = request.GET.get('token') # TODO : HTTP_AUTHORIZATION
+	token = request.GET.get('token') # TODO : HTTP_AUTHORIZATION or cookie 
 	if not session_key:
 		status = verify_token(request, token)
 		if (status == 200):

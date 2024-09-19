@@ -35,16 +35,11 @@ class Pong(models.Model):
     paddleSpeed = models.FloatField(default=15.0)  # Speed of the paddles
     mapId = models.IntegerField(default=0)
 
-class GameHistory(models.Model):
-    player = models.ForeignKey(User, on_delete=models.CASCADE)
-    game = models.ForeignKey(Pong, on_delete=models.CASCADE)
-    score = models.IntegerField()
-    date = models.DateTimeField(auto_now_add=True)
-
 class Game(models.Model):
     players = models.ManyToManyField(User)
     status = models.CharField(max_length=20, default='waiting')  # pending, ongoing, finished
     gameName = models.CharField(max_length=255)
+    start_date = models.DateTimeField()
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
@@ -53,7 +48,24 @@ class Game(models.Model):
     def __str__(self):
         return self.gameName
 
-# class Score(models.Model):
-#     game = models.ForeignKey(Game, on_delete=models.CASCADE)
-#     player = models.ForeignKey(Player, on_delete=models.CASCADE)
-#     score = models.IntegerField(default=0)
+class GameHistory(models.Model):
+    player = models.ForeignKey(User, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    score = models.IntegerField()
+    date = models.DateTimeField(auto_now_add=True)
+
+class Tournament(models.Model):
+    name = models.CharField(max_length=100)
+    gameName = models.CharField(max_length=255)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField(null=True, blank=True)
+    players = models.ManyToManyField(PongPlayer)
+    max_player = models.PositiveIntegerField(default=10)
+
+class Match(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, related_name='party', on_delete=models.CASCADE)
+    winner = models.ForeignKey(User, related_name='won_matches', on_delete=models.SET_NULL, null=True, blank=True)
+    match_date = models.DateTimeField()
+    round_number = models.PositiveIntegerField()
+    next_match = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='previous_matches')

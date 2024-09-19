@@ -1,0 +1,17 @@
+.wrapper {
+	position: relative;
+	margin: 20px;
+}
+
+.btn-primary {
+	background-color: transparent;
+	color: var(--secondary);
+	border: 3px solid var(--secondary);
+	transition: none;
+}
+
+.btn-primary:hover {
+	background-color: var(--secondary);
+	color: var(--background);
+	border: 3px solid var(--secondary);
+}

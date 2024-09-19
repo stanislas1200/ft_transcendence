@@ -1,4 +1,17 @@
-document.addEventListener('DOMContentLoaded', function () {
+let friendList;
+let chatArea;
+let messageInput;
+let sendButton;
+
+function getElementFriend() {
+    friendList = document.getElementById('friend-list');
+    chatArea = document.getElementById('chat-area');
+    messageInput = document.getElementById('message-input');
+    sendButton = document.getElementById('send-button');
+    chat();
+}
+
+function chat() {
     // Données d'exemple pour les amis
     console.log(1);
     const friends = [
@@ -12,11 +25,6 @@ document.addEventListener('DOMContentLoaded', function () {
         chat2: ['Hi Bob!', 'What’s up?'],
         chat3: ['Hey Charlie!', 'Long time no see!']
     };
-
-    const friendList = document.getElementById('friend-list');
-    const chatArea = document.getElementById('chat-area');
-    const messageInput = document.getElementById('message-input');
-    const sendButton = document.getElementById('send-button');
 
     // Fonction pour ajouter un message à la zone de chat
     function addMessage(message, type) {
@@ -98,5 +106,5 @@ document.addEventListener('DOMContentLoaded', function () {
             sendMessage();
         }
     });
-});
+}
 

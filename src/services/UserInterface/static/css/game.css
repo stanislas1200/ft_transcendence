@@ -60,13 +60,14 @@ button:hover {
     background-color: #0056b3;
 }
 
-#game-mode[disabled] {
+#game-mode[disabled],
+#game-mode-create[disabled] {
     background-color: #f4f4f4;
     cursor: not-allowed;
 }
 
 #random-game {
-    text-align: center;
+    text-align: left;
 }
 
 /* Styles de l'écran de chargement */

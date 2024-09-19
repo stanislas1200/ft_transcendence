@@ -1,67 +1,58 @@
 {% load static %}
 
-<div class="container-xl px-4 mt-4">
-    <!-- Account page navigation-->
-    <div class="row">
-        <div class="col-xl-4" id="firstColSettings">
-            <!-- Profile picture card-->
-            <div class="card mb-4 mb-xl-0">
-                <div class="card-header">Profile Picture</div>
-                <div class="card-body text-center">
-                    <!-- Profile picture image-->
-                    <img class="img-account-profile rounded-circle mb-2"
-                        src="http://bootdey.com/img/Content/avatar/avatar1.png" alt="">
-                    <!-- Profile picture help block-->
-                    <div class="small font-italic text-muted mb-4">JPG or PNG no larger than 5 MB</div>
-                    <!-- Profile picture upload button-->
-                    <!-- <button class="btn btn-primary" type="button">Upload new image</button> -->
-                    <label class="btn btn-primary">
-                        Upload new photo
-                        <input type="file" class="account-settings-fileinput" id="updateAvatar">
-                    </label> &nbsp;
+<div class="container">
+    <div class="form-container">
+        <h2>Modifier les informations du compte</h2>
+        <form id="accountForm" onsubmit="return validateForm()" enctype="multipart/form-data">
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="firstName">Prénom</label>
+                    <input type="text" id="firstName" name="firstName" required>
+                    <span class="error" id="firstNameError"></span>
+                </div>
+
+                <div class="input-group">
+                    <label for="lastName">Nom</label>
+                    <input type="text" id="lastName" name="lastName" required>
+                    <span class="error" id="lastNameError"></span>
                 </div>
             </div>
-        </div>
-        <div class="col-xl-8">
-            <!-- Account details card-->
-            <div class="card mb-4">
-                <div class="card-header">Account Details</div>
-                <div class="card-body">
-                    <form>
-                        <!-- Form Group (username)-->
-                        <div class="mb-3">
-                            <label class="small mb-1" for="inputUsername">Username</label>
-                            <input class="form-control" id="inputUsername" type="text" placeholder="Enter your username"
-                                value="username">
-                        </div>
-                        <!-- Form Row-->
-                        <!-- Form Group (email address)-->
-                        <div class="mb-3">
-                            <label class="small mb-1" for="inputEmail">Email address</label>
-                            <input class="form-control" id="inputEmail" type="email"
-                                placeholder="Enter your email address" value="name@example.com">
-                        </div>
-                        <!-- Form Row        -->
-                        <div class="row gx-3 mb-3">
-                            <!-- Form Group (Old Password)-->
-                            <div class="col-md-6">
-                                <label class="small mb-1" for="inputOldPass">Old Password</label>
-                                <input class="form-control" id="inputOldPass" type="password"
-                                    placeholder="Your old password" value="">
-                            </div>
-                            <!-- Form Group (New Password)-->
-                            <div class="col-md-6">
-                                <label class="small mb-1" for="inputNewPass">New Password</label>
-                                <input class="form-control" id="inputNewPass" type="password"
-                                    placeholder="Your new password" value="">
-                            </div>
-                        </div>
-                        <!-- Save changes button-->
-                        <button class="btn btn-primary" type="button" id="updateInfo">Save changes</button>
-                    </form>
-                </div>
+
+            <div class="input-group" style="width: 100%">
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" name="username" required>
             </div>
+
+            <div class="input-group" style="width: 100%">
+                <label for="email">Adresse e-mail</label>
+                <input type="email" id="email" name="email" required>
+                <span class="error" id="emailError"></span>
+            </div>
+
+            <div class="input-group" style="width: 100%">
+                <label for="password">Nouveau mot de passe</label>
+                <input type="password" id="password" name="password" required>
+                <span class="error" id="passwordError"></span>
+            </div>
+
+            <div class="input-group" style="width: 100%">
+                <label for="confirmPassword">Confirmer le mot de passe</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                <span class="error" id="confirmPasswordError"></span>
+            </div>
+
+            <button type="submit">Enregistrer les modifications</button>
+        </form>
+    </div>
+
+    <div class="profile-container">
+        <!-- <label class="-label" for="file">
+            <span class="glyphicon glyphicon-camera"></span>
+            <span>Change Image</span>
+        </label> -->
+        <div class="profile-picture" onclick="triggerFileInput()">
+            <img id="profileImage" src="{% static 'images/roblox.png' %}" alt="">
+            <input type="file" id="profilePic" name="profilePic" accept="image/*" onchange="previewImage(event)">
         </div>
     </div>
 </div>
-<script src="{% static 'js/settings.js' %}"></script>

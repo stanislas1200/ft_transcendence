@@ -18,7 +18,14 @@ urlpatterns = [
 
 	path('game/main.css', views.get_css, name='views_game'),
 	path('game/', views.get_game_page, name='views_game'),
-	path('game/pong.js', views.get_js)
+	path('game/pong.js', views.get_js),
+
+    
+    path('send-request/<int:user_id>/', views.send_friend_request, name='send_friend_request'),
+    path('accept-request/<int:request_id>/', views.accept_friend_request, name='accept_friend_request'),
+    path('decline-request/<int:request_id>/', views.decline_friend_request, name='decline_friend_request'),
+    path('friends/<int:user_id>/', views.list_friends, name='list_friends'),
+    path('list_request/', views.list_friend_requests, name='list_request'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # urlpatterns = [

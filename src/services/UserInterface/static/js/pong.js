@@ -2,10 +2,15 @@ let ballX;
 let ballY;
 let player1Y;
 let player2Y;
+let canvas;
 
-document.addEventListener('DOMContentLoaded', function () {
-	const canvas = document.getElementById('pongCanvas');
+function getElementPong() {
+	console.log("pong");
+	canvas = document.getElementById('pongCanvas');
+	pong();
+}
 
+function pong() {
 	// Vérifiez que le canvas existe avant de continuer
 	if (canvas) {
 		const ctx = canvas.getContext('2d');
@@ -64,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	} else {
 		console.error('Canvas not found');
 	}
-});
+}
 
 function connect() {
 	let sessionId = 1; // getCookie('sessionid');

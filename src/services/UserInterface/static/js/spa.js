@@ -1,7 +1,7 @@
 /********************************* GESTION SPA *********************************/
 
-function loadPage(page) {
-    fetch('/' + page + '/', {
+async function loadPage(page) {
+    await fetch('/' + page + '/', {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest'  // Add this header to indicate an AJAX request
@@ -23,6 +23,23 @@ function loadPage(page) {
             console.error('There was a problem with the fetch operation:', error);
             // Optionally load an error page or show an error message
         });
+
+    switch (page) {
+        case 'friend':
+            getElementFriend();
+            break;
+        case 'pong':
+            getElementPong();
+            break;
+        case 'game':
+            getElementGame();
+            break;
+        case 'settings':
+            loadSettings();
+            break;
+        default:
+            break;
+    }
 }
 
 // window.onpopstate = function () {

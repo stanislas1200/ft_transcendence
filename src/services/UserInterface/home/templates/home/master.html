@@ -7,6 +7,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Page</title>
+    <script>testIfLoggedIn();
+        function testIfLoggedIn() {
+            let url = "https://localhost:8000/me";
+            url = url.replace("localhost", window.location.hostname);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.withCredentials = true;
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status !== 200 && xhr.status !== 201) {
+                        window.location.replace("/login");
+                    }
+                    console.log(xhr.responseText);
+                }
+            };
+            xhr.send();
+        }
+    </script>
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
     <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/master.css' %}">
@@ -14,6 +34,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/friend.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/pong.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/game.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/settings.css' %}">
 
     <!-- ************************************************ settings ******************************************************** -->
 
@@ -25,6 +46,7 @@
     <script src="{% static 'js/master.js' %}"></script>
     <script src="{% static 'js/friend.js' %}"></script>
     <script src="{% static 'js/game.js' %}"></script>
+    <script src="{% static 'js/settings.js' %}"></script>
     <!-- <script src="{% static 'js/themeToggle.js' %}"></script> -->
 </head>
 
@@ -36,7 +58,7 @@
                     <li><a href="#home" onclick="setActive(this, '')">Home</a></li>
                     <li><a href="#game" onclick="setActive(this, 'game')">Game</a></li>
                     <li><a href="#friend" onclick="setActive(this, 'friend')">Friend</a></li>
-                    <li><a href="#profil" onclick="setActive(this, 'profil')">Profil</a></li>
+                    <li><a href="#profil" onclick="setActive(this, 'pong')">Pong</a></li>
                     <li><a href="#settings" onclick="setActive(this, 'settings')">Settings</a></li>
                     <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn" type="checkbox">
                         <input type="checkbox" id="themeToggle" class="themeToggleInput" />

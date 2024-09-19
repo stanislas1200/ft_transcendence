@@ -19,6 +19,7 @@
 # Ignore build and distribution directories
 /dist
 /build
+src/services/AuthenticationService/authentication/migrations/
 
 # Ignore system files
 .DS_Store

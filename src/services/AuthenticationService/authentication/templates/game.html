@@ -1,95 +1,279 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-    <link rel="stylesheet" type="text/css" href="main.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGODIN Test</title>
+    <style>
+        :root {
+            --text: #dbddfa;
+            --background: #050724;
+            --primary: #8791ed;
+            --secondary: #6e1485;
+            --accent: #e240cd;
+
+            color: var(--text);
+            background-color: var(--background);
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--background);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        canvas {
+            margin-top: 20px;
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-gap: 20px;
+            padding: 20px;
+            height: 100%;
+            width: 100%;
+        }
+
+        .container2 {
+            display: flex;
+            grid-gap: 20px;
+            padding: 20px;
+            height: 100%;
+            width: 100%;
+        }
+
+        .box {
+            background-color: var(--background);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px var(--secondary);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 350px;
+        }
+
+        .box h2 {
+            margin-top: 0;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .box form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .box input[type="text"],
+        .box input[type="password"],
+        .box input[type="email"] {
+            padding: 10px;
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            flex: 1;
+        }
+
+        .box button {
+            padding: 10px;
+            background-color: var(--primary);
+            color: var(--text);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            flex: 1;
+        }
+
+        .box button:hover {
+            background-color: var(--secondary);
+        }
+
+        .response {
+            background-color: var(--background);
+            border: 2px solid var(--accent);
+            border-radius: 4px;
+            margin-top: 20px;
+            width: 100%;
+            height: 600px;
+        }
+    </style>
 </head>
-<body></body>
-<div class="app-container">
-	<div class="sidebar">
-	  <div class="sidebar-header">
-		<div class="app-icon">
-		  <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M507.606 371.054a187.217 187.217 0 00-23.051-19.606c-17.316 19.999-37.648 36.808-60.572 50.041-35.508 20.505-75.893 31.452-116.875 31.711 21.762 8.776 45.224 13.38 69.396 13.38 49.524 0 96.084-19.286 131.103-54.305a15 15 0 004.394-10.606 15.028 15.028 0 00-4.395-10.615zM27.445 351.448a187.392 187.392 0 00-23.051 19.606C1.581 373.868 0 377.691 0 381.669s1.581 7.793 4.394 10.606c35.019 35.019 81.579 54.305 131.103 54.305 24.172 0 47.634-4.604 69.396-13.38-40.985-.259-81.367-11.206-116.879-31.713-22.922-13.231-43.254-30.04-60.569-50.039zM103.015 375.508c24.937 14.4 53.928 24.056 84.837 26.854-53.409-29.561-82.274-70.602-95.861-94.135-14.942-25.878-25.041-53.917-30.063-83.421-14.921.64-29.775 2.868-44.227 6.709-6.6 1.576-11.507 7.517-11.507 14.599 0 1.312.172 2.618.512 3.885 15.32 57.142 52.726 100.35 96.309 125.509zM324.148 402.362c30.908-2.799 59.9-12.454 84.837-26.854 43.583-25.159 80.989-68.367 96.31-125.508.34-1.267.512-2.573.512-3.885 0-7.082-4.907-13.023-11.507-14.599-14.452-3.841-29.306-6.07-44.227-6.709-5.022 29.504-15.121 57.543-30.063 83.421-13.588 23.533-42.419 64.554-95.862 94.134zM187.301 366.948c-15.157-24.483-38.696-71.48-38.696-135.903 0-32.646 6.043-64.401 17.945-94.529-16.394-9.351-33.972-16.623-52.273-21.525-8.004-2.142-16.225 2.604-18.37 10.605-16.372 61.078-4.825 121.063 22.064 167.631 16.325 28.275 39.769 54.111 69.33 73.721zM324.684 366.957c29.568-19.611 53.017-45.451 69.344-73.73 26.889-46.569 38.436-106.553 22.064-167.631-2.145-8.001-10.366-12.748-18.37-10.605-18.304 4.902-35.883 12.176-52.279 21.529 11.9 30.126 17.943 61.88 17.943 94.525.001 64.478-23.58 111.488-38.702 135.912zM266.606 69.813c-2.813-2.813-6.637-4.394-10.615-4.394a15 15 0 00-10.606 4.394c-39.289 39.289-66.78 96.005-66.78 161.231 0 65.256 27.522 121.974 66.78 161.231 2.813 2.813 6.637 4.394 10.615 4.394s7.793-1.581 10.606-4.394c39.248-39.247 66.78-95.96 66.78-161.231.001-65.256-27.511-121.964-66.78-161.231z"/></svg> 
-		</div>
-		<span>Site Name</span>
-	  </div>
-	  <ul class="sidebar-list">
-		<li class="sidebar-list-item">
-		  <a href="#">
-			<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-			<span>Home</span>
-		  </a>
-		</li>
-		<li class="sidebar-list-item active">
-		  <a href="#">
-			<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-			<span>Profile</span>
-		  </a>
-		</li>
-		<li class="sidebar-list-item">
-		  <a href="#">
-			<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-pie-chart"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-			<span>Party</span>
-		  </a>
-		</li>
-		<li class="sidebar-list-item">
-		  <a href="#">
-			<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-inbox"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
-			<span>Tournament</span>
-		  </a>
-		</li>
-		<li class="sidebar-list-item">
-		  <a href="#">
-			<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-			<span>Leaderboard</span>
-		  </a>
-		</li>
-	  </ul>
-	</div>
-	
-	<div class="app-content">
-	  <div class="app-content-header">
-		<input class="search-bar" placeholder="Search..." type="text">
-		<button class="mode-switch" title="Switch Theme">
-		  <svg class="moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="24" height="24" viewBox="0 0 24 24">
-			<defs></defs>
-			<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
-		  </svg>
-		</button>
-		<a href="#">
-			<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-		  </a>
-		<a href="#">
-			<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-		  </a>
-		<a href="#">
-			<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-		  </a>
-		<a class="account-info-picture" href="#">
-		  <!-- <img src="https://images.unsplash.com/photo-1527736947477-2790e28f3443?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTE2fHx3b21hbnxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=900&q=60" alt="Account"> -->
-		</a>
-	  </div>
-	  <div class="game-flex">
-		<div class="game-item">
-			<canvas id="c" width="800" height="600" style="background:#000"></canvas>
-		</div>
-		<div class="game-item">
-			<form id="loginForm">
-				<input type="text" id="username" name="username" placeholder="Username" required />
-				<input type="password" id="password" name="password" placeholder="Password" required />
-				<button type="submit">Login</button>
-			</form>
-			
-			<h2>Enter Party ID</h2>
-		
-			<form id="partyForm">
-				<label for="partyId">Party ID:</label><br>
-				<input type="text" id="partyId" name="partyId"><br>
-				<input type="button" value="Connect" onclick="connect()">
-			</form>
-		</div>
-	  </div>
-	</div>
-  </div>
-  <script src="pong.js"></script>
+
+<body>
+    <div class="container2">
+        <div style="width: 800px">
+            <canvas id="c" width="800" height="600" style="background:#000"></canvas>
+        </div>
+        <div class="response" id="responseBox"></div>
+    </div>
+    <input type="text" id="partyId" name="partyId"><br>
+    <input type="button" value="Connect" onclick="connect()">
+    <div class="container">
+        <div class="box">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div class="box">
+            <h2>Register</h2>
+            <form id="registerForm">
+                <input type="text" id="usernameR" placeholder="Username" required>
+                <input type="password" id="passwordR" placeholder="Password" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div class="box">
+            <h2>Create Tournament</h2>
+            <form id="createT">
+                <input type="text" id="name" placeholder="Name" required>
+                <input type="text" id="game" placeholder="Game" required>
+                <!-- Uncomment and adjust as needed -->
+                <!-- <input type="datetime-local" id="time" name="time" required> -->
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div class="box">
+            <h2>Join Tournament</h2>
+            <form id="joinT">
+                <input type="text" id="TID" placeholder="TID" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div class="box">
+            <h2>Get Tournament</h2>
+            <form id="getT">
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="pong.js"></script>
+    <script>
+        function formatDate(date) {
+            // Get components of the date
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+
+            // Construct the formatted date string
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+        }
+
+
+        document.getElementById('joinT').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+
+            tid = document.getElementById('TID').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', `https://localhost:8001/game/join_tournament/${tid}`, true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.withCredentials = true;
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        console.log('Login Success:', xhr.responseText);
+                        document.getElementById('responseBox').textContent = JSON.stringify(xhr.responseText, null, 2);
+                    } else {
+                        console.error('Login Error:', xhr.responseText);
+                        document.getElementById('responseBox').textContent = JSON.stringify(xhr.responseText, null, 2);
+                    }
+                }
+            };
+            xhr.send();
+        });
+        document.getElementById('createT').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+
+            name = document.getElementById('game').value;
+            // time = document.getElementById('time').value;
+            const time = formatDate(new Date());
+            game = document.getElementById('game').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://localhost:8001/game/create_tournament', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.withCredentials = true;
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        console.log('Login Success:', xhr.responseText);
+                        document.getElementById('responseBox').textContent = JSON.stringify(xhr.responseText, null, 2);
+                    } else {
+                        console.error('Login Error:', xhr.responseText);
+                        document.getElementById('responseBox').textContent = JSON.stringify(xhr.responseText, null, 2);
+                    }
+                }
+            };
+            xhr.send('name=' + encodeURIComponent(name) + '&start_date=' + encodeURIComponent(time) + '&game=' + encodeURIComponent(game));
+        });
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://localhost:8000/login', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 201) {
+                        console.log('Login Success:', xhr.responseText);
+                        document.getElementById('responseBox').textContent = JSON.stringify(xhr.responseText, null, 2);
+                    } else {
+                        console.error('Login Error:', xhr.responseText);
+                        document.getElementById('responseBox').textContent = JSON.stringify(xhr.responseText, null, 2);
+                    }
+                }
+            };
+            xhr.send('username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password));
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+
+            // Get form data
+            const username = document.getElementById('usernameR').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('passwordR').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://localhost:8000/register', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        console.log(xhr.responseText)
+                        document.getElementById('responseBox').textContent = JSON.stringify(response.json(), null, 2);
+                        return response.json();
+                    } else {
+                        document.getElementById('responseBox').textContent = JSON.stringify(response.json(), null, 2);
+                        throw new Error('Failed to register');
+                    }
+                }
+            };
+            xhr.send('username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password) + '&email=' + encodeURIComponent(email));
+        });
+    </script>
+
 </body>
+
 </html>
