@@ -34,6 +34,42 @@ def get_player(session_key, token, user_id):
         return user
     return None
 
+
+@csrf_exempt
+@require_GET
+def search(request):
+    try:
+        query = request.GET.get('query', '')
+        page = int(request.GET.get('page', 1))
+
+        if page <= 0:
+            page = 1
+
+        per_page = 10
+        start_index = (page - 1) * per_page
+
+        results = {}
+
+        users = User.objects.filter(username__icontains=query).only('id', 'username')[start_index:start_index + per_page]
+        total_results = User.objects.filter(username__icontains=query).count()
+        results['users'] = list(users.values('id', 'username'))
+
+        games = Game.objects.filter(gameName__icontains=query).only('id', 'gameName')[start_index:start_index + per_page]
+        total_results += Game.objects.filter(gameName__icontains=query).count()
+        results['games'] = list(games.values('id', 'gameName'))
+
+        results['pagination'] = {
+            'total_results': total_results,
+            'current_page': page,
+            'total_pages': (total_results // per_page) + (1 if total_results % per_page > 0 else 0)
+        }
+        
+        return JsonResponse(results)
+    except Exception as e:
+        print(e, flush=True)
+        return JsonResponse({'error': 'Server error'}, status=500)
+    
+
 @csrf_exempt
 @require_POST
 def create_tournament(request):

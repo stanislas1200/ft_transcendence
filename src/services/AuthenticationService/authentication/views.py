@@ -491,7 +491,7 @@ def me(request):
 
 @csrf_exempt # Disable CSRF protection for this view
 # service comunication
-def get_user_from_session(request): # TODO : remove and use /me ?
+def get_user_from_session(request): # TODO : make a verif token for comunication and a get_user to get user info and /me to get personal info
 	session_key = request.GET.get('session_key')
 	token = request.GET.get('token') # TODO : HTTP_AUTHORIZATION or cookie 
 	if not session_key:

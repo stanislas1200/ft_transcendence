@@ -19,6 +19,8 @@ urlpatterns = [
 	path('create_tournament', views.create_tournament),
 	path('join_tournament/<int:tournament_id>', views.join_tournament),
 	path('get_tournament/<int:tournament_id>', views.get_tournament),
+
+	path('search', views.search)
 	
     # # User-related endpoints...
     # path('users', views.list_users, name='list_users'),  # Lists all users
