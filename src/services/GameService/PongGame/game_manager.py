@@ -137,9 +137,14 @@ class Party:
 		if prop.mapId == 3:
 			make_map3()
 		self.map = maps[prop.mapId]
+		self.gameMode = prop.gameMode
 
 		self.players = sorted(self.players, key=lambda x: x['n'])
 		self.date = prop.start_date
+		self.last_hit = 0
+
+	def add_player(self, players):
+		self.players = [self.get_player_info(player) for player in players]
 
 	def get_player_info(self, player):
 		return {
@@ -219,13 +224,15 @@ party_list = {}
 
 def setup(game_id, player):
 	party = party_list.get(game_id)
-	if party:
+	# if party:
+	# 	setting = {
+	# 		'obstacles': party.map,
+	# 	}
+	
+	if party and party.state == 'playing':
 		setting = {
 			'obstacles': party.map,
 		}
-	
-	# if party and party.state == 'playing':
-	if party:
 		return setting
 
 	game = Game.objects.filter(id=game_id).first()
@@ -234,18 +241,28 @@ def setup(game_id, player):
 	
 	if game:
 		prop = game.gameProperty
-		prop.start_date = game.start_date
-		if not prop.ball:
-			prop.ball = {'x': prop.width/2, 'y': prop.height/2, 'dx': prop.ballSpeed, 'dy': prop.ballSpeed}
-		party = Party(prop, game_id)
-		if party.player_number == 1:
-			party.add_ai_player()
-		if party.player_number <= prop.players.count():
+		if not party:
+			prop.start_date = game.start_date
+			if not prop.ball:
+				prop.ball = {'x': prop.width/2, 'y': prop.height/2, 'dx': prop.ballSpeed, 'dy': prop.ballSpeed}
+			party = Party(prop, game_id)
+			if party.player_number == 1:
+				party.add_ai_player()
+			party_list[game_id] = party
+		else:
+			party.add_player(prop.players.all())
+
+		if party.player_number <= prop.players.count() and prop.players.filter(player__id=player.id):
 			party.state = 'playing'
-		party_list[game_id] = party
 		
 		return {'obstacles': party.map}
 	return None
+
+def dict_player(player):
+	return {
+		"username": player['name'],
+		"id": player['id'] # TODO : check id
+	}
 
 def get_pong_state(game_id):
 	game = party_list.get(game_id)
@@ -261,10 +278,17 @@ def get_pong_state(game_id):
 		'positions': game.positions,
 		'scores': scores,
 		'usernames': username,
-		'state': game.state
+		'state': game.state,
+		'gameMode': game.gameMode
 	}
 	if (game.state == 'finished'):
-		game_state['winner'] = game.players[0] if game.players[0]['score'] >= game.score else game.players[1]
+		if game.gameMode == 'team':
+			game_state['winner'] = [dict_player(game.players[0]), dict_player(game.players[2])] if game.players[0]['score'] >= game.score else [dict_player(game.players[1]), dict_player(game.players[3])],
+		else:
+			player = dict_player(max(game.players, key=lambda player: player['score']))
+			game_state['winner'] = [player]
+		# else:
+		# 	game_state['winner'] = [game.players[0]] if game.players[0]['score'] >= game.score else [game.players[1]]
 		del party_list[game_id]  # remove party from party_list
 	return game_state
 
@@ -282,12 +306,14 @@ def move_pong(game_id, n, direction):
 	game = party_list.get(game_id)
 	if game is None:
 		return
-	if game.state != 'playing':
-		return
+	# if game.state != 'playing':
+	# 	return
 	if game.positions[n - 1] > 50 and direction == 'up':
 		game.positions[n - 1] -= game.player_speed
+	# elif game.positions[n - 1] < game.height - 50 and direction == 'down' and (n < 3 or game.gameMode == 'team'):
 	elif game.positions[n - 1] < game.height - 50 and direction == 'down':
 		game.positions[n - 1] += game.player_speed
+	# elif game.gameMode == 'ffa' and game.position
 
 import time
 def ai_play(game):
@@ -347,7 +373,7 @@ def ai_play(game):
 			time.sleep(0.5)
 		time.sleep(0.1)
 
-def check_collision(game, vertices):
+def check_collision(game, vertices, n):
 	if in_polygon_with_radius(game.ball, vertices, game.ballR):
 		nex_x = game.ball['x'] + (game.ball['dx'] * -1)
 		new_point = {'x': nex_x, 'y': game.ball['y']}
@@ -357,6 +383,8 @@ def check_collision(game, vertices):
 		else:
 			game.ball['dx'] *= -1
 			game.ball['x'] += game.ball['dx']
+		return n
+	return 0
 
 import threading
 async def update_pong(game_id):
@@ -375,14 +403,24 @@ async def update_pong(game_id):
 	if game.ball['y'] <= 0 + game.ballR or game.ball['y'] >= game.height - game.ballR:
 		game.ball['dy'] *= -1
 		game.ball['y'] += game.ball['dy']*1.5
+	if game.ball['y'] <= game.paddlePadding/4 + game.ballR or game.ball['y'] >= game.height - game.paddlePadding/4 - game.ballR:
+		game.players[game.last_hit]["score"] += 1
+		game.ball['y'] = game.height/2
+		game.ball['x'] = game.width/2
 
 	# check out collision x
 	if game.ball['x'] <= game.paddlePadding/4 + game.ballR:
 		game.players[1]["score"] += 1
+		if game.gameMode == 'team':
+			game.players[3]["score"] += 1
 		game.ball['x'] = game.width/2
+		game.ball['y'] = game.height/2
 	if game.ball['x'] >= game.width - game.paddlePadding/4 - game.ballR:
 		game.players[0]["score"] += 1
+		if game.gameMode == 'team':
+			game.players[2]["score"] += 1
 		game.ball['x'] = game.width/2
+		game.ball['y'] = game.height/2
 
 	# check game over
 	if game.players[0]["score"] >= game.score or game.players[1]["score"] >= game.score:
@@ -398,7 +436,7 @@ async def update_pong(game_id):
 		{'x': game.paddlePadding + game.paddleWidth, 'y': game.positions[0] + game.paddleHeight/2},
 		{'x': game.paddlePadding, 'y': game.positions[0] + game.paddleHeight/2}
 	]
-	check_collision(game, paddleVertices)
+	game.last_hit = check_collision(game, paddleVertices, 0)
 		
 
 	# check collision player 2
@@ -408,7 +446,25 @@ async def update_pong(game_id):
 		{'x': game.width - game.paddlePadding - game.paddleWidth, 'y': game.positions[1] + game.paddleHeight/2},
 		{'x': game.width - game.paddlePadding, 'y': game.positions[1] + game.paddleHeight/2}
 	]
-	check_collision(game, paddleVertices)
+	game.last_hit = check_collision(game, paddleVertices, 1)
+
+	# check collision player 3
+	paddleVertices = [
+		{'x': game.positions[2] - game.paddleHeight/2, 'y': game.paddlePadding},
+		{'x': game.positions[2] + game.paddleHeight/2, 'y': game.paddlePadding},
+		{'x': game.positions[2] + game.paddleHeight/2, 'y': game.paddlePadding + game.paddleWidth},
+		{'x': game.positions[2] - game.paddleHeight/2, 'y': game.paddlePadding + game.paddleWidth}
+	]
+	game.last_hit = check_collision(game, paddleVertices, 2)
+
+	# check collision player 4
+	paddleVertices = [
+		{'x': game.positions[2] - game.paddleHeight/2, 'y': game.width - game.paddlePadding},
+		{'x': game.positions[2] + game.paddleHeight/2, 'y': game.width - game.paddlePadding},
+		{'x': game.positions[2] + game.paddleHeight/2, 'y': game.width - game.paddlePadding - game.paddleWidth},
+		{'x': game.positions[2] - game.paddleHeight/2, 'y': game.width - game.paddlePadding - game.paddleWidth}
+	]
+	game.last_hit = check_collision(game, paddleVertices, 3)
 	
 	for shape in game.map:
 		check_collision(game, shape['vertices'])

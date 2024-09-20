@@ -298,8 +298,8 @@ def join_game(request):
         
 
         # Check if a player is already in a game # TODO : check waiting and playing and for start_game() 
-        if Game.objects.filter(status='waiting', players__in=[player]).exists():
-            return JsonResponse({'error': 'Player already in a game'}, status=400)
+        # if Game.objects.filter(status='waiting', players__in=[player]).exists():
+        #     return JsonResponse({'error': 'Player already in a game'}, status=400)
         
         if game_id:
             game = Game.objects.get(id=game_id)  # Get the game
@@ -334,14 +334,20 @@ def join_game(request):
 def startPong(request, player, token, gameType):
     
     playerNumber = request.POST.get('playerNumber', 1) # TODO : check default 1 or error ?
+    gameMode = request.POST.get('gameMode', 'ffa')
     map = request.POST.get('map', 0)
+
     if not playerNumber or not gameType:
         return JsonResponse({'error': 'Missing setting'}, status=400)
     if int(playerNumber) < 1:
         return JsonResponse({'error': 'Invalid player number'}, status=400)
 
-    pong = Pong.objects.create(playerNumber=playerNumber, mapId=map)
-    game = Game.objects.create(gameName='pong', gameProperty=pong, start_date=timezone.now())
+    if gameMode == 'team' and int(playerNumber) < 4:
+        return JsonResponse({'error': 'Not enough player to play in team'}, status=400)
+
+    pong = Pong.objects.create(playerNumber=playerNumber, mapId=map, gameMode=gameMode)
+    party_name = request.POST.get('partyName', 'pong')
+    game = Game.objects.create(gameName='pong', gameProperty=pong, start_date=timezone.now(), party_name=party_name)
     game.players.add(player)
     player = PongPlayer.objects.create(player=player, score=0, n=1, token=token)
     game.gameProperty.players.add(player)
@@ -373,7 +379,7 @@ def startPong(request, player, token, gameType):
 # @require_POST
 @csrf_exempt # Disable CSRF protection for this view
 # create a game party # TODO : check
-def start_game(request, gameName):
+def start_game(request, gameName=None):
     # try:
     # get user
     session_key = request.session.session_key
