@@ -29,40 +29,77 @@
 
 <body>
     <main>
-        <div class="wrapper">
-            <div class="navbar">
+        <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn" type="checkbox">
+            <input type="checkbox" id="themeToggle" class="themeToggleInput" />
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" stroke="none">
+                <mask id="moon-mask">
+                    <rect x="0" y="0" width="20" height="20" fill="white"></rect>
+                    <circle cx="11" cy="3" r="8" fill="black"></circle>
+                </mask>
+                <circle class="sunMoon" cx="10" cy="10" r="8" mask="url(#moon-mask)"></circle>
+                <g>
+                    <circle class="sunRay sunRay1" cx="18" cy="10" r="1.5"></circle>
+                    <circle class="sunRay sunRay2" cx="14" cy="16.928" r="1.5"></circle>
+                    <circle class="sunRay sunRay3" cx="6" cy="16.928" r="1.5"></circle>
+                    <circle class="sunRay sunRay4" cx="2" cy="10" r="1.5"></circle>
+                    <circle class="sunRay sunRay5" cx="6" cy="3.1718" r="1.5"></circle>
+                    <circle class="sunRay sunRay6" cx="14" cy="3.1718" r="1.5"></circle>
+                </g>
+            </svg>
+        </label>
+        <div class="navbars">
+            <nav class="navbar-left">
                 <ul>
-                    <li><a href="#home" onclick="setActive(this, '')">Home</a></li>
-                    <li><a href="#game" onclick="setActive(this, 'game')">Game</a></li>
-                    <li><a href="#friend" onclick="setActive(this, 'friend')">Friend</a></li>
-                    <li><a href="#profil" onclick="setActive(this, 'pong')">Pong</a></li>
-                    <li><a href="#settings" onclick="setActive(this, 'settings')">Settings</a></li>
-                    <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn" type="checkbox">
-                        <input type="checkbox" id="themeToggle" class="themeToggleInput" />
-                        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" stroke="none">
-                            <mask id="moon-mask">
-                                <rect x="0" y="0" width="20" height="20" fill="white"></rect>
-                                <circle cx="11" cy="3" r="8" fill="black"></circle>
-                            </mask>
-                            <circle class="sunMoon" cx="10" cy="10" r="8" mask="url(#moon-mask)"></circle>
-                            <g>
-                                <circle class="sunRay sunRay1" cx="18" cy="10" r="1.5"></circle>
-                                <circle class="sunRay sunRay2" cx="14" cy="16.928" r="1.5"></circle>
-                                <circle class="sunRay sunRay3" cx="6" cy="16.928" r="1.5"></circle>
-                                <circle class="sunRay sunRay4" cx="2" cy="10" r="1.5"></circle>
-                                <circle class="sunRay sunRay5" cx="6" cy="3.1718" r="1.5"></circle>
-                                <circle class="sunRay sunRay6" cx="14" cy="3.1718" r="1.5"></circle>
-                            </g>
-                        </svg>
-                    </label>
+                    <li>
+                        <a href="#home" onclick="setActive(this, '')">
+                            <i class="fa fa-home fa-2x"></i>
+                            <span class="nav-text">
+                                Home
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#game" onclick="setActive(this, 'game')">
+                            <i class="fa fa-gamepad fa-2x"></i>
+                            <span class="nav-text">
+                                Game
+                            </span>
+                        </a>
+                    </li>
                 </ul>
-            </div>
-            <div class="spa" id="spa-content">
-                {% include content %}
-            </div>
-            <div class="friend_list">
-                Friend list
-            </div>
+                <ul class="logout">
+                    <li>
+                        <a href="#">
+                            <i class="fa fa-power-off fa-2x"></i>
+                            <span class="nav-text">
+                                Logout
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <nav class="navbar-top">
+                <ul>
+                    <li>
+                        <a href="#friend" onclick="setActive(this, 'friend')">
+                            <i class="fa fa-comments fa-2x"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#profil" onclick="setActive(this, 'pong')">
+                            <i class="fa fa-user fa-2x"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#settings" onclick="setActive(this, 'settings')">
+                            <i class="fa fa-gear fa-2x"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="spa" id="spa-content">
+            {% include content %}
         </div>
     </main>
 </body>

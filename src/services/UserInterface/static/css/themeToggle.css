@@ -4,9 +4,10 @@
 
 .st-sunMoonThemeToggleBtn {
   position: absolute;
-  top: 7px;
-  right: 25px;
+  top: 2px;
+  right: 6px;
   cursor: pointer;
+  z-index: 1000;
 }
 
 .st-sunMoonThemeToggleBtn .themeToggleInput {
