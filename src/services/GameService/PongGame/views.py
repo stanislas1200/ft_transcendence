@@ -286,6 +286,9 @@ def join_game(request):
     try:
         session_key = request.session.session_key
         game_id = request.GET.get('gameId')
+        game_name = request.GET.get('gameName')
+        if not game_id and not game_name:
+            return JsonResponse({'error': 'Missing field'}, status=400)
         token = request.COOKIES.get('token')
         user_id = request.COOKIES.get('userId')
 
@@ -294,11 +297,17 @@ def join_game(request):
             return JsonResponse({'error': 'Failed to get player'}, status=400)
         
 
-        # Check if a player is already in a game
-        if Game.objects.filter(players__in=[player]).exists():
+        # Check if a player is already in a game # TODO : check waiting and playing and for start_game() 
+        if Game.objects.filter(status='waiting', players__in=[player]).exists():
             return JsonResponse({'error': 'Player already in a game'}, status=400)
         
-        game = Game.objects.get(id=game_id)  # Get the game
+        if game_id:
+            game = Game.objects.get(id=game_id)  # Get the game
+        else:
+            game = Game.objects.filter(gameName=game_name, status='waiting').order_by('?').first() # Get random game
+            if not game:
+                return start_game(request, game_name) # No game found, create one # TODO : multi no alone
+                
 
         # Check if party accept player
         if game.gameProperty.playerNumber <= game.players.count():
@@ -364,7 +373,7 @@ def startPong(request, player, token, gameType):
 # @require_POST
 @csrf_exempt # Disable CSRF protection for this view
 # create a game party # TODO : check
-def start_game(request):
+def start_game(request, gameName):
     # try:
     # get user
     session_key = request.session.session_key
@@ -380,7 +389,8 @@ def start_game(request):
     #     return JsonResponse({'error': 'Player already in a game'}, status=400)
     
     # get requested game:
-    gameName = request.POST.get('game')
+    if not gameName:
+        gameName = request.POST.get('game')
     gameType = request.POST.get('gameType', 'simple')  # Get the game type from the request, default to 'simple'
     if gameName == 'pong':
         return startPong(request, player, token, gameType)
