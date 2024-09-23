@@ -90,6 +90,17 @@ select {
     padding: 25px 10px 10px;
     font-weight: 600;
     color: var(--secondary);
+    margin-bottom: -10px;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
 }
 
 .login__label span {
@@ -106,4 +117,24 @@ select {
 .login__label .span-active {
     font-size: 0.7em;
     margin: 8px 10px;
+}
+
+#max-players-random,
+#game-mode,
+#max-players-create,
+#game-mode-create,
+#map-choice {
+    font-size: 0.9em;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--secondary);
+    cursor: text;
+    transition: font-size 200ms ease, margin 200ms ease;
+    width: 100%;
+    background-color: transparent;
+    border: 2px solid var(--secondary);
+    border-radius: 5px;
+    outline: none;
+    padding: 10px 10px 10px;
+    margin-bottom: 9px;
 }

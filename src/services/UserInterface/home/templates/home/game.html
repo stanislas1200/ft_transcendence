@@ -15,11 +15,6 @@
     <!-- Partie gauche inférieure: Trouver une partie aléatoire -->
     <div id="random-game">
         <h2>Trouver une partie aléatoire</h2>
-        <select id="game-mode-create">
-            <option value="ffa">FFA</option>
-            <option value="team">Team</option>
-        </select>
-
         <label for="max-players-random">Nombre de joueurs max:</label>
         <select id="max-players-random">
             <option value="2">2</option>
@@ -30,7 +25,8 @@
             <option value="ffa">FFA</option>
             <option value="team">Team</option>
         </select>
-        <button class="random-game-button" id="random-game-button">Rechercher une partie</button>
+        <button class="random-game-button" id="random-game-button">Rechercher une
+            partie</button>
     </div>
 
     <!-- Partie droite: Créer une partie -->
@@ -41,11 +37,13 @@
             <input id="username" type="text" name="username" class="input">
         </label>
 
-        <label for="max-players-create">Nombre de joueurs max:</label>
-        <select id="max-players-create">
-            <option value="2">2</option>
-            <option value="4">4</option>
-        </select>
+        <label for="max-players-create">
+            <span>Nombre de joueurs max:</span>
+            <select id="max-players-create">
+                <option value="2">2</option>
+                <option value="4">4</option>
+            </select>
+        </label>
 
         <label for="game-mode-create">Mode de jeu:</label>
         <select id="game-mode-create">
