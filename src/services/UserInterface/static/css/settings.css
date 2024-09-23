@@ -2,7 +2,7 @@
     display: flex;
     width: 80%;
     max-width: 1200px;
-    background-color: #fff;
+    background-color: var(--background);
     border-radius: 10px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
 }
@@ -17,33 +17,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f0f0f0;
+    background-color: var(--background);
     border-left: 1px solid #ccc;
 }
 
-.profile-picture {
-    position: relative;
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 3px solid #ccc;
-    cursor: pointer;
-}
-
-.profile-picture img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
-
-.profile-picture input {
-    display: none;
-}
-
 h2 {
-    color: #333;
+    color: var(--primary);
     margin-bottom: 20px;
 }
 
@@ -69,19 +48,19 @@ input {
 button {
     width: 100%;
     padding: 10px;
-    background-color: #28a745;
-    color: white;
+    background-color: var(--secondary);
+    color: var(--text);
     border: none;
     border-radius: 4px;
     cursor: pointer;
 }
 
 button:hover {
-    background-color: #218838;
+    background-color: var(--primary);
 }
 
 .error {
-    color: red;
+    color: var(--primary);
     font-size: 12px;
     display: none;
 }
@@ -118,7 +97,6 @@ button:hover {
 
 .profile-picture input[type="file"] {
     display: none;
-    /* Cache le bouton de sélection de fichier */
 }
 
 .profile-picture .-label {
@@ -131,17 +109,15 @@ button:hover {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: #fff;
+    background-color: var(--background);
+    color: var(--primary);
     text-align: center;
     border-radius: 50%;
     z-index: 1000;
     transition: background-color 0.2s ease-in-out;
     visibility: hidden;
-    /* Cache l'étiquette par défaut */
 }
 
 .profile-picture:hover .-label {
     visibility: visible;
-    /* Affiche l'étiquette au survol */
 }
