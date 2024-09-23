@@ -13,7 +13,6 @@ from django.core.cache import cache
 class GameConsumer(AsyncWebsocketConsumer):
 	connected_users = 0
 	async def connect(self):
-		
 		self.game_id = self.scope['url_route']['kwargs']['game_id']
 		self.token = self.scope['url_route']['kwargs']['token'] # TODO : token in header 
 		user_id = self.scope['url_route']['kwargs']['UserId']
@@ -25,9 +24,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.game_group_name,
 			self.channel_name
 		)
-		print(f'Connected to game {self.game_id}')
 		await self.accept()
-
 		if player:
 			# TODO : check game time or tournament 
 			setting = await sync_to_async(setup)(self.game_id, player)
@@ -56,6 +53,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 	async def game_loop(self):
 		while True:
 			ret, game_id = await update_pong(self.game_id) or (None, None)
+			# if not ret:
+			# 	continue
 			game_state = get_pong_state(self.game_id)
 
 			await self.channel_layer.group_send(
@@ -66,7 +65,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				}
 			)
 			if ret:
-				break
+				break # TODO : circle game solo
 			await asyncio.sleep(1/60)
 
 	async def update_game_state(self, event):

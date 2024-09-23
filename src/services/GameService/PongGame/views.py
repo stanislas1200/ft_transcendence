@@ -34,6 +34,53 @@ def get_player(session_key, token, user_id):
         return user
     return None
 
+
+@csrf_exempt
+@require_GET
+def search(request):
+    try:
+        query = request.GET.get('query', '')
+        try:
+            page = int(request.GET.get('page', 1))
+            if page <= 0 or page >= 10000:
+                page = 1
+        except ValueError:
+            page = 1
+
+        filters = request.GET.get('filter', '')
+
+
+        per_page = 10
+        start_index = (page - 1) * per_page
+
+        results = {}
+        total_results = highest_total = 0
+
+        if 'user' in filters: 
+            users = User.objects.filter(username__icontains=query).only('id', 'username')[start_index:start_index + per_page]
+            total_results = User.objects.filter(username__icontains=query).count()
+            highest_total = total_results
+            results['users'] = list(users.values('id', 'username'))
+
+        if 'game' in filters:
+            games = Game.objects.filter(gameName__icontains=query).only('id', 'gameName')[start_index:start_index + per_page]
+            total_game = Game.objects.filter(gameName__icontains=query).count()
+            highest_total = total_results if total_results > total_game else total_game
+            total_results += total_game
+            results['games'] = list(games.values('id', 'gameName'))
+
+        results['pagination'] = {
+            'total_results': total_results,
+            'current_page': page,
+            'total_pages': (highest_total // per_page) + (1 if highest_total % per_page > 0 else 0)
+        }
+
+        return JsonResponse(results)
+    except Exception as e:
+        print(e, flush=True)
+        return JsonResponse({'error': 'Server error'}, status=500)
+    
+
 @csrf_exempt
 @require_POST
 def create_tournament(request):
@@ -239,6 +286,9 @@ def join_game(request):
     try:
         session_key = request.session.session_key
         game_id = request.GET.get('gameId')
+        game_name = request.GET.get('gameName')
+        if not game_id and not game_name:
+            return JsonResponse({'error': 'Missing field'}, status=400)
         token = request.COOKIES.get('token')
         user_id = request.COOKIES.get('userId')
 
@@ -247,11 +297,17 @@ def join_game(request):
             return JsonResponse({'error': 'Failed to get player'}, status=400)
         
 
-        # Check if a player is already in a game
-        if Game.objects.filter(players__in=[player]).exists():
-            return JsonResponse({'error': 'Player already in a game'}, status=400)
+        # Check if a player is already in a game # TODO : check waiting and playing and for start_game() 
+        # if Game.objects.filter(status='waiting', players__in=[player]).exists():
+        #     return JsonResponse({'error': 'Player already in a game'}, status=400)
         
-        game = Game.objects.get(id=game_id)  # Get the game
+        if game_id:
+            game = Game.objects.get(id=game_id)  # Get the game
+        else:
+            game = Game.objects.filter(gameName=game_name, status='waiting').order_by('?').first() # Get random game
+            if not game:
+                return start_game(request, game_name) # No game found, create one # TODO : use and check passed param in join like create
+                
 
         # Check if party accept player
         if game.gameProperty.playerNumber <= game.players.count():
@@ -278,14 +334,20 @@ def join_game(request):
 def startPong(request, player, token, gameType):
     
     playerNumber = request.POST.get('playerNumber', 1) # TODO : check default 1 or error ?
+    gameMode = request.POST.get('gameMode', 'ffa')
     map = request.POST.get('map', 0)
+
     if not playerNumber or not gameType:
         return JsonResponse({'error': 'Missing setting'}, status=400)
     if int(playerNumber) < 1:
         return JsonResponse({'error': 'Invalid player number'}, status=400)
 
-    pong = Pong.objects.create(playerNumber=playerNumber, mapId=map)
-    game = Game.objects.create(gameName='pong', gameProperty=pong, start_date=timezone.now())
+    if gameMode == 'team' and int(playerNumber) < 4:
+        return JsonResponse({'error': 'Not enough player to play in team'}, status=400)
+
+    pong = Pong.objects.create(playerNumber=playerNumber, mapId=map, gameMode=gameMode)
+    party_name = request.POST.get('partyName', 'pong')
+    game = Game.objects.create(gameName='pong', gameProperty=pong, start_date=timezone.now(), party_name=party_name)
     game.players.add(player)
     player = PongPlayer.objects.create(player=player, score=0, n=1, token=token)
     game.gameProperty.players.add(player)
@@ -317,7 +379,7 @@ def startPong(request, player, token, gameType):
 # @require_POST
 @csrf_exempt # Disable CSRF protection for this view
 # create a game party # TODO : check
-def start_game(request):
+def start_game(request, gameName=None):
     # try:
     # get user
     session_key = request.session.session_key
@@ -333,7 +395,8 @@ def start_game(request):
     #     return JsonResponse({'error': 'Player already in a game'}, status=400)
     
     # get requested game:
-    gameName = request.POST.get('game')
+    if not gameName:
+        gameName = request.POST.get('game')
     gameType = request.POST.get('gameType', 'simple')  # Get the game type from the request, default to 'simple'
     if gameName == 'pong':
         return startPong(request, player, token, gameType)

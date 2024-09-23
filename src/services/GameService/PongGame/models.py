@@ -22,7 +22,7 @@ class PongPlayer(models.Model):
     n = models.IntegerField(default=0)
 
 def get_default_player_positions():
-    return [250, 250]
+    return [250, 250, 250, 250] # TODO : ADDAPT based on player nb
 class Pong(models.Model):
     width = models.IntegerField(default=800)
     height = models.IntegerField(default=600)
@@ -34,11 +34,13 @@ class Pong(models.Model):
     ballSpeed = models.FloatField(default=4.0)  # Speed of the ball
     paddleSpeed = models.FloatField(default=15.0)  # Speed of the paddles
     mapId = models.IntegerField(default=0)
+    gameMode = models.CharField(max_length=20, default='ffa')
 
 class Game(models.Model):
     players = models.ManyToManyField(User)
     status = models.CharField(max_length=20, default='waiting')  # pending, ongoing, finished
     gameName = models.CharField(max_length=255)
+    party_name = models.CharField(max_length=50, default='game')
     start_date = models.DateTimeField()
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)

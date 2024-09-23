@@ -5,7 +5,7 @@ import os
 def user_directory_path(instance, filename):
     return os.path.join('user_{0}/avatar/'.format(instance.user.id), filename)
 
-class UserToken(models.Model): # TODO : Social service ?: use ws to get online/offline +- and for notification db notif on connect send all if read delete from db. Add friends
+class UserToken(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     token = models.CharField(max_length=255)
     avatar = models.ImageField(upload_to=user_directory_path, default='default.png', blank=True, null=True)
@@ -23,6 +23,14 @@ class FriendRequest(models.Model):
     receiver = models.ForeignKey(User, related_name='received_requests', on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
 
+class Block(models.Model):
+    blocker = models.ForeignKey(User, related_name='blocker', on_delete=models.CASCADE)
+    blocked = models.ForeignKey(User, related_name='blocked', on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('blocker', 'blocked')
+
 
 User.add_to_class(
     'friends',
@@ -34,5 +42,10 @@ User.add_to_class(
             )
         ))
     )
+)
+
+User.add_to_class(
+    'blocked',
+    property(lambda u: User.objects.filter(id__in=Block.objects.filter(blocker=u).values_list('blocked_id', flat=True)))
 )
     
