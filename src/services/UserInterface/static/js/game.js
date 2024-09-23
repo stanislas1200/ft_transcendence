@@ -84,57 +84,6 @@ function twoPlayer() {
 }
 
 function waitingRoom() {
-
-    // Simuler la recherche d'une partie
-    function showLoadingOverlay(players, maxPlayers, gameMode) {
-        loadingOverlay.style.display = 'flex';
-
-        // Mettre à jour le texte avec le nombre de joueurs
-        loadingText.textContent = `Chargement... ${players.length}/${maxPlayers}`;
-
-        // Vider les positions des joueurs
-        playerPositions.innerHTML = '';
-
-        if (gameMode === 'ffa') {
-            // Répartir les joueurs dans les 4 positions (haut, bas, gauche, droite)
-            const positions = ['top', 'right', 'bottom', 'left'];
-            players.forEach((player, index) => {
-                const position = positions[index % positions.length];
-                const div = document.createElement('div');
-                div.className = `player-position ${position}`;
-                div.innerHTML = `<span>${player}</span>`;
-                playerPositions.appendChild(div);
-            });
-        } else if (gameMode === 'team') {
-            // Répartir les joueurs en deux équipes (gauche et droite)
-            const team1 = players.slice(0, Math.ceil(players.length / 2));
-            const team2 = players.slice(Math.ceil(players.length / 2));
-
-            team1.forEach(player => {
-                const div = document.createElement('div');
-                div.className = 'player-position left';
-                div.innerHTML = `<span>${player}</span>`;
-                playerPositions.appendChild(div);
-            });
-
-            team2.forEach(player => {
-                const div = document.createElement('div');
-                div.className = 'player-position right';
-                div.innerHTML = `<span>${player}</span>`;
-                playerPositions.appendChild(div);
-            });
-        }
-    }
-
-    // Simuler la recherche d'une partie avec des données d'exemple
-    randomGameButton.addEventListener('click', function () {
-        const a = ['Alice', 'Bob', 'Charlie', 'David'];
-        const maxa = 4;
-        const b = 'ffa'; // Ou 'team'
-
-        showLoadingOverlay(a, maxa, b);
-    });
-
     // Gestion de la création de partie
     createGameButton.addEventListener('click', function () {
         // console.log('je suis occupe de creer une game!');
@@ -172,14 +121,33 @@ function waitingRoom() {
 
         // Simulez la création de la partie (intégration backend nécessaire)
         alert("Partie créée avec succès !");
-        showLoadingOverlay(["Alice", "BOB"], maxPlayers, gameMode);
     });
+}
 
-    // Cacher l'écran de chargement lorsque la partie est prête
-    function hideLoadingOverlay() {
-        loadingOverlay.style.display = 'none';
+document.addEventListener('DOMContentLoaded', () => {
+    const inputs = document.querySelectorAll('.input');
+    const button = document.querySelector('.login__button');
+    const loginButton = document.getElementById("loginButton");
+
+    const handleFocus = ({ target }) => {
+        const span = target.previousElementSibling;
+        if (span) {
+            span.classList.add('span-active');
+        }
     }
 
-    // Simuler la fin du chargement de la partie
-    // Appelez hideLoadingOverlay() quand la partie est prête
-}
+    const handleFocusOut = ({ target }) => {
+        if (target.value === '') {
+            const span = target.previousElementSibling;
+            if (span) {
+                span.classList.remove('span-active');
+            }
+        }
+    }
+
+    inputs.forEach((input) => {
+        input.addEventListener('focus', handleFocus);
+        input.addEventListener('blur', handleFocusOut);
+    });
+
+});

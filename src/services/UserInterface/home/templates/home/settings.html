@@ -30,26 +30,23 @@
             </div>
 
             <div class="input-group" style="width: 100%">
-                <label for="password">Nouveau mot de passe</label>
-                <input type="password" id="password" name="password" required>
+                <label for="oldPassword">Ancien mot de passe</label>
+                <input type="password" id="oldPassword" name="oldPassword" required>
                 <span class="error" id="passwordError"></span>
             </div>
 
             <div class="input-group" style="width: 100%">
-                <label for="confirmPassword">Confirmer le mot de passe</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" required>
-                <span class="error" id="confirmPasswordError"></span>
+                <label for="newPassword">Nouveau le mot de passe</label>
+                <input type="password" id="newPassword" name="newPassword" required>
+                <span class="error" id="newPasswordError"></span>
             </div>
 
-            <button type="submit">Enregistrer les modifications</button>
+            <button type="button" id="saveButton">Enregistrer les modifications</button>
+            <!-- <button type="button" class="register-button" disabled></button> -->
         </form>
     </div>
 
     <div class="profile-container">
-        <!-- <label class="-label" for="file">
-            <span class="glyphicon glyphicon-camera"></span>
-            <span>Change Image</span>
-        </label> -->
         <div class="profile-picture" onclick="triggerFileInput()">
             <img id="profileImage" src="{% static 'images/roblox.png' %}" alt="">
             <input type="file" id="profilePic" name="profilePic" accept="image/*" onchange="previewImage(event)">
