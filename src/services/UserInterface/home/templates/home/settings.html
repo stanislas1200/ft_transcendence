@@ -5,20 +5,45 @@
         <h2>Modifier les informations du compte</h2>
         <form id="accountForm" onsubmit="return validateForm()" enctype="multipart/form-data">
             <div class="input-row">
-                <div class="input-group">
+                <label class="login__label" style="margin-right: 10px;">
+                    <span>First name</span>
+                    <input id="firstName" type="text" name="firstName" class="input">
+                </label>
+                <label class="login__label">
+                    <span>Last name</span>
+                    <input id="lastName" type="text" name="lastName" class="input">
+                </label>
+
+                <!-- <div class="input-group">
                     <label for="firstName">Prénom</label>
                     <input type="text" id="firstName" name="firstName" required>
                     <span class="error" id="firstNameError"></span>
                 </div>
-
+                
                 <div class="input-group">
                     <label for="lastName">Nom</label>
                     <input type="text" id="lastName" name="lastName" required>
                     <span class="error" id="lastNameError"></span>
-                </div>
+                </div> -->
             </div>
+            <label class="login__label">
+                <span>User name</span>
+                <input id="username" type="text" name="userName" class="input">
+            </label>
+            <label class="login__label span-active">
+                <span>email</span>
+                <input id="email" type="text" name="email" class="input">
+            </label>
+            <label class="login__label">
+                <span>Old password</span>
+                <input id="oldPassword" type="text" name="oldPassword" class="input">
+            </label>
+            <label class="login__label">
+                <span>New password</span>
+                <input id="newPassword" type="text" name="newPassword" class=" input">
+            </label>
 
-            <div class="input-group" style="width: 100%">
+            <!-- <div class="input-group" style="width: 100%">
                 <label for="username">Nom d'utilisateur</label>
                 <input type="text" id="username" name="username" required>
             </div>
@@ -39,7 +64,7 @@
                 <label for="newPassword">Nouveau le mot de passe</label>
                 <input type="password" id="newPassword" name="newPassword" required>
                 <span class="error" id="newPasswordError"></span>
-            </div>
+            </div> -->
 
             <button type="button" id="saveButton">Enregistrer les modifications</button>
             <!-- <button type="button" class="register-button" disabled></button> -->
@@ -48,7 +73,7 @@
 
     <div class="profile-container">
         <div class="profile-picture" onclick="triggerFileInput()">
-            <img id="profileImage" src="{% static 'images/roblox.png' %}" alt="">
+            <img id="profileImage" src="{% static 'images/pp.png' %}" alt="">
             <input type="file" id="profilePic" name="profilePic" accept="image/*" onchange="previewImage(event)">
         </div>
     </div>

@@ -1,4 +1,5 @@
 let button;
+let inputs;
 // let pp;
 
 function loadSettings() {
@@ -6,6 +7,7 @@ function loadSettings() {
     const lastName = document.getElementById('lastName');
     const userName = document.getElementById('username');
     const email = document.getElementById('email');
+    inputs = document.querySelectorAll('.input');
     var response; let url = "https://localhost:8000/me";
     url = url.replace("localhost", window.location.hostname); var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
@@ -23,15 +25,19 @@ function loadSettings() {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
+        console.log(response.email);
+        console.log(email);
         email.value = response.email;
         firstName.value = response.firstname;
         lastName.value = response.lastname;
         userName.value = response.username;
+        email.classList.add('span-active');
     };
     xhr.send();
     button = document.getElementById('saveButton');
     // pp = document.getElementById('profilePicture');
     validateForm();
+    inputsChangement();
 }
 
 function containsUpperCase(pwd) {
@@ -142,4 +148,38 @@ function previewImage(event) {
     };
     reader.readAsDataURL(event.target.files[0]);
     // });
+}
+
+function inputsChangement() {
+    console.log('je suis ici');
+
+    const handleFocus = ({ target }) => {
+        const span = target.previousElementSibling;
+        if (span) {
+            span.classList.add('span-active');
+        }
+    }
+
+    const handleFocusOut = ({ target }) => {
+        if (target.value === '') {
+            const span = target.previousElementSibling;
+            if (span) {
+                span.classList.remove('span-active');
+            }
+        }
+    }
+
+    // const handleChange = () => {
+    //     const [username, password] = inputs;
+
+    //     if (username.value && password.value) {
+    //         button.removeAttribute('disabled');
+    //     } else {
+    //         button.setAttribute('disabled', '');
+    //     }
+    // }
+
+    inputs.forEach((input) => {
+        input.addEventListener('focus', handleFocus);
+    });
 }
