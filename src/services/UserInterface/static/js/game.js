@@ -1,15 +1,15 @@
 let maxPlayersSelectRandom;
 let maxPlayersSelectCreate;
-let gameModeSelect;
+// let gameModeSelect;
 let gameModeSelectCreate;
-let joinGameButton;
-let joinGameName;
-let randomGameButton;
+// let joinGameButton;
+// let joinGameName;
+// let randomGameButton;
 let loadingOverlay;
 let loadingText;
 let playerPositions;
 let createGameButton;
-let gameName;
+// let gameName;
 let gameMode;
 let mapChoice;
 let ballSpeed;
@@ -19,30 +19,33 @@ function getElementGame() {
     console.log('game');
     maxPlayersSelectRandom = document.getElementById('max-players-random');
     maxPlayersSelectCreate = document.getElementById('max-players-create');
-    gameModeSelect = document.getElementById('game-mode');
-    gameModeSelect.disabled = true;
+    // gameModeSelect = document.getElementById('game-mode');
+    // gameModeSelect.disabled = true;
     gameModeSelectCreate = document.getElementById('game-mode-create');
-    gameModeSelectCreate.disabled = true;
-    joinGameButton = document.getElementById('join-game-button');
-    joinGameName = document.getElementById('join-game-name').value;
-    randomGameButton = document.getElementById('random-game-button');
+    // joinGameButton = document.getElementById('join-game-button');
+    // joinGameName = document.getElementById('join-game-name').value;
+    // randomGameButton = document.getElementById('random-game-button');
     loadingOverlay = document.getElementById('loading-overlay');
     loadingText = document.getElementById('loading-text');
     playerPositions = document.getElementById('player-positions');
     createGameButton = document.getElementById('create-game-button');
 
-    gameName = document.getElementById('game-name').value;
+    // gameName = document.getElementById('game-name').value;
     gameMode = document.getElementById('game-mode').value;
     mapChoice = document.getElementById('map-choice').value;
     ballSpeed = parseInt(document.getElementById('ball-speed').value);
     paddleSpeed = parseInt(document.getElementById('paddle-speed').value);
 
-    twoPlayer();
+    gameModeDisabler();
+    inputAnimation();
+    randomJoinGameButton();
     waitingRoom();
 }
 
-function twoPlayer() {
+function gameModeDisabler() {
     // Désactive le choix du mode de jeu si 2 joueurs sont sélectionnés
+    const gameModeSelect = document.getElementById('game-mode');
+    gameModeSelect.disabled = true;
     maxPlayersSelectRandom.addEventListener('change', function () {
         if (this.value === '2') {
             gameModeSelect.value = 'ffa';
@@ -51,35 +54,52 @@ function twoPlayer() {
             gameModeSelect.disabled = false;
         }
     });
+    
+    const gameModeCreateTeam = document.getElementById('game-mode-create-team');
+    const gameModeCreateFfa = document.getElementById('game-mode-create-ffa');
+    const gameModeCreateSolo = document.getElementById('game-mode-create-solo');
+    gameModeCreateFfa.disabled = true;
+    gameModeCreateTeam.disabled = true;
 
     maxPlayersSelectCreate.addEventListener('change', function () {
-        if (this.value === '2') {
+        if (this.value === '1') {
+            gameModeSelectCreate.value = 'solo-ia';
+            gameModeCreateFfa.disabled = true;
+            gameModeCreateTeam.disabled = true;
+            gameModeCreateSolo.disabled = false;
+        } else if (this.value === '2') {
             gameModeSelectCreate.value = 'ffa';
-            gameModeSelectCreate.disabled = true;
+            gameModeCreateSolo.disabled = true;
+            gameModeCreateTeam.disabled = true;
+            gameModeCreateFfa.disabled = false;
         } else {
-            gameModeSelectCreate.disabled = false;
+            gameModeCreateSolo.disabled = true;
+            gameModeCreateFfa.disabled = false;
+            gameModeCreateTeam.disabled = false;
         }
     });
+}
 
+function randomJoinGameButton() {
+    const randomGameButton = document.getElementById('random-game-button');
+    const gameModeSelect = document.getElementById('game-mode');
 
-    // Gestion de la jonction de partie
-    joinGameButton.addEventListener('click', function () {
-
-        if (!joinGameName) {
-            alert("Veuillez entrer le nom de la partie à rejoindre.");
-            return;
-        }
-
-        console.log("Tentative de rejoindre la partie:", joinGameName);
-
-        // Simulez la jonction de la partie (intégration backend nécessaire)
-    });
-
-    // Gestion de la recherche d'une partie aléatoire
     randomGameButton.addEventListener('click', function () {
-        console.log("Recherche d'une partie aléatoire...");
-        // Simulez la recherche d'une partie (intégration backend nécessaire)
-        alert("Partie aléatoire trouvée !");
+        var xhr = new XMLHttpRequest();
+        url = window.location.href + "/game/join?gameName=pong&gameMode=" + gameModeSelect.value;
+        xhr.withCredentials = true;
+        xhr.open("GET", url, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4)
+                if (xhr.status === 200) {
+                    console.log('Game joined');
+                }
+                else {
+                    console.log('Error joining game'); // TODO put a message
+                }
+        };
+        xhr.send();
     });
 }
 
@@ -124,7 +144,7 @@ function waitingRoom() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function inputAnimation() {
     const inputs = document.querySelectorAll('.input');
     const button = document.querySelector('.login__button');
     const loginButton = document.getElementById("loginButton");
@@ -149,5 +169,4 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener('focus', handleFocus);
         input.addEventListener('blur', handleFocusOut);
     });
-
-});
+}
