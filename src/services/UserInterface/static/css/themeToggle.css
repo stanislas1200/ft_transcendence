@@ -1,11 +1,11 @@
 .themeToggle {
-  width: 3em;
+  width: 2em;
 }
 
 .st-sunMoonThemeToggleBtn {
   position: absolute;
-  top: 2px;
-  right: 6px;
+  top: 9px;
+  right: 12px;
   cursor: pointer;
   z-index: 1000;
 }

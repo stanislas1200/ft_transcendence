@@ -39,7 +39,7 @@ nav li {
 
     /* STYLE */
     background: var(--background);
-    border-right: 1px solid var(--text);
+    border-right: 1px solid var(--secondary);
     transition: width 0.05s ease;
     overflow: hidden;
 }
@@ -101,7 +101,7 @@ nav.navbar-left li.active>a {
 
     /* STYLE */
     background-color: var(--background);
-    border-bottom: 1px solid var(--text);
+    border-bottom: 1px solid var(--secondary);
 }
 
 .navbar-top>ul {
