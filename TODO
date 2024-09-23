@@ -1,0 +1,24 @@
+• The user should encounter no unhandled errors and no warnings when browsing the
+website.
+
+• Everything must be launched with a single command line to run an autonomous
+container provided by Docker . Example : docker-compose up --build
+
+• Your website must be a single-page application. The user should be able to use the
+Back and Forward buttons of the browse
+
+• Therefore, users must have the ability to participate in a live Pong game against
+another player directly on the website. Both players will use the same keyboard.
+
+• There must be a matchmaking system: the tournament system organize the
+matchmaking of the participants, and announce the next fight.
+
+• If you have a backend or any other features, it is mandatory to enable an HTTPS
+connection for all aspects (Utilize wss instead of ws...).
+
+◦ Users can add others as friends and view their online status
+
+◦ Each user has a Match History including 1v1 games, dates, and relevant
+details, accessible to logged-in users.
+
+• Minor module: User and Game Stats Dashboards.

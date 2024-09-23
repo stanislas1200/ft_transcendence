@@ -9,7 +9,8 @@ from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.decorators import login_required
 import requests, secrets, os
-from .models import UserToken, Friendship, FriendRequest
+from .models import UserToken, Friendship, FriendRequest, Block
+from django.core.exceptions import ObjectDoesNotExist
 
 from django.core.files.images import get_image_dimensions
 
@@ -19,12 +20,13 @@ from django.core.files.base import ContentFile
 
 from django.shortcuts import get_object_or_404
 
-def send_friend_request(request, user_id):
+def send_friend_request(request, user_id): # TODO : POST and not GET when modif
 	try:
 		if request.user.is_authenticated:
 			sender = request.user
 		else:
 			status = verify_token(request)
+
 			if (status == 200):
 				u_id = request.GET.get('UserId')
 				if not u_id:
@@ -177,6 +179,89 @@ def list_friend_requests(request):
 		})
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
+
+def list_blocked_user(request):
+	try:
+		if request.user.is_authenticated:
+			user = request.user
+		else:
+			status = verify_token(request)
+			if (status == 200):
+				u_id = request.GET.get('UserId')
+				if not u_id:
+					u_id = request.COOKIES.get('userId')
+
+				user = User.objects.get(id=u_id)
+			else:
+				return JsonResponse({'error': 'User is not logged in'}, status=401)
+		
+		return JsonResponse({'blocked_user': [{'id': b.id, 'username': b.username} for b in user.blocked]})
+
+	except ObjectDoesNotExist:
+		return JsonResponse({'error': 'Object not found'}, status=404)
+	except Exception as e:
+		print(e, flush=True)
+		return JsonResponse({'error': 'Server error'}, status=500)
+
+def block_user(request, user_id):
+	try:
+		if request.user.is_authenticated:
+			user = request.user
+		else:
+			status = verify_token(request)
+			if (status == 200):
+				u_id = request.GET.get('UserId')
+				if not u_id:
+					u_id = request.COOKIES.get('userId')
+
+				user = User.objects.get(id=u_id)
+			else:
+				return JsonResponse({'error': 'User is not logged in'}, status=401)
+
+		if not User.objects.filter(id=user_id).exists():
+			return JsonResponse({'error': 'User not found'}, status=404)
+		user_to_block = User.objects.get(id=user_id)
+		
+		if Block.objects.filter(blocker=user, blocked=user_to_block).exists(): # TODO : check exis insted of not for each ( less cost )
+			return JsonResponse({'error': 'User is already blocked'}, status=400)
+		
+		if user == user_to_block:
+			return JsonResponse({'error': 'Users cannot send requests to themselves'}, status=403)
+
+		Block.objects.create(blocker=user, blocked=user_to_block)
+		remove_friend(request, user_id)
+		return JsonResponse({'message': 'User blocked successfully'})
+	except ObjectDoesNotExist:
+		return JsonResponse({'error': 'Object not found'}, status=404)
+	except:
+		return JsonResponse({'error': 'Server error'}, status=500)
+
+def unblock_user(request, user_id):
+	try:
+		if request.user.is_authenticated:
+			user = request.user
+		else:
+			status = verify_token(request)
+			if (status == 200):
+				u_id = request.GET.get('UserId')
+				if not u_id:
+					u_id = request.COOKIES.get('userId')
+
+				user = User.objects.get(id=u_id)
+			else:
+				return JsonResponse({'error': 'User is not logged in'}, status=401)
+		
+		if not Block.objects.filter(blocker=user, blocked__id=user_id).exists():
+			return JsonResponse({'error': 'User is not blocked'}, status=404)
+
+		block = Block.objects.get(blocker=request.user, blocked__id=user_id)
+		block.delete()
+		return JsonResponse({'message': 'User unblocked successfully'})
+	except ObjectDoesNotExist:
+		return JsonResponse({'error': 'Object not found'}, status=404)
+	except:
+		return JsonResponse({'error': 'Server error'}, status=500)
+
 
 def compress_gif(avatar):
 	with Image.open(avatar) as img:

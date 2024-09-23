@@ -306,7 +306,7 @@ def join_game(request):
         else:
             game = Game.objects.filter(gameName=game_name, status='waiting').order_by('?').first() # Get random game
             if not game:
-                return start_game(request, game_name) # No game found, create one # TODO : multi no alone
+                return start_game(request, game_name) # No game found, create one # TODO : use and check passed param in join like create
                 
 
         # Check if party accept player
