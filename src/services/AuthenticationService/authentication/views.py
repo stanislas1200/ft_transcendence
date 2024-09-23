@@ -78,6 +78,36 @@ def accept_friend_request(request, request_id):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
+def remove_friend(request, user_id):
+	try:
+		if request.user.is_authenticated:
+			user = request.user
+		else:
+			status = verify_token(request)
+			if (status == 200):
+				u_id = request.GET.get('UserId')
+				if not u_id:
+					u_id = request.COOKIES.get('userId')
+
+				user = User.objects.get(id=u_id)
+			else:
+				return JsonResponse({'error': 'User is not logged in'}, status=401)
+		friends = user.friends
+		
+		if not any(friend.id == user_id for friend in friends):
+			return JsonResponse({'error': 'User is not a friend'}, status=404)
+
+		if Friendship.objects.filter(user1=user, user2__id=user_id):
+			Friendship.objects.get(user1=user, user2__id=user_id).delete()
+		elif Friendship.objects.filter(user2=user, user1__id=user_id):
+			Friendship.objects.get(user2=user, user1__id=user_id).delete()
+
+		return JsonResponse({'message': 'Friend removed'})
+	except ObjectDoesNotExist:
+		return JsonResponse({'error': 'User or friendship not found'}, status=404)
+	except:
+		return JsonResponse({'error': 'Server error'}, status=500)
+
 def decline_friend_request(request, request_id):
 	try:
 		if request.user.is_authenticated:
