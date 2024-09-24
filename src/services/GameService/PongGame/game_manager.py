@@ -1,4 +1,4 @@
-from .models import Game, PongPlayer, GameType, PlayerGameTypeStats, GameHistory, Match
+from .models import Game, PongPlayer, GameType, PlayerGameTypeStats, Match
 from django.contrib.auth.models import User
 from django.db.models import F
 from asgiref.sync import sync_to_async
@@ -194,7 +194,9 @@ class Party:
 				stats.save()
 
 				# save history
-				GameHistory.objects.get_or_create(player=p, game=game, score=player['score'])
+				game.status = 'finished'
+				game.save()
+				# GameHistory.objects.get_or_create(player=p, game=game, score=player['score'])
 			# if tournament add winner to next match # TODO : check if tournament
 			if Match.objects.filter(game=game).exists():
 				m = Match.objects.get(game=game)

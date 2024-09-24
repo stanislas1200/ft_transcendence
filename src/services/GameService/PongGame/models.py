@@ -47,14 +47,14 @@ class Game(models.Model):
     object_id = models.PositiveIntegerField()
     gameProperty = GenericForeignKey('content_type', 'object_id')
 
-    def __str__(self):
-        return self.gameName
+    # def __str__(self):
+    #     return self.gameName
 
-class GameHistory(models.Model):
-    player = models.ForeignKey(User, on_delete=models.CASCADE)
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
-    score = models.IntegerField()
-    date = models.DateTimeField(auto_now_add=True)
+# class GameHistory(models.Model):
+#     player = models.ForeignKey(User, on_delete=models.CASCADE)
+#     game = models.ForeignKey(Game, on_delete=models.CASCADE)
+#     score = models.IntegerField()
+#     date = models.DateTimeField(auto_now_add=True)
 
 class Tournament(models.Model):
     name = models.CharField(max_length=100)

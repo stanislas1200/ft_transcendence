@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, GameHistory, Tournament, Match
+from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, Tournament, Match
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST, require_GET
 from django.forms.models import model_to_dict
@@ -503,13 +503,16 @@ def get_history(request):
                 ret.append(info)
             return JsonResponse(ret, safe=False)
 
-        history = GameHistory.objects.filter(player_id=user_id)
+        # history = GameHistory.objects.filter(player_id=user_id)
 
         history_list = []
-        for hist in history:
-            hist_dict = model_to_dict(hist)
-            hist_dict.pop('player')
-            history_list.append(hist_dict)
+        games = Game.objects.filter(players__id=user_id).order_by('start_date')
+        for game in games: # TODO : add if win and score ?
+            game_dict = model_to_dict(game)
+            game_dict.pop('players')
+            game_dict.pop('content_type')
+            game_dict.pop('object_id')
+            history_list.append(game_dict)
         return JsonResponse(history_list, safe=False)
     
     except Exception as e:
