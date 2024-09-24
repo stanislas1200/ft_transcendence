@@ -20,7 +20,9 @@ from django.core.files.base import ContentFile
 
 from django.shortcuts import get_object_or_404
 
-def send_friend_request(request, user_id): # TODO : POST and not GET when modif
+@csrf_exempt # Disable CSRF protection for this view
+@require_POST
+def send_friend_request(request, user_id):
 	try:
 		if request.user.is_authenticated:
 			sender = request.user
@@ -52,7 +54,10 @@ def send_friend_request(request, user_id): # TODO : POST and not GET when modif
 			return JsonResponse({'error': 'Friend request already exists'}, status=409) # TODO : check sender receiver and receiver sender 
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
-	
+
+
+@csrf_exempt # Disable CSRF protection for this view
+@require_POST
 def accept_friend_request(request, request_id):
 	try:
 		if request.user.is_authenticated:
@@ -80,6 +85,8 @@ def accept_friend_request(request, request_id):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
+@csrf_exempt # Disable CSRF protection for this view
+@require_POST
 def remove_friend(request, user_id):
 	try:
 		if request.user.is_authenticated:
@@ -110,6 +117,8 @@ def remove_friend(request, user_id):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
+@csrf_exempt # Disable CSRF protection for this view
+@require_POST
 def decline_friend_request(request, request_id):
 	try:
 		if request.user.is_authenticated:
@@ -136,6 +145,7 @@ def decline_friend_request(request, request_id):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
+@require_GET
 def list_friends(request, user_id):
 	try:
 		# TODO: private ??
@@ -156,6 +166,7 @@ def list_friends(request, user_id):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
+@require_GET
 def list_friend_requests(request):
 	try:
 		if request.user.is_authenticated:
@@ -180,6 +191,7 @@ def list_friend_requests(request):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
+@require_GET
 def list_blocked_user(request):
 	try:
 		if request.user.is_authenticated:
@@ -203,6 +215,8 @@ def list_blocked_user(request):
 		print(e, flush=True)
 		return JsonResponse({'error': 'Server error'}, status=500)
 
+@csrf_exempt # Disable CSRF protection for this view
+@require_POST
 def block_user(request, user_id):
 	try:
 		if request.user.is_authenticated:
@@ -236,6 +250,8 @@ def block_user(request, user_id):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
+@csrf_exempt # Disable CSRF protection for this view
+@require_POST
 def unblock_user(request, user_id):
 	try:
 		if request.user.is_authenticated:
