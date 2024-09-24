@@ -29,6 +29,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 			return
 
 		game = await sync_to_async(Game.objects.get)(id=self.game_id)
+		if game.status == 'finished':
+			await self.accept()
+			await asyncio.sleep(0.5)  # FIXME : ws don't wait that client got the message not working
+			await self.send(text_data="Game is finished. Closing connection.")
+			await self.close(code=4001) # FIXME : close_code not pass
+			return
+
 		self.game = game.gameName
 
 		self.game_group_name = f'{game.gameName}_game_{self.game_id}'
@@ -94,6 +101,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				}
 			)
 			if ret:
+				await self.close()
 				break # TODO : circle game solo
 			await asyncio.sleep(1/60)
 
