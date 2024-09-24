@@ -36,6 +36,11 @@ class Pong(models.Model):
     mapId = models.IntegerField(default=0)
     gameMode = models.CharField(max_length=20, default='ffa')
 
+class Test(models.Model):
+    players = models.ManyToManyField(PongPlayer)
+    playerNumber = models.IntegerField(default=1)
+
+
 class Game(models.Model):
     players = models.ManyToManyField(User)
     status = models.CharField(max_length=20, default='waiting')  # pending, ongoing, finished

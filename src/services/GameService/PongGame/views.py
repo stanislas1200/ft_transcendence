@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, Tournament, Match
+from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, Tournament, Match, Test
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST, require_GET
 from django.forms.models import model_to_dict
@@ -376,6 +376,27 @@ def startPong(request, player, token, gameType):
     game.save()
     return JsonResponse({'message': 'Game started', 'game_id': game.id})
 
+
+def startTest(request, player, token, gameType):
+    playerNumber = request.POST.get('playerNumber', 1) # TODO : check default 1 or error ?
+
+    if not playerNumber or not gameType:
+        return JsonResponse({'error': 'Missing setting'}, status=400)
+    if int(playerNumber) < 1:
+        return JsonResponse({'error': 'Invalid player number'}, status=400)
+
+    test = Test.objects.create(playerNumber=playerNumber)
+    party_name = request.POST.get('partyName', 'test')
+    game = Game.objects.create(gameName='test', gameProperty=test, start_date=timezone.now(), party_name=party_name)
+    game.players.add(player)
+    player = PongPlayer.objects.create(player=player, score=0, n=1, token=token)
+    game.gameProperty.players.add(player)
+
+    game.status = 'waiting' if int(playerNumber) > 1 else 'playing'
+
+    game.save()
+    return JsonResponse({'message': 'Game started', 'game_id': game.id})
+    
 # @require_POST
 @csrf_exempt # Disable CSRF protection for this view
 # create a game party # TODO : check
@@ -400,6 +421,8 @@ def start_game(request, gameName=None):
     gameType = request.POST.get('gameType', 'simple')  # Get the game type from the request, default to 'simple'
     if gameName == 'pong':
         return startPong(request, player, token, gameType)
+    elif gameName == 'test':
+        return startTest(request, player, token, gameType)
     else:
         return JsonResponse({'error': 'Game not found'}, status=404)
     # except:
