@@ -196,8 +196,7 @@ class Party:
 				# save history
 				game.status = 'finished'
 				game.save()
-				# GameHistory.objects.get_or_create(player=p, game=game, score=player['score'])
-			# if tournament add winner to next match # TODO : check if tournament
+			# if tournament add winner to next match
 			if Match.objects.filter(game=game).exists():
 				m = Match.objects.get(game=game)
 				winner = self.players[0] if self.players[0]['score'] >= self.score else self.players[1]
