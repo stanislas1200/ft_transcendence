@@ -16,16 +16,20 @@
     <!-- Partie gauche inférieure: Trouver une partie aléatoire -->
     <div id="random-game">
         <h2>Find a random game</h2>
-        <label for="max-players-random">Numbers of players:</label>
-        <select id="max-players-random">
-            <option value="2">2</option>
-            <option value="4">4</option>
-        </select>
-        <label for="game-mode">Game mode:</label>
-        <select id="game-mode">
-            <option value="ffa">FFA</option>
-            <option value="team">Team</option>
-        </select>
+        <label for="max-players-random">
+            <span>Numbers of players</span>
+            <select id="max-players-random">
+                <option value="2">2</option>
+                <option value="4">4</option>
+            </select>
+        </label>
+        <label for="game-mode">
+            <span>Game mode</span>
+            <select id="game-mode">
+                <option value="ffa">FFA</option>
+                <option value="team">Team</option>
+            </select>
+        </label>
         <button class="random-game-button" id="random-game-button">Find a game</button>
     </div>
 
@@ -38,7 +42,7 @@
         </label>
 
         <label for="max-players-create">
-            <span>Numbers of players:</span>
+            <span>Numbers of players</span>
             <select id="max-players-create">
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -46,19 +50,24 @@
             </select>
         </label>
 
-        <label for="game-mode-create">Game Mode:</label>
-        <select id="game-mode-create">
-            <option id="game-mode-create-solo" value="solo-ia">Solo-IA</option>
-            <option id="game-mode-create-ffa" value="ffa">FFA</option>
-            <option id="game-mode-create-team" value="team">Team</option>
-        </select>
+        <label for="game-mode-create">
+            <span>Game Mode</span>
+            <select id="game-mode-create">
+                <option id="game-mode-create-solo" value="solo-ia">Solo-IA</option>
+                <option id="game-mode-create-ffa" value="ffa">FFA</option>
+                <option id="game-mode-create-team" value="team">Team</option>
+            </select>
+        </label>
 
-        <label for="map-choice">Map:</label>
-        <select id="map-choice">
-            <option value="1">Map 1</option>
-            <option value="2">Map 2</option>
-            <option value="3">Map 3</option>
-        </select>
+        <label for="map-choice">
+            <span>Map</span>
+            <select id="map-choice">
+                <option value="0">Map 0</option>
+                <option value="1">Map 1</option>
+                <option value="2">Map 2</option>
+                <option value="3">Map 3</option>
+            </select>
+        </label>
 
         <label class="login__label">
             <span class="span-active">ball-speed</span>

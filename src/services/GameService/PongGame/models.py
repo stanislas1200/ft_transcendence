@@ -36,7 +36,7 @@ class Pong(models.Model):
     mapId = models.IntegerField(default=0)
     gameMode = models.CharField(max_length=20, default='ffa')
 
-class Test(models.Model):
+class Tron(models.Model):
     players = models.ManyToManyField(PongPlayer)
     playerNumber = models.IntegerField(default=1)
 
