@@ -1,9 +1,5 @@
 @import url(//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
 
-main {
-    color: yellow;
-}
-
 nav ul,
 nav li {
     outline: 0;
@@ -123,7 +119,7 @@ nav.navbar-left li.active>a {
 
 .navbar-top li:hover>a,
 nav.navbar-top li.active>a {
-    background-color: var(--primary);
+    scale: 1.5;
 }
 
 .spa {
