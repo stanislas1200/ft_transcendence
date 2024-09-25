@@ -1,5 +1,4 @@
 let button;
-let inputs;
 // let pp;
 
 function loadSettings() {
@@ -7,7 +6,6 @@ function loadSettings() {
     const lastName = document.getElementById('lastName');
     const userName = document.getElementById('username');
     const email = document.getElementById('email');
-    inputs = document.querySelectorAll('.input');
     var response; let url = "https://localhost:8000/me";
     url = url.replace("localhost", window.location.hostname); var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
@@ -25,13 +23,10 @@ function loadSettings() {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
-        console.log(response.email);
-        console.log(email);
         email.value = response.email;
         firstName.value = response.firstname;
         lastName.value = response.lastname;
         userName.value = response.username;
-        email.classList.add('span-active');
     };
     xhr.send();
     button = document.getElementById('saveButton');
@@ -151,6 +146,7 @@ function previewImage(event) {
 }
 
 function inputsChangement() {
+    const inputs = document.querySelectorAll('.input');
     console.log('je suis ici');
 
     const handleFocus = ({ target }) => {
@@ -180,6 +176,9 @@ function inputsChangement() {
     // }
 
     inputs.forEach((input) => {
+        console.log('test');
         input.addEventListener('focus', handleFocus);
+        input.addEventListener('blur', handleFocusOut);
+        // input.addEventListener('input', handleChange);
     });
 }

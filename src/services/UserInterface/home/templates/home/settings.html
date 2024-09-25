@@ -5,33 +5,21 @@
         <h2>Modifier les informations du compte</h2>
         <form id="accountForm" onsubmit="return validateForm()" enctype="multipart/form-data">
             <div class="input-row">
-                <label class="login__label" style="margin-right: 10px;">
-                    <span>First name</span>
+                <label class="login__label" id="firstName_label">
+                    <span class="span-active">First name</span>
                     <input id="firstName" type="text" name="firstName" class="input">
                 </label>
-                <label class="login__label">
-                    <span>Last name</span>
+                <label class="login__label" id="lastName_label">
+                    <span class="span-active">Last name</span>
                     <input id="lastName" type="text" name="lastName" class="input">
                 </label>
-
-                <!-- <div class="input-group">
-                    <label for="firstName">Prénom</label>
-                    <input type="text" id="firstName" name="firstName" required>
-                    <span class="error" id="firstNameError"></span>
-                </div>
-                
-                <div class="input-group">
-                    <label for="lastName">Nom</label>
-                    <input type="text" id="lastName" name="lastName" required>
-                    <span class="error" id="lastNameError"></span>
-                </div> -->
             </div>
             <label class="login__label">
-                <span>User name</span>
+                <span class="span-active">User name</span>
                 <input id="username" type="text" name="userName" class="input">
             </label>
             <label class="login__label span-active">
-                <span>email</span>
+                <span class="span-active">email</span>
                 <input id="email" type="text" name="email" class="input">
             </label>
             <label class="login__label">
@@ -42,32 +30,7 @@
                 <span>New password</span>
                 <input id="newPassword" type="text" name="newPassword" class=" input">
             </label>
-
-            <!-- <div class="input-group" style="width: 100%">
-                <label for="username">Nom d'utilisateur</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-
-            <div class="input-group" style="width: 100%">
-                <label for="email">Adresse e-mail</label>
-                <input type="email" id="email" name="email" required>
-                <span class="error" id="emailError"></span>
-            </div>
-
-            <div class="input-group" style="width: 100%">
-                <label for="oldPassword">Ancien mot de passe</label>
-                <input type="password" id="oldPassword" name="oldPassword" required>
-                <span class="error" id="passwordError"></span>
-            </div>
-
-            <div class="input-group" style="width: 100%">
-                <label for="newPassword">Nouveau le mot de passe</label>
-                <input type="password" id="newPassword" name="newPassword" required>
-                <span class="error" id="newPasswordError"></span>
-            </div> -->
-
             <button type="button" id="saveButton">Enregistrer les modifications</button>
-            <!-- <button type="button" class="register-button" disabled></button> -->
         </form>
     </div>
 
@@ -78,3 +41,4 @@
         </div>
     </div>
 </div>
+<script>loadSettings();</script>

@@ -39,6 +39,7 @@ function getElementGame() {
 
     twoPlayer();
     waitingRoom();
+    inputsAnimation();
 }
 
 function twoPlayer() {
@@ -124,7 +125,7 @@ function waitingRoom() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function inputsAnimation() {
     const inputs = document.querySelectorAll('.input');
     const button = document.querySelector('.login__button');
     const loginButton = document.getElementById("loginButton");
@@ -150,4 +151,4 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener('blur', handleFocusOut);
     });
 
-});
+}
