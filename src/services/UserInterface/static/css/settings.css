@@ -1,10 +1,13 @@
 .container {
     display: flex;
-    width: 80%;
-    max-width: 1200px;
+    width: 200%;
+    max-width: 1400px;
     background-color: var(--background);
-    border-radius: 10px;
+    border-radius: 5px;
+    border: 2px solid var(--secondary);
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    margin-top: 15rem;
+    margin-right: 35rem;
 }
 
 .form-container {
@@ -17,8 +20,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: var(--background);
-    border-left: 1px solid #ccc;
+    border-left: 2px solid;
 }
 
 h2 {
@@ -28,35 +30,6 @@ h2 {
 
 .input-group {
     margin-bottom: 20px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-button {
-    width: 100%;
-    padding: 10px;
-    background-color: var(--secondary);
-    color: var(--text);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: var(--primary);
 }
 
 .error {
@@ -120,4 +93,14 @@ button:hover {
 
 .profile-picture:hover .-label {
     visibility: visible;
+}
+
+#firstName_label {
+    width: 98%;
+    justify-content: left;
+}
+
+#lastName_label {
+    width: 98%;
+    margin-left: 6px;
 }

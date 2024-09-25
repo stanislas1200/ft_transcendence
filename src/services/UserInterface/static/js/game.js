@@ -56,7 +56,7 @@ function gameModeDisabler() {
             gameModeSelect.disabled = false;
         }
     });
-    
+
     const maxPlayersSelectCreate = document.getElementById('max-players-create');
     const gameModeCreateTeam = document.getElementById('game-mode-create-team');
     const gameModeCreateFfa = document.getElementById('game-mode-create-ffa');
@@ -119,7 +119,7 @@ function createGameButton() {
         const mapChoice = document.getElementById('map-choice').value;
         const ballSpeed = document.getElementById('ball-speed').value;
         const paddleSpeed = document.getElementById('paddle-speed').value;
-    
+
         var xhr = new XMLHttpRequest();
         let url = "https://" + window.location.hostname + ":8001" + "/game/create";
         console.log(url);

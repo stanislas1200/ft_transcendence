@@ -28,12 +28,12 @@ h2 {
     margin-top: 0;
 }
 
-label {
+/* label {
     display: block;
     margin-bottom: 8px;
     font-weight: bold;
     color: var(--secondary);
-}
+} */
 
 /* input[type="text"],
 input[type="number"],
@@ -75,13 +75,13 @@ select {
     text-align: left;
 }
 
-.login__label {
+/* .login__label {
     display: block;
     margin-bottom: 20px;
     width: 100%;
-}
+} */
 
-.input {
+/* .input {
     width: 100%;
     background-color: transparent;
     border: 2px solid var(--secondary);
@@ -92,7 +92,7 @@ select {
     font-weight: 600;
     color: var(--secondary);
     margin-bottom: -10px;
-}
+} */
 
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
@@ -104,7 +104,7 @@ input[type=number] {
     -moz-appearance: textfield;
 }
 
-.login__label span {
+/* .login__label span {
     position: absolute;
     font-size: 0.8em;
     font-weight: 700;
@@ -118,7 +118,7 @@ input[type=number] {
 .login__label .span-active {
     font-size: 0.7em;
     margin: 8px 10px;
-}
+} */
 
 #max-players-random,
 #game-mode,

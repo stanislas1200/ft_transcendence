@@ -32,6 +32,7 @@ function loadSettings() {
     button = document.getElementById('saveButton');
     // pp = document.getElementById('profilePicture');
     validateForm();
+    inputsChangement();
 }
 
 function containsUpperCase(pwd) {
@@ -142,4 +143,42 @@ function previewImage(event) {
     };
     reader.readAsDataURL(event.target.files[0]);
     // });
+}
+
+function inputsChangement() {
+    const inputs = document.querySelectorAll('.input');
+    console.log('je suis ici');
+
+    const handleFocus = ({ target }) => {
+        const span = target.previousElementSibling;
+        if (span) {
+            span.classList.add('span-active');
+        }
+    }
+
+    const handleFocusOut = ({ target }) => {
+        if (target.value === '') {
+            const span = target.previousElementSibling;
+            if (span) {
+                span.classList.remove('span-active');
+            }
+        }
+    }
+
+    // const handleChange = () => {
+    //     const [username, password] = inputs;
+
+    //     if (username.value && password.value) {
+    //         button.removeAttribute('disabled');
+    //     } else {
+    //         button.setAttribute('disabled', '');
+    //     }
+    // }
+
+    inputs.forEach((input) => {
+        console.log('test');
+        input.addEventListener('focus', handleFocus);
+        input.addEventListener('blur', handleFocusOut);
+        // input.addEventListener('input', handleChange);
+    });
 }

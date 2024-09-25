@@ -19,7 +19,7 @@
     grid-auto-rows: minmax(100px, auto);
 }
 
-.four {
+.settings-grid-userCard {
     grid-row: 1 / 4;
     grid-column: 1 / 3;
     color: var(--text);
@@ -28,7 +28,7 @@
     align-items: center;
 }
 
-.five {
+.settings-grid-userInformation {
     color: var(--text);
     grid-column: 3 / 10;
     grid-row: 1 / 4;
