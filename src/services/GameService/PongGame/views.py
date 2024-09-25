@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, GameHistory, Tournament, Match
+from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, Tournament, Match, Test, GameType
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST, require_GET
 from django.forms.models import model_to_dict
@@ -211,7 +211,7 @@ def get_tournament(request, tournament_id):
 
 @csrf_exempt # Disable CSRF protection for this view
 @require_POST
-# end a game party # TODO : check
+# end a game party
 def leave_game(request):
     try:
         session_key = request.session.session_key
@@ -240,28 +240,24 @@ def get_game_state(request):
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
 
-# TODO : make a game list
+
 @require_GET # return a list of all game
 def list_game(request):
-    # games = Game.objects.all()
-    # game_list = []
-    # for game in games:
-    #     game_dict = model_to_dict(game)
-    #     game_dict['players'] = [model_to_dict(player) for player in game.players.all()]
-    #     game_list.append(game_dict)
-    game_list = ['pong', 'idk']
+    games = GameType.objects.all()
+    game_list = []
+    for game in games:
+        game_list.append(game.name)
     return JsonResponse(game_list, safe=False)
 
 def user_to_dict(user):
     return {
         'id': user.id,
         'username': user.username,
-        'email': user.email,
         'last_login': user.last_login
     }
 
 @require_GET # return a list of party
-def get_party(request): #TODO : send party detail but not all
+def get_party(request):
     try:
         game_id = request.GET.get('gameId')
         if game_id:
@@ -272,6 +268,8 @@ def get_party(request): #TODO : send party detail but not all
         for game in games:
             game_dict = model_to_dict(game)
             game_dict['players'] = [user_to_dict(player) for player in game.players.all()]
+            game_dict.pop('content_type')
+            game_dict.pop('object_id')
             game_list.append(game_dict)
         return JsonResponse(game_list, safe=False)
     except Game.DoesNotExist:
@@ -281,7 +279,7 @@ def get_party(request): #TODO : send party detail but not all
 
 @require_POST
 @csrf_exempt # Disable CSRF protection for this view
-# join a game party  # TODO : check
+# join a game party
 def join_game(request):
     try:
         session_key = request.session.session_key
@@ -319,10 +317,7 @@ def join_game(request):
         game.players.add(player)  # Add the player to the game
         player = PongPlayer.objects.create(player=player, score=0, n=game.players.count(), token=token)
         game.gameProperty.players.add(player)
-        # PartyPlayer.objects.create(party=game, player=player, player_number=game.players.count() + 1)
-        # TODO : update status if game.gameProperty.playerNumber == game.players.count()
         game.status = 'playing' if game.players.count() >= game.gameProperty.playerNumber else 'waiting'
-        # game.status = 'playing' if game.players.count() == 2 else 'waiting'  # Update the game status
         game.save()
 
         return JsonResponse({'message': 'Player joined', 'game_id': game.id})
@@ -332,8 +327,7 @@ def join_game(request):
         return JsonResponse({'error': 'Player not found'}, status=404)
 
 def startPong(request, player, token, gameType):
-    
-    playerNumber = request.POST.get('playerNumber', 1) # TODO : check default 1 or error ?
+    playerNumber = request.POST.get('playerNumber', 1)
     gameMode = request.POST.get('gameMode', 'ffa')
     map = request.POST.get('map', 0)
 
@@ -376,9 +370,30 @@ def startPong(request, player, token, gameType):
     game.save()
     return JsonResponse({'message': 'Game started', 'game_id': game.id})
 
+
+def startTest(request, player, token, gameType):
+    playerNumber = request.POST.get('playerNumber', 1) # TODO : check default 1 or error ?
+
+    if not playerNumber or not gameType:
+        return JsonResponse({'error': 'Missing setting'}, status=400)
+    if int(playerNumber) < 1:
+        return JsonResponse({'error': 'Invalid player number'}, status=400)
+
+    test = Test.objects.create(playerNumber=playerNumber)
+    party_name = request.POST.get('partyName', 'test')
+    game = Game.objects.create(gameName='test', gameProperty=test, start_date=timezone.now(), party_name=party_name)
+    game.players.add(player)
+    player = PongPlayer.objects.create(player=player, score=0, n=1, token=token)
+    game.gameProperty.players.add(player)
+
+    game.status = 'waiting' if int(playerNumber) > 1 else 'playing'
+
+    game.save()
+    return JsonResponse({'message': 'Game started', 'game_id': game.id})
+    
 # @require_POST
 @csrf_exempt # Disable CSRF protection for this view
-# create a game party # TODO : check
+# create a game party
 def start_game(request, gameName=None):
     # try:
     # get user
@@ -400,6 +415,8 @@ def start_game(request, gameName=None):
     gameType = request.POST.get('gameType', 'simple')  # Get the game type from the request, default to 'simple'
     if gameName == 'pong':
         return startPong(request, player, token, gameType)
+    elif gameName == 'test':
+        return startTest(request, player, token, gameType)
     else:
         return JsonResponse({'error': 'Game not found'}, status=404)
     # except:
@@ -426,7 +443,7 @@ def record_move(request):
         # p = game.gameProperty.players.get(player=player).n
         # print(p)
         
-        # players = cache.get('players') # TODO: change all this no cache layer and store player in game_manager.py
+        # players = cache.get('players')
         # print(players)
         # game_group_name = f'pong_game_{game_id}'
         # channel_player = players.get(game_group_name)
@@ -446,7 +463,7 @@ def record_move(request):
         return JsonResponse({'message': 'Move recorded', 'game_id': game_id})
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
-    except Player.DoesNotExist: # FIXME : NameError: name 'Player' is not defined
+    except Player.DoesNotExist:
         return JsonResponse({'error': 'Player not found'}, status=404)
 
 @require_GET
@@ -503,13 +520,16 @@ def get_history(request):
                 ret.append(info)
             return JsonResponse(ret, safe=False)
 
-        history = GameHistory.objects.filter(player_id=user_id)
+        # history = GameHistory.objects.filter(player_id=user_id)
 
         history_list = []
-        for hist in history:
-            hist_dict = model_to_dict(hist)
-            hist_dict.pop('player')
-            history_list.append(hist_dict)
+        games = Game.objects.filter(players__id=user_id).order_by('start_date')
+        for game in games: # TODO : add if win and score ?
+            game_dict = model_to_dict(game)
+            game_dict.pop('players')
+            game_dict.pop('content_type')
+            game_dict.pop('object_id')
+            history_list.append(game_dict)
         return JsonResponse(history_list, safe=False)
     
     except Exception as e:

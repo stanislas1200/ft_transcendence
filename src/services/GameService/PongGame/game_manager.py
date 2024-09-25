@@ -1,4 +1,4 @@
-from .models import Game, PongPlayer, GameType, PlayerGameTypeStats, GameHistory, Match
+from .models import Game, PongPlayer, GameType, PlayerGameTypeStats, Match
 from django.contrib.auth.models import User
 from django.db.models import F
 from asgiref.sync import sync_to_async
@@ -194,8 +194,9 @@ class Party:
 				stats.save()
 
 				# save history
-				GameHistory.objects.get_or_create(player=p, game=game, score=player['score'])
-			# if tournament add winner to next match # TODO : check if tournament
+				game.status = 'finished'
+				game.save()
+			# if tournament add winner to next match
 			if Match.objects.filter(game=game).exists():
 				m = Match.objects.get(game=game)
 				winner = self.players[0] if self.players[0]['score'] >= self.score else self.players[1]
@@ -387,6 +388,31 @@ def check_collision(game, vertices, n):
 	return 0
 
 import threading
+
+def ffa_update(game):
+	if game.ball['y'] <= game.paddlePadding/4 + game.ballR or game.ball['y'] >= game.height - game.paddlePadding/4 - game.ballR:
+		game.players[game.last_hit]["score"] += 1
+		game.ball['y'] = game.height/2
+		game.ball['x'] = game.width/2
+
+	# check collision player 3
+	paddleVertices = [
+		{'x': game.positions[2] - game.paddleHeight/2, 'y': game.paddlePadding},
+		{'x': game.positions[2] + game.paddleHeight/2, 'y': game.paddlePadding},
+		{'x': game.positions[2] + game.paddleHeight/2, 'y': game.paddlePadding + game.paddleWidth},
+		{'x': game.positions[2] - game.paddleHeight/2, 'y': game.paddlePadding + game.paddleWidth}
+	]
+	game.last_hit = check_collision(game, paddleVertices, 2)
+
+	# check collision player 4
+	paddleVertices = [
+		{'x': game.positions[2] - game.paddleHeight/2, 'y': game.width - game.paddlePadding},
+		{'x': game.positions[2] + game.paddleHeight/2, 'y': game.width - game.paddlePadding},
+		{'x': game.positions[2] + game.paddleHeight/2, 'y': game.width - game.paddlePadding - game.paddleWidth},
+		{'x': game.positions[2] - game.paddleHeight/2, 'y': game.width - game.paddlePadding - game.paddleWidth}
+	]
+	game.last_hit = check_collision(game, paddleVertices, 3)
+
 async def update_pong(game_id):
 	if game_id not in party_list:
 		# print(f"Game ID {game_id} not found in party list.")
@@ -403,10 +429,6 @@ async def update_pong(game_id):
 	if game.ball['y'] <= 0 + game.ballR or game.ball['y'] >= game.height - game.ballR:
 		game.ball['dy'] *= -1
 		game.ball['y'] += game.ball['dy']*1.5
-	if game.ball['y'] <= game.paddlePadding/4 + game.ballR or game.ball['y'] >= game.height - game.paddlePadding/4 - game.ballR:
-		game.players[game.last_hit]["score"] += 1
-		game.ball['y'] = game.height/2
-		game.ball['x'] = game.width/2
 
 	# check out collision x
 	if game.ball['x'] <= game.paddlePadding/4 + game.ballR:
@@ -438,7 +460,6 @@ async def update_pong(game_id):
 	]
 	game.last_hit = check_collision(game, paddleVertices, 0)
 		
-
 	# check collision player 2
 	paddleVertices = [
 		{'x': game.width - game.paddlePadding, 'y': game.positions[1] - game.paddleHeight/2},
@@ -448,26 +469,30 @@ async def update_pong(game_id):
 	]
 	game.last_hit = check_collision(game, paddleVertices, 1)
 
-	# check collision player 3
-	paddleVertices = [
-		{'x': game.positions[2] - game.paddleHeight/2, 'y': game.paddlePadding},
-		{'x': game.positions[2] + game.paddleHeight/2, 'y': game.paddlePadding},
-		{'x': game.positions[2] + game.paddleHeight/2, 'y': game.paddlePadding + game.paddleWidth},
-		{'x': game.positions[2] - game.paddleHeight/2, 'y': game.paddlePadding + game.paddleWidth}
-	]
-	game.last_hit = check_collision(game, paddleVertices, 2)
 
-	# check collision player 4
-	paddleVertices = [
-		{'x': game.positions[2] - game.paddleHeight/2, 'y': game.width - game.paddlePadding},
-		{'x': game.positions[2] + game.paddleHeight/2, 'y': game.width - game.paddlePadding},
-		{'x': game.positions[2] + game.paddleHeight/2, 'y': game.width - game.paddlePadding - game.paddleWidth},
-		{'x': game.positions[2] - game.paddleHeight/2, 'y': game.width - game.paddlePadding - game.paddleWidth}
-	]
-	game.last_hit = check_collision(game, paddleVertices, 3)
+	if game.gameMode == 'ffa' and game.player_number > 2:
+		ffa_update(game)
+	elif game.gameMode =='team':
+		# check collision player 3
+		paddleVertices = [
+			{'x': game.paddlePadding, 'y': game.positions[2] - game.paddleHeight/2},
+			{'x': game.paddlePadding + game.paddleWidth, 'y': game.positions[2] - game.paddleHeight/2},
+			{'x': game.paddlePadding + game.paddleWidth, 'y': game.positions[2] + game.paddleHeight/2},
+			{'x': game.paddlePadding, 'y': game.positions[2] + game.paddleHeight/2}
+		]
+		game.last_hit = check_collision(game, paddleVertices, 0)
+			
+		# check collision player 4
+		paddleVertices = [
+			{'x': game.width - game.paddlePadding, 'y': game.positions[3] - game.paddleHeight/2},
+			{'x': game.width - game.paddlePadding - game.paddleWidth, 'y': game.positions[3] - game.paddleHeight/2},
+			{'x': game.width - game.paddlePadding - game.paddleWidth, 'y': game.positions[3] + game.paddleHeight/2},
+			{'x': game.width - game.paddlePadding, 'y': game.positions[3] + game.paddleHeight/2}
+		]
+		game.last_hit = check_collision(game, paddleVertices, 1)
 	
 	for shape in game.map:
-		check_collision(game, shape['vertices'])
+		check_collision(game, shape['vertices'], None)
 
 import math
 def in_polygon_with_radius(point, vertices, radius=0):
