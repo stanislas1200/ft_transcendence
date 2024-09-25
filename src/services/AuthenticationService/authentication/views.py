@@ -366,7 +366,7 @@ def get_avatar(request, user_id):
 			profile = UserToken.objects.get(user=user)
 			if not hasattr(profile, 'avatar') or not profile.avatar:
 				return JsonResponse({'error': 'Avatar not found'}, status=404)
-			return HttpResponseRedirect(profile.avatar.url)
+			return HttpResponse(profile.avatar.url)
 
 		return JsonResponse({'error': 'User not found'}, status=404)
 	except:
