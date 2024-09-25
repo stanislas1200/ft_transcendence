@@ -27,6 +27,8 @@ function loadSettings() {
         firstName.value = response.firstname;
         lastName.value = response.lastname;
         userName.value = response.username;
+        loadProfilePicture(response.id);
+        saveChangement(response.id);
     };
     xhr.send();
     button = document.getElementById('saveButton');
@@ -135,7 +137,6 @@ function triggerFileInput() {
 
 function previewImage(event) {
     // pp.addEventListener("click", () => {
-    console.log('ici');
     const reader = new FileReader();
     reader.onload = function () {
         const output = document.getElementById('profileImage');
@@ -147,7 +148,6 @@ function previewImage(event) {
 
 function inputsChangement() {
     const inputs = document.querySelectorAll('.input');
-    console.log('je suis ici');
 
     const handleFocus = ({ target }) => {
         const span = target.previousElementSibling;
@@ -176,9 +176,58 @@ function inputsChangement() {
     // }
 
     inputs.forEach((input) => {
-        console.log('test');
         input.addEventListener('focus', handleFocus);
         input.addEventListener('blur', handleFocusOut);
         // input.addEventListener('input', handleChange);
+    });
+}
+
+function loadProfilePicture(id) {
+    const profilePicture = document.getElementById('profileImage');
+    var response;
+    let url = "https://localhost:8000/users/<int:user_id>/avatar";
+    url = url.replace("localhost", window.location.hostname); var xhr = new XMLHttpRequest();
+    url = url.replace("<int:user_id>", id);
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.withCredentials = true;
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 3) {
+            if (xhr.status === 200 || xhr.status === 201) {
+                response = xhr.responseText;
+            } else {
+                alert('Error: ' + JSON.parse(xhr.responseText).error);
+            }
+        }
+        var newProfilePicture = url.replace("/users/<int:user_id>/avatar".replace("<int:user_id>", id), response);
+        profilePicture.src = newProfilePicture;
+    };
+    xhr.send();
+}
+
+function saveChangement(id) {
+    const saveButton = document.getElementById('saveButton');
+    saveButton.addEventListener('click', function () {
+        const firstName = document.getElementById('firstName');
+        const lastName = document.getElementById('lastName');
+        const userName = document.getElementById('username');
+        const email = document.getElementById('email');
+        const profilePicture = document.getElementById('profilePic');
+        let url = "https://localhost:8000/users/<int:user_id>/edit";
+        url = url.replace("localhost", window.location.hostname); var xhr = new XMLHttpRequest();
+        url = url.replace("<int:user_id>", id);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', url, false);
+        xhr.withCredentials = true;
+        formData = new FormData();
+        console.log(profilePicture);
+        formData.append("avatar", profilePicture.files[0]);
+        formData.append("username", userName.value);
+        formData.append("email", email.value);
+        formData.append("first_name", firstName.value);
+        formData.append("last_name", lastName.value);
+        console.log(formData);
+        xhr.send(formData);
     });
 }

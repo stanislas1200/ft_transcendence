@@ -15,6 +15,7 @@ function loadProfile() {
             }
         }
         userName.textContent = response.username;
+        loadProfilePicture(response.id);
     };
     xhr.send();
 }
