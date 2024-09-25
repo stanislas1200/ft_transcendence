@@ -120,6 +120,19 @@ input[type=number] {
     margin: 8px 10px;
 } */
 
+label:has(> select) {
+    border: 2px solid var(--secondary);
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+label:has(> select) span {
+    position: absolute;
+    font-size: 0.7em;
+    margin: 8px 10px;
+    text-transform: uppercase;
+}
+
 #max-players-random,
 #game-mode,
 #max-players-create,
@@ -133,9 +146,9 @@ input[type=number] {
     transition: font-size 200ms ease, margin 200ms ease;
     width: 100%;
     background-color: transparent;
-    border: 2px solid var(--secondary);
-    border-radius: 5px;
+    border: none;
+    border-radius: none;
     outline: none;
-    padding: 10px 10px 10px;
-    margin-bottom: 9px;
+    padding: 25px 10px 10px;
+    margin-bottom: 0px;
 }
