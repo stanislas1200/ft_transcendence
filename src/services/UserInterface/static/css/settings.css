@@ -1,13 +1,13 @@
 .container {
     display: flex;
-    width: 200%;
+    width: 100%;
     max-width: 1400px;
     background-color: var(--background);
     border-radius: 5px;
     border: 2px solid var(--secondary);
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     margin-top: 15rem;
-    margin-right: 35rem;
+    min-width: 580px;
 }
 
 .form-container {
@@ -32,12 +32,6 @@ h2 {
     margin-bottom: 20px;
 }
 
-.error {
-    color: var(--primary);
-    font-size: 12px;
-    display: none;
-}
-
 .input-row {
     display: flex;
     justify-content: space-between;
@@ -49,8 +43,8 @@ h2 {
 
 .profile-picture {
     position: relative;
-    width: 150px;
-    height: 150px;
+    width: 200px;
+    height: 200px;
     border-radius: 50%;
     overflow: hidden;
     border: 3px solid #ccc;
@@ -103,4 +97,14 @@ h2 {
 #lastName_label {
     width: 98%;
     margin-left: 6px;
+}
+
+.error {
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    text-decoration-line: underline;
+}
+
+.sucess-saving {
+    background-color: green;
 }
