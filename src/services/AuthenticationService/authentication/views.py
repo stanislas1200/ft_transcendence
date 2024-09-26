@@ -194,18 +194,18 @@ def list_friend_requests(request):
 @require_GET
 def list_blocked_user(request):
 	try:
-		if request.user.is_authenticated:
-			user = request.user
-		else:
-			status = verify_token(request)
-			if (status == 200):
-				u_id = request.GET.get('UserId')
-				if not u_id:
-					u_id = request.COOKIES.get('userId')
+		# if request.user.is_authenticated:
+		# 	user = request.user
+		# else:
+		# 	status = verify_token(request) # TODO : check cuz not working for tchat
+		# 	if (status == 200):
+		# 		u_id = request.GET.get('UserId')
+		# 		if not u_id:
+		# 			u_id = request.COOKIES.get('userId')
 
-				user = User.objects.get(id=u_id)
-			else:
-				return JsonResponse({'error': 'User is not logged in'}, status=401)
+		# 		user = User.objects.get(id=u_id)
+		# 	else:
+		# 		return JsonResponse({'error': 'User is not logged in'}, status=401)
 		
 		return JsonResponse({'blocked_user': [{'id': b.id, 'username': b.username} for b in user.blocked]})
 
