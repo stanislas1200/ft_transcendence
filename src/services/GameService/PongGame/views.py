@@ -313,7 +313,7 @@ def join_game(request):
                 if g.gameProperty.gameMode == game_mode:
                     game = g
             if not game:
-                return start_game(request, game_name) # No game found, create one # TODO : use and check passed param in join like create
+                return start_game(request, game_name, game_mode, player_number) # No game found, create one # TODO : use and check passed param in join like create
                 
 
         # Check if party accept player
@@ -335,9 +335,11 @@ def join_game(request):
     except User.DoesNotExist:
         return JsonResponse({'error': 'Player not found'}, status=404)
 
-def startPong(request, player, token, gameType):
-    playerNumber = request.POST.get('playerNumber', 1)
-    gameMode = request.POST.get('gameMode', 'ffa')
+def startPong(request, player, token, gameType, gameMode, playerNumber):
+    if not playerNumber:
+        playerNumber = request.POST.get('playerNumber', 1)
+    if not gameMode:
+        gameMode = request.POST.get('gameMode', 'ffa')
     map = request.POST.get('map', 0)
 
     if not playerNumber or not gameType:
@@ -380,8 +382,9 @@ def startPong(request, player, token, gameType):
     return JsonResponse({'message': 'Game started', 'game_id': game.id})
 
 
-def startTron(request, player, token, gameType):
-    playerNumber = request.POST.get('playerNumber', 1) # TODO : check default 1 or error ?
+def startTron(request, player, token, gameType, gameMode, playerNumber):
+    if not playerNumber:
+        playerNumber = request.POST.get('playerNumber', 1) # TODO : check default 1 or error ?
 
     if not playerNumber or not gameType:
         return JsonResponse({'error': 'Missing setting'}, status=400)
@@ -403,7 +406,7 @@ def startTron(request, player, token, gameType):
 # @require_POST
 @csrf_exempt # Disable CSRF protection for this view
 # create a game party
-def start_game(request, gameName=None):
+def start_game(request, gameName=None, gameMode=None, playerNumber=None):
     # try:
     # get user
     session_key = request.session.session_key
@@ -423,9 +426,9 @@ def start_game(request, gameName=None):
         gameName = request.POST.get('game')
     gameType = request.POST.get('gameType', 'simple')  # Get the game type from the request, default to 'simple'
     if gameName == 'pong':
-        return startPong(request, player, token, gameType)
+        return startPong(request, player, token, gameType, gameMode, playerNumber)
     elif gameName == 'tron':
-        return startTron(request, player, token, gameType)
+        return startTron(request, player, token, gameType, gameMode, playerNumber)
     else:
         return JsonResponse({'error': 'Game not found'}, status=404)
     # except:
