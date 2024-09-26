@@ -1,55 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .form-container {
+            width: 300px;
+            margin: 0 auto;
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
+
     <h2>Chat Room</h2>
+    
+    <!-- Recipient form -->
+    <div class="form-container">
+        <h3>Send a Message to a Recipient</h3>
+        <form id="recipientForm">
+            <label for="recipient">Recipient:</label>
+            <input type="text" id="recipient" name="recipient" placeholder="Enter recipient name" required>
+            <input type="submit" value="Set Recipient">
+        </form>
+        <p id="recipientResult"></p>
+    </div>
+
+    <!-- Chat UI -->
     <textarea id="chat-log" cols="100" rows="20" readonly></textarea><br>
-    <input id="chat-message-input" type="text" size="100"><br>
+    <input id="chat-message-input" type="text" size="100" placeholder="Type your message here"><br>
     <button id="chat-message-send">Send</button>
 
     <script>
-        const roomName = "room1";  // Adjust room name dynamically as needed
+        // Recipient input logic
+        const recipientForm = document.getElementById('recipientForm');
+        const recipientInput = document.getElementById('recipient');
+        const recipientResult = document.getElementById('recipientResult');
+        let currentRecipient = 'Unknowed';
+
+        
+        // Chat functionality
+        const roomName = "Oldroom";  // Adjust room name dynamically as needed
         
         function getCookie(name) {
             var value = "; " + document.cookie;
             var parts = value.split("; " + name + "=");
             if (parts.length == 2) return parts.pop().split(";").shift();
         }
+        
+        // chatSocket = new WebSocket(
+        //     'wss://' + window.location.host + '/ws/chat/' + roomName + '/' + getCookie("userId") + '/' + currentRecipient + '/'
+        //     );
+            
+        recipientForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent page reload
+            currentRecipient = recipientInput.value;
+            recipientResult.textContent = "Message will be sent to: " + currentRecipient;
+            chatSocket = new WebSocket(
+                'wss://' + window.location.host + '/ws/chat/' + roomName + '/' + getCookie("userId") + '/' + currentRecipient + '/'
+            );
+            connect_to_chat();
+        });
+        function connect_to_chat() {
+            chatSocket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                var message;
+                message = data.message;
+                document.querySelector('#chat-log').value += (message + '\n');
+            };
 
-        const chatSocket = new WebSocket(
-            'ws://' + window.location.host + '/ws/chat/' + roomName + '/' + getCookie("userId") + '/'
-        );
+            chatSocket.onclose = function(e) {
+                console.error('Chat socket closed unexpectedly');
+            };
 
-        chatSocket.onmessage = function(e) {
-            const data = JSON.parse(e.data);
-            // console.log(data);
-            const message = data.message;
-            if (!message)
-                return
-            document.querySelector('#chat-log').value += (message + '\n');
-        };
+            document.querySelector('#chat-message-input').focus();
+            document.querySelector('#chat-message-input').onkeyup = function(e) {
+                if (e.keyCode === 13) {  // Enter key sends the message
+                    document.querySelector('#chat-message-send').click();
+                }
+            };
 
-        chatSocket.onclose = function(e) {
-            console.error('Chat socket closed unexpectedly');
-        };
-
-        document.querySelector('#chat-message-input').focus();
-        document.querySelector('#chat-message-input').onkeyup = function(e) {
-            if (e.keyCode === 13) {  // Enter key sends the message
-                document.querySelector('#chat-message-send').click();
-            }
-        };
-
-        document.querySelector('#chat-message-send').onclick = function(e) {
-            const messageInputDom = document.querySelector('#chat-message-input');
-            const message = messageInputDom.value;
-            chatSocket.send(JSON.stringify({
-                'message': message
-            }));
-            messageInputDom.value = '';
+            document.querySelector('#chat-message-send').onclick = function(e) {
+                const messageInputDom = document.querySelector('#chat-message-input');
+                const message = messageInputDom.value;
+                if (currentRecipient) {
+                    chatSocket.send(JSON.stringify({
+                        'message': message,
+                        'recipient': currentRecipient
+                    }));
+                    messageInputDom.value = '';
+                } else {
+                    alert("Please set a recipient before sending a message.");
+                }
+            };
         };
     </script>
+
 </body>
 </html>
