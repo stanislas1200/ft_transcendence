@@ -7,94 +7,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Page</title>
-    <script>testIfLoggedIn();
-        function testIfLoggedIn() {
-            let url = "https://localhost:8000/me";
-            url = url.replace("localhost", window.location.hostname);
 
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', url, true);
-            xhr.withCredentials = true;
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    if (xhr.status !== 200 && xhr.status !== 201) {
-                        window.location.replace("/login");
-                    }
-                    console.log(xhr.responseText);
-                }
-            };
-            xhr.send();
-        }
-    </script>
-    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
-    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'images/pong.png' %}" type="image/x-icon">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/spa.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/master.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/themeToggle.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/master.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/friend.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/pong.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/game.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/pong.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/settings.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/profile.css' %}">
 
-    <!-- ************************************************ settings ******************************************************** -->
-
-    <!-- ************************************************ settings ******************************************************** -->
-
-    <script src="{% static 'js/test.js' %}"></script>
-    <script src="{% static 'js/pong.js' %}"></script>
-    <script src="{% static 'js/spa.js' %}"></script>
+    <script src="{% static 'js/themeToggle.js' %}"></script>
     <script src="{% static 'js/master.js' %}"></script>
     <script src="{% static 'js/friend.js' %}"></script>
+    <script src="{% static 'js/spa.js' %}"></script>
     <script src="{% static 'js/game.js' %}"></script>
+    <!-- <script src="{% static 'js/pong.js' %}"></script> -->
     <script src="{% static 'js/settings.js' %}"></script>
-    <!-- <script src="{% static 'js/themeToggle.js' %}"></script> -->
+    <script src="{% static 'js/profile.js' %}"></script>
 </head>
 
 <body>
     <main>
-        <div class="wrapper">
-            <div class="one">
+        <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn" type="checkbox">
+            <input type="checkbox" id="themeToggle" class="themeToggleInput" />
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" stroke="none">
+                <mask id="moon-mask">
+                    <rect x="0" y="0" width="20" height="20" fill="white"></rect>
+                    <circle cx="11" cy="3" r="8" fill="black"></circle>
+                </mask>
+                <circle class="sunMoon" cx="10" cy="10" r="8" mask="url(#moon-mask)"></circle>
+                <g>
+                    <circle class="sunRay sunRay1" cx="18" cy="10" r="1.5"></circle>
+                    <circle class="sunRay sunRay2" cx="14" cy="16.928" r="1.5"></circle>
+                    <circle class="sunRay sunRay3" cx="6" cy="16.928" r="1.5"></circle>
+                    <circle class="sunRay sunRay4" cx="2" cy="10" r="1.5"></circle>
+                    <circle class="sunRay sunRay5" cx="6" cy="3.1718" r="1.5"></circle>
+                    <circle class="sunRay sunRay6" cx="14" cy="3.1718" r="1.5"></circle>
+                </g>
+            </svg>
+        </label>
+        <div class="navbars">
+            <nav class="navbar-left">
                 <ul>
-                    <li><a href="#home" onclick="setActive(this, '')">Home</a></li>
-                    <li><a href="#game" onclick="setActive(this, 'game')">Game</a></li>
-                    <li><a href="#friend" onclick="setActive(this, 'friend')">Friend</a></li>
-                    <li><a href="#profil" onclick="setActive(this, 'pong')">Pong</a></li>
-                    <li><a href="#settings" onclick="setActive(this, 'settings')">Settings</a></li>
-                    <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn" type="checkbox">
-                        <input type="checkbox" id="themeToggle" class="themeToggleInput" />
-                        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" stroke="none">
-                            <mask id="moon-mask">
-                                <rect x="0" y="0" width="20" height="20" fill="white"></rect>
-                                <circle cx="11" cy="3" r="8" fill="black"></circle>
-                            </mask>
-                            <circle class="sunMoon" cx="10" cy="10" r="8" mask="url(#moon-mask)"></circle>
-                            <g>
-                                <circle class="sunRay sunRay1" cx="18" cy="10" r="1.5"></circle>
-                                <circle class="sunRay sunRay2" cx="14" cy="16.928" r="1.5"></circle>
-                                <circle class="sunRay sunRay3" cx="6" cy="16.928" r="1.5"></circle>
-                                <circle class="sunRay sunRay4" cx="2" cy="10" r="1.5"></circle>
-                                <circle class="sunRay sunRay5" cx="6" cy="3.1718" r="1.5"></circle>
-                                <circle class="sunRay sunRay6" cx="14" cy="3.1718" r="1.5"></circle>
-                            </g>
-                        </svg>
-                    </label>
+                    <li>
+                        <a href="#home" onclick="setActive(this, '')">
+                            <i class="fa fa-home fa-2x"></i>
+                            <span class="nav-text">
+                                Home
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#game" onclick="setActive(this, 'game')">
+                            <i class="fa fa-gamepad fa-2x"></i>
+                            <span class="nav-text">
+                                Game
+                            </span>
+                        </a>
+                    </li>
                 </ul>
-            </div>
-            <div class="three" id="spa-content">
-                {% include content %}
-            </div>
-            <div class="two">
-                Friend list
-            </div>
+                <ul class="logout">
+                    <li>
+                        <a href="#">
+                            <i class="fa fa-power-off fa-2x"></i>
+                            <span class="nav-text">
+                                Logout
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <nav class="navbar-top">
+                <ul>
+                    <li>
+                        <a href="#friend" onclick="setActive(this, 'friend')">
+                            <i class="fa fa-comments fa-2x"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#profil" onclick="setActive(this, 'profile')">
+                            <i class="fa fa-user fa-2x"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#settings" onclick="setActive(this, 'settings')">
+                            <i class="fa fa-gear fa-2x"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="spa" id="spa-content">
+            {% include content %}
         </div>
     </main>
 </body>
-<script>
-    document.getElementById("themeToggle").addEventListener("click", function () {
-        const currentTheme = document.documentElement.getAttribute("data-theme");
-        const newTheme = currentTheme === "light" ? "dark" : "light";
-        document.documentElement.setAttribute("data-theme", newTheme);
-    });
-</script>
 
 </html>

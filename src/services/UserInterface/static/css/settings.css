@@ -1,10 +1,13 @@
 .container {
     display: flex;
-    width: 80%;
-    max-width: 1200px;
-    background-color: #fff;
-    border-radius: 10px;
+    width: 100%;
+    max-width: 1400px;
+    background-color: var(--background);
+    border-radius: 5px;
+    border: 2px solid var(--secondary);
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    margin-top: 15rem;
+    min-width: 580px;
 }
 
 .form-container {
@@ -17,73 +20,16 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f0f0f0;
-    border-left: 1px solid #ccc;
-}
-
-.profile-picture {
-    position: relative;
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 3px solid #ccc;
-    cursor: pointer;
-}
-
-.profile-picture img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
-
-.profile-picture input {
-    display: none;
+    border-left: 2px solid;
 }
 
 h2 {
-    color: #333;
+    color: var(--primary);
     margin-bottom: 20px;
 }
 
 .input-group {
     margin-bottom: 20px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #218838;
-}
-
-.error {
-    color: red;
-    font-size: 12px;
-    display: none;
 }
 
 .input-row {
@@ -97,8 +43,8 @@ button:hover {
 
 .profile-picture {
     position: relative;
-    width: 150px;
-    height: 150px;
+    width: 200px;
+    height: 200px;
     border-radius: 50%;
     overflow: hidden;
     border: 3px solid #ccc;
@@ -118,7 +64,6 @@ button:hover {
 
 .profile-picture input[type="file"] {
     display: none;
-    /* Cache le bouton de sélection de fichier */
 }
 
 .profile-picture .-label {
@@ -131,17 +76,35 @@ button:hover {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: #fff;
+    background-color: var(--background);
+    color: var(--primary);
     text-align: center;
     border-radius: 50%;
     z-index: 1000;
     transition: background-color 0.2s ease-in-out;
     visibility: hidden;
-    /* Cache l'étiquette par défaut */
 }
 
 .profile-picture:hover .-label {
     visibility: visible;
-    /* Affiche l'étiquette au survol */
+}
+
+#firstName_label {
+    width: 98%;
+    justify-content: left;
+}
+
+#lastName_label {
+    width: 98%;
+    margin-left: 6px;
+}
+
+.error {
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    text-decoration-line: underline;
+}
+
+.sucess-saving {
+    background-color: green;
 }

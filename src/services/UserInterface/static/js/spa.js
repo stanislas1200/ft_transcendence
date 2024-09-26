@@ -37,6 +37,9 @@ async function loadPage(page) {
         case 'settings':
             loadSettings();
             break;
+        case 'profile':
+            loadProfile();
+            break;
         default:
             break;
     }

@@ -1,0 +1,39 @@
+{% load static %}
+
+<div class="wrapper">
+    <div class="settings-grid-userCard">
+        <!-- profile picture + userName + add friend + message -->
+        <div class="profile-container" id="profile-container">
+            <div class="profile-picture" id="profile-picture">
+                <img id="profileImage" class="profileImage" src="{% static 'images/pp.png' %}" alt="">
+            </div>
+            <div id="userName">
+                <!-- UserName -->
+            </div>
+            <div class="buttonFriendMessage">
+                <div class="addFriend">
+                    <span class="plus">+</span>
+                    <span class="text">Add Friend</span>
+                </div>
+                <div class="addFriend">
+                    <span class="text">Message me</span>
+                </div>
+            </div>
+            <div class="addFriend">
+                <span class="text">Challenge me</span>
+            </div>
+        </div>
+    </div>
+    <div class="settings-grid-userInformation">
+        player information
+        <div class="info-area">
+            <div class="hystory">
+                hystory
+            </div>
+            <div class="achivement">
+                achivement
+            </div>
+        </div>
+    </div>
+</div>
+<script>loadProfile();</script>

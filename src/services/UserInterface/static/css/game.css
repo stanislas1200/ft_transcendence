@@ -2,11 +2,12 @@
     display: flex;
     justify-content: space-around;
     padding: 20px;
-    background-color: #f4f4f4;
-    border: 1px solid #ddd;
+    background-color: var(--background);
+    /* border: 1px solid var(--secondary); */
     border-radius: 10px;
     width: 100%;
     box-sizing: border-box;
+    flex-wrap: wrap;
 }
 
 /* Partie gauche supérieure: Rejoindre une partie */
@@ -15,54 +16,58 @@
 #create-game {
     flex: 1;
     padding: 20px;
-    background-color: #fff;
-    border: 1px solid #ddd;
+    background-color: var(--background);
+    border: 1px solid var(--secondary);
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
     margin: 10px;
     box-sizing: border-box;
 }
 
 h2 {
     margin-top: 0;
-    color: #333;
 }
 
-label {
+/* label {
     display: block;
     margin-bottom: 8px;
     font-weight: bold;
-}
+    color: var(--secondary);
+} */
 
-input[type="text"],
+/* input[type="text"],
 input[type="number"],
 select {
     width: 100%;
     padding: 10px;
     margin-bottom: 15px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--secondary);
     border-radius: 5px;
     box-sizing: border-box;
-}
+} */
 
-button {
+.join-game-button,
+.random-game-button,
+.create-game-button {
     width: 100%;
     padding: 10px;
-    background-color: #007bff;
-    color: white;
+    background-color: var(--secondary);
+    color: var(--text);
     border: none;
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
 }
 
-button:hover {
-    background-color: #0056b3;
+.join-game-button:hover,
+.random-game-button:hover,
+.join-game-button:hover {
+    background-color: var(--primary);
 }
 
 #game-mode[disabled],
 #game-mode-create[disabled] {
-    background-color: #f4f4f4;
+    background-color: var(--background);
     cursor: not-allowed;
 }
 
@@ -70,56 +75,80 @@ button:hover {
     text-align: left;
 }
 
-/* Styles de l'écran de chargement */
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 18px;
-    z-index: 9999;
-    display: none;
-    /* Masqué par défaut */
-    flex-direction: column;
-    text-align: center;
-}
-
-.loading-content {
-    max-width: 500px;
-    padding: 20px;
-    background-color: rgba(0, 0, 0, 0.8);
-    border-radius: 10px;
-}
-
-#loading-text {
+/* .login__label {
+    display: block;
     margin-bottom: 20px;
+    width: 100%;
+} */
+
+/* .input {
+    width: 100%;
+    background-color: transparent;
+    border: 2px solid var(--secondary);
+    border-radius: 5px;
+    outline: none;
+    font-size: 0.9em;
+    padding: 25px 10px 10px;
+    font-weight: 600;
+    color: var(--secondary);
+    margin-bottom: -10px;
+} */
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
-.player-positions {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
+input[type=number] {
+    -moz-appearance: textfield;
 }
 
-.player-position {
-    width: 100px;
-    height: 100px;
-    border: 2px solid white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 10px;
-    position: relative;
+/* .login__label span {
+    position: absolute;
+    font-size: 0.8em;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--secondary);
+    margin: 20px;
+    cursor: text;
+    transition: font-size 200ms ease, margin 200ms ease;
 }
 
-.player-position span {
-    font-size: 16px;
-    color: white;
+.login__label .span-active {
+    font-size: 0.7em;
+    margin: 8px 10px;
+} */
+
+label:has(> select) {
+    border: 2px solid var(--secondary);
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+label:has(> select) span {
+    position: absolute;
+    font-size: 0.7em;
+    margin: 8px 10px;
+    text-transform: uppercase;
+}
+
+#max-players-random,
+#game-mode,
+#max-players-create,
+#game-mode-create,
+#map-choice {
+    font-size: 0.9em;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--secondary);
+    cursor: text;
+    transition: font-size 200ms ease, margin 200ms ease;
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    border-radius: none;
+    outline: none;
+    padding: 25px 10px 10px;
+    margin-bottom: 0px;
 }

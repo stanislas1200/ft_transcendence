@@ -14,7 +14,7 @@ urlpatterns = [
     path('me', views.me),
     path('get_user/', views.get_user_from_session),
     path('users/<int:user_id>/edit', views.update_user),
-    path('users/<int:user_id>/avatar', views.get_avatar),
+    path('users/<int:user_id>/avatar', views.get_avatar), # call pour la pp
 
 	path('game/main.css', views.get_css, name='views_game'),
 	path('game/', views.get_game_page, name='views_game'),
@@ -26,6 +26,11 @@ urlpatterns = [
     path('decline-request/<int:request_id>/', views.decline_friend_request, name='decline_friend_request'),
     path('friends/<int:user_id>/', views.list_friends, name='list_friends'),
     path('list_request/', views.list_friend_requests, name='list_request'),
+    path('remove_friend/<int:user_id>/', views.remove_friend, name='remove_friend'),
+    path('block_user/<int:user_id>/', views.block_user, name='block_user'),
+    path('list_blocked_user/', views.list_blocked_user, name='list_blocked_user'),
+    path('unblock_user/<int:user_id>/', views.unblock_user, name='unblock_user'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # urlpatterns = [

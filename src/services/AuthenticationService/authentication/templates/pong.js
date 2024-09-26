@@ -49,14 +49,22 @@ function connect() {
 		}
 
 		// Update ball position and direction
-		x = serverMessage.x;
-		y = serverMessage.y;
-		name1 = serverMessage.usernames[0];
-		name2 = serverMessage.usernames[1];
-		m = serverMessage.positions[0]; // Assuming player 0 is the player on the left
-		n = serverMessage.positions[1]; // Assuming player 1 is the player on the right
-		s1 = serverMessage.scores[0];
-		s2 = serverMessage.scores[1];
+		if (game == 'pong') {
+			x = serverMessage.x;
+			y = serverMessage.y;
+			name1 = serverMessage.usernames[0];
+			name2 = serverMessage.usernames[1];
+			p1 = serverMessage.positions[0]; // Assuming player 0 is the player on the left
+			p2 = serverMessage.positions[1]; // Assuming player 1 is the player on the right
+			p3 = serverMessage.positions[2];
+			p4 = serverMessage.positions[3];
+			s1 = serverMessage.scores[0];
+			s2 = serverMessage.scores[1];
+			mode = serverMessage.gameMode;
+		}
+		if (game == 'tron') {
+			players = serverMessage.players;
+		}
 	});
 
 	socket.addEventListener('close', function (event) {
@@ -73,6 +81,10 @@ function connect() {
 			direction = "up";
 		} else if (event.key === "ArrowDown") {
 			direction = "down";
+		} else if (event.key === "ArrowLeft") {
+			direction = "left";
+		} else if (event.key === "ArrowRight") {
+			direction = "right";
 		}
 
 		if (direction && socket) {
@@ -83,36 +95,73 @@ function connect() {
 		}
 	});
 }
+
+game = 'tron'
+players = []
 c = document.getElementById('c').getContext('2d')
 c.fillStyle = "#FFF"
 c.font = "60px monospace"
 w = s = 1
 p = q = s1 = s2 = 0
 name1 = name2 = null
-m = n = 250
+p1 = p2 = p3 = p4 = 250
 x = 400; y = 300
 r = 5; v = 3
+mode = "ffa"
 function draw() {
 
-	// c.clearRect(0, 0, 800, 600)
-	c.fillStyle = "rgb(0 0 0 / 20%)";
-	c.fillRect(0, 0, 800, 600);
-	c.fillStyle = "#8791ed";
-	for (i = 5; i < 600; i += 20)c.fillRect(400, i, 4, 10)
-	c.fillStyle = "#FFFFFF";
-	c.fillText(name1, 0, 60)
-	c.fillText(name2, 800 - c.measureText(name2).width, 60)
-	c.fillText(s1 + " " + s2 , 350, 60)
-	c.fillRect(40, m - 100/2, 10, 100)
-	c.fillRect(800 - 40 - 10, n - 100/2, 10, 100)
-	// c.fillRect(x, y, 10, 10)
+	if (game == 'pong'){
+
+		// c.clearRect(0, 0, 800, 600)
+		c.fillStyle = "rgb(0 0 0 / 20%)";
+		c.fillRect(0, 0, 800, 600);
+		c.fillStyle = "#8791ed";
+		for (i = 5; i < 600; i += 20)c.fillRect(400, i, 4, 10)
+		c.fillStyle = "#FFFFFF";
+		c.fillText(name1, 0, 60)
+		c.fillText(name2, 800 - c.measureText(name2).width, 60)
+		c.fillText(s1 + " " + s2 , 350, 60)
+		c.fillRect(40, p1 - 100/2, 10, 100)
+		c.fillRect(800 - 40 - 10, p2 - 100/2, 10, 100)
+		if (mode == "team") {
+			c.fillRect(40, p3 - 100/2, 10, 100)
+			c.fillRect(800 - 40 - 10, p4 - 100/2, 10, 100)
+		}
+		else if (mode == "ffa") {
+			c.fillRect(p3, 40, 100, 10)
+			c.fillRect(p4, 600 - 40, 100, 10)
+		}
+		// c.fillRect(x, y, 10, 10)
+		
+		// c.fillStyle = "#e24091";
+		c.beginPath();
+		c.moveTo(x, y);
+		c.arc(x, y, r, 0, Math.PI * 2, true); // Left eye
+		c.stroke();
+		c.fill()
+	}
+	if (game == 'tron') {
+		// c.clearRect(0, 0, 600, 600)
+		if (players) {
+			players.forEach((player, index) => {
+				// Calculate x and y positions for each player
+				const x = player['x']
+				const y = player['y']
 	
-	// c.fillStyle = "#e24091";
-    c.beginPath();
-    c.moveTo(x, y);
-    c.arc(x, y, r, 0, Math.PI * 2, true); // Left eye
-    c.stroke();
-    c.fill()
+				// Set the fill color based on player data
+				c.fillStyle = player['color'];
+	
+				// Draw the square
+				c.fillRect(x, y, 5, 5);
+	
+				// Optionally, draw the player's name inside the square
+				// c.fillStyle = 'white'; // Text color
+				c.font = '14px Arial';
+				c.textAlign = 'center';
+				c.fillText(player.username, 100 * (index+1) , 100);
+			});
+		}
+	}
 }
 
 function gameLoop() {

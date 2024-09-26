@@ -1,5 +1,7 @@
+let button;
+// let pp;
+
 function loadSettings() {
-    console.log('bonjour');
     const firstName = document.getElementById('firstName');
     const lastName = document.getElementById('lastName');
     const userName = document.getElementById('username');
@@ -12,83 +14,142 @@ function loadSettings() {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status === 200 || xhr.status === 201) {
-                // console.log('Login Success:', xhr.responseText);
                 response = JSON.parse(xhr.responseText);
-                console.log(response);
-                // localStorage.setItem('token', response.token);
-                // Here you can store the session ID or token if needed
-                // window.location.replace("/home");
+                email.value = response.email;
+                firstName.value = response.firstname;
+                lastName.value = response.lastname;
+                userName.value = response.username;
+                loadProfilePicture(response.id);
+                saveChangement(response.id);
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
-        email.value = response.email;
-        firstName.value = response.firstname;
-        lastName.value = response.lastname;
-        userName.value = response.username;
     };
     xhr.send();
-    console.log(response);
+    button = document.getElementById('saveButton');
+    // validateForm();
+    inputsChangement();
 }
 
+function containsUpperCase(pwd) {
+    return /[A-Z]/.test(pwd);  // A-Z pour les majuscules
+}
+
+function containsLowerCase(pwd) {
+    return /[a-z]/.test(pwd);  // a-z pour les minuscules
+}
+
+function containsSpecialCharacter(pwd) {
+    return /[!@#$%^&*(),.?":{}|<>]/.test(pwd);  // Caractères spéciaux communs
+}
+
+function containsNumber(pwd) {
+    return /\d/.test(pwd);  // \d correspond à un chiffre (0-9)
+}
+
+function checkPassword(pwd) {
+    let check = 0;
+
+    if (!containsUpperCase(pwd)) {
+        document.getElementById('newPasswordError').textContent = "the password must contain at least one capital letter";
+        check++;
+    }
+    if (!containsLowerCase(pwd)) {
+        document.getElementById('newPasswordError').textContent = "password must contain at least one lowercase letter";
+        check++;
+    }
+    if (!containsNumber(pwd)) {
+        document.getElementById('newPasswordError').textContent = "password must contain at least one number";
+        check++;
+    }
+    if (!containsSpecialCharacter(pwd)) {
+        console.log(containsSpecialCharacter(pwd));
+        document.getElementById('newPasswordError').textContent = "password must contain at least one special caracter";
+        check++;
+    }
+    if (check != 0)
+        return 1;
+    return 0;
+}
+
+// function validateForm() {
 function validateForm() {
-    let valid = true;
+    console.log('button press');
+    let valid = 1;
 
-    // Effacer les erreurs précédentes
-    document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
-
-    // Vérifier le prénom (uniquement des lettres)
-    const firstName = document.getElementById('firstName').value;
-    if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(firstName)) {
-        document.getElementById('firstNameError').textContent = "Le prénom ne doit contenir que des lettres.";
-        document.getElementById('firstNameError').style.display = 'block';
-        valid = false;
+    const newFirstName = document.getElementById('firstName');
+    const spanNewFirstName = document.getElementById('span-firstname');
+    if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(newFirstName.value)) {
+        console.log('firstname error');
+        valid = 0;
+        newFirstName.classList.add('error');
+        spanNewFirstName.style.color = 'var(--accent)';
+    } else {
+        newFirstName.classList.remove('error');
+        spanNewFirstName.style.color = 'var(--secondary)';
     }
 
     // Vérifier le nom (uniquement des lettres)
-    const lastName = document.getElementById('lastName').value;
-    if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(lastName)) {
-        document.getElementById('lastNameError').textContent = "Le nom ne doit contenir que des lettres.";
-        document.getElementById('lastNameError').style.display = 'block';
-        valid = false;
+    const newLastName = document.getElementById('lastName');
+    const spanNewLastName = document.getElementById('span-lastname');
+    if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(newLastName.value)) {
+        console.log('lastname error');
+        valid = 0;
+        newLastName.classList.add('error');
+        spanNewLastName.style.color = 'var(--accent)';
+    } else {
+        newLastName.classList.remove('error');
+        spanNewLastName.style.color = 'var(--secondary)';
+    }
+
+    const username = document.getElementById('username');
+    const spanusername = document.getElementById('span-username');
+    if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(username.value)) {
+        console.log('lastname error');
+        valid = 0;
+        username.classList.add('error');
+        spanusername.style.color = 'var(--accent)';
+    } else {
+        username.classList.remove('error');
+        spanusername.style.color = 'var(--secondary)';
     }
 
     // Vérifier l'adresse e-mail
-    const email = document.getElementById('email').value;
-    if (!/\S+@\S+\.\S+/.test(email)) {
-        document.getElementById('emailError').textContent = "Veuillez entrer une adresse e-mail valide.";
-        document.getElementById('emailError').style.display = 'block';
-        valid = false;
+    const newEmail = document.getElementById('email');
+    const spanNewEmail = document.getElementById('span-email');
+    if (!/\S+@\S+\.\S+/.test(newEmail.value)) {
+        console.log('email error');
+        valid = 0;
+        newEmail.classList.add('error');
+        spanNewEmail.style.color = 'var(--accent)';
+    } else {
+        newEmail.classList.remove('error');
+        spanNewEmail.style.color = 'var(--secondary)';
     }
 
-    // Vérifier le mot de passe (doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial)
-    const password = document.getElementById('password').value;
-    const passwordStrength = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordStrength.test(password)) {
-        document.getElementById('passwordError').textContent = "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.";
-        document.getElementById('passwordError').style.display = 'block';
-        valid = false;
-    }
+    const currentPassword = document.getElementById('oldPassword');
+    const spanCurrentPassword = document.getElementById('span-oldpwd');
 
-    // Vérifier la confirmation du mot de passe
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    if (password !== confirmPassword) {
-        document.getElementById('confirmPasswordError').textContent = "Les mots de passe ne correspondent pas.";
-        document.getElementById('confirmPasswordError').style.display = 'block';
-        valid = false;
+    const newPassword = document.getElementById('newPassword');
+    const spanNewPassword = document.getElementById('span-newpwd');
+    if (currentPassword.value == '') {
+        console.log('no password enter');
+        valid = 0;
     }
-
+    if (newPassword == '') {
+        console.log('no new password');
+        valid = 0;
+    }
+    if (currentPassword.value === newPassword.value) {
+        console.log('same pwd than before error');
+        valid = 0;
+    }
+    if (checkPassword(newPassword.value) != 0) {
+        console.log('new pwd error');
+        valid = 0;
+    }
     return valid;
-}
-
-// Fonction pour prévisualiser l'image téléchargée
-function previewImage(event) {
-    const reader = new FileReader();
-    reader.onload = function () {
-        const output = document.getElementById('profileImage');
-        output.src = reader.result;
-    };
-    reader.readAsDataURL(event.target.files[0]);
 }
 
 function triggerFileInput() {
@@ -103,3 +164,100 @@ function previewImage(event) {
     };
     reader.readAsDataURL(event.target.files[0]);
 }
+
+function inputsChangement() {
+    const inputs = document.querySelectorAll('.input');
+
+    const handleFocus = ({ target }) => {
+        const span = target.previousElementSibling;
+        if (span) {
+            span.classList.add('span-active');
+        }
+    }
+
+    const handleFocusOut = ({ target }) => {
+        if (target.value === '') {
+            const span = target.previousElementSibling;
+            if (span) {
+                span.classList.remove('span-active');
+            }
+        }
+    }
+
+    inputs.forEach((input) => {
+        input.addEventListener('focus', handleFocus);
+        input.addEventListener('blur', handleFocusOut);
+    });
+}
+
+function loadProfilePicture(id) {
+    const profilePicture = document.getElementById('profileImage');
+    var response;
+    let url = "https://localhost:8000/users/<int:user_id>/avatar";
+    url = url.replace("localhost", window.location.hostname); var xhr = new XMLHttpRequest();
+    url = url.replace("<int:user_id>", id);
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.withCredentials = true;
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 3) {
+            if (xhr.status === 200 || xhr.status === 201) {
+                response = xhr.responseText;
+            } else {
+                alert('Error: ' + JSON.parse(xhr.responseText).error);
+            }
+        }
+        var newProfilePicture = url.replace("/users/<int:user_id>/avatar".replace("<int:user_id>", id), response);
+        profilePicture.src = newProfilePicture;
+    };
+    xhr.send();
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function saveChangement(id) {
+    const saveButton = document.getElementById('saveButton');
+    saveButton.addEventListener('click', function () {
+        let verif = 1
+        verif = validateForm();
+        if (verif == 1) {
+            const firstName = document.getElementById('firstName');
+            const lastName = document.getElementById('lastName');
+            const userName = document.getElementById('username');
+            const email = document.getElementById('email');
+            const profilePicture = document.getElementById('profilePic');
+            let url = "https://localhost:8000/users/<int:user_id>/edit";
+            url = url.replace("localhost", window.location.hostname); var xhr = new XMLHttpRequest();
+            url = url.replace("<int:user_id>", id);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', url, false);
+            xhr.withCredentials = true;
+            formData = new FormData();
+            console.log(profilePicture);
+            formData.append("avatar", profilePicture.files[0]);
+            formData.append("username", userName.value);
+            formData.append("email", email.value);
+            formData.append("first_name", firstName.value);
+            formData.append("last_name", lastName.value);
+            console.log(formData);
+            xhr.send(formData);
+            saveButton.innerHTML = 'save with sucess!';
+            saveButton.classList.add('sucess-saving');
+            sleep(1000).then(() => {
+                saveButton.innerHTML = 'save changement';
+                saveButton.classList.remove('sucess-saving');
+            });
+        }
+        else {
+            console.log('error');
+        }
+    });
+}
+
+
+
+email.classList.add('error');
+emailSpan.style.color = 'var(--accent)';
