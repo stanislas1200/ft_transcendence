@@ -73,8 +73,6 @@
         }
 
         // Chat functionality
-        const roomName = "Oldroom";  // Adjust room name dynamically as needed
-        
         function getCookie(name) {
             var value = "; " + document.cookie;
             var parts = value.split("; " + name + "=");
@@ -92,7 +90,7 @@
             currentRecipient = recipientInput.value;
             recipientResult.textContent = "Message will be sent to: " + currentRecipient;
             chatSocket = new WebSocket(
-                'wss://' + window.location.host + '/ws/chat/' + roomName + '/' + getCookie("userId") + '/' + currentRecipient + '/'
+                'wss://' + window.location.host + '/ws/chat/' + getCookie("userId") + '/' + currentRecipient + '/' + getCookie("token") + '/'
             );
             connect_to_chat();
         });

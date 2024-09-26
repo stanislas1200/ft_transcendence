@@ -4,3 +4,4 @@ channels==4.0.0
 channels-redis==4.0.0
 psycopg[binary]
 uvicorn[standard]
+requests

@@ -5,17 +5,22 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth.models import User
 from .views import get_user
 from asgiref.sync import sync_to_async
+import requests 
 
 
 class TChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.userId = self.scope["url_route"]["kwargs"]["UserId"] #get user id
         recipient   = self.scope["url_route"]["kwargs"]["Recipient"]
+        token       = self.scope["url_route"]["kwargs"]["token"]
         print("=======Recipient: " + recipient, flush=True)
+        print("+=====token: " + token, flush=True)
         # if not (recipient):
         #     recipient = "Guigz"
         user = await sync_to_async(get_user)(self.userId) #get user name
         # recipient_exist = await sync_to_async(get_user)(recipient) # get destinataire
+        # cookies = dict(cookies_are='token')
+        # print(f'Token being sent: {cookies}')
         try:    
             recipient_id = await sync_to_async(User.objects.get)(username=recipient)
         except User.DoesNotExist:
@@ -25,21 +30,15 @@ class TChatConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(message))
             await self.close()
             return
-            # self.chat_group_name = str(self.userId)
-            # await self.channel_layer.group_add(
-            #     self.chat_group_name,
-            #     self.channel_name
-            # )
-            # messages = f'no user found called: \"{recipient}\"'
-            # await self.channel_layer.group_send(
-            # self.chat_group_name,
-            # {
-            #     'type': 'update_message_state',
-            #     'message': {'message': messages}
-            # }
-            # )
-            # return
-            
+
+
+        try:
+            response = requests.get('https://auth-service:8000/list_blocked_user/', cookies={'token': token, 'userId': self.userId}, verify=False)#, params={'UserId': self.userId}) # TODO verify token instead #verify false for self signed
+            # response = requests.get('https://127.0.0.1:8000/list_blocked_user/', cookies=cookies, verify=False)#, params={'UserId': self.userId}) # TODO verify token instead #verify false for self signed
+            print(f"Reponse blocklist: {response.text}", flush=True)
+        except requests.exceptions.RequestException as e: # TODO : remove http (used for processing)
+            print(f"HTTPS request failed: {e}, trying HTTP")
+
         print("=======Recipient_id: " + str(recipient_id.id), flush=True)
         print("---------UserName: " + user.username, flush=True)
         
