@@ -9,8 +9,6 @@ from asgiref.sync import sync_to_async
 
 class TChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        if (self.connect)
-            await self.close
         self.userId = self.scope["url_route"]["kwargs"]["UserId"] #get user id
         recipient   = self.scope["url_route"]["kwargs"]["Recipient"]
         print("=======Recipient: " + recipient, flush=True)
@@ -46,19 +44,23 @@ class TChatConsumer(AsyncWebsocketConsumer):
         print("---------UserName: " + user.username, flush=True)
         
         if (user.username <= recipient):
-            self.chat_group_name = user.username + recipient
+            group_name = user.username + recipient
         else:
-            self.chat_group_name = recipient + user.username
-        print("==--== chat_group_name: " + self.chat_group_name, flush=True)
+            group_name = recipient + user.username
+        print("==--== chat_group_name: " + group_name, flush=True)
         # self.chat_group_name = f'chat_1' #to change to user + destinataire
-        
+       
+        # current_channels = await self.channel_layer.groups_channels(group_name)
+        # if (any(group_name == channel for channel in current_channels)):
+        #     print("Oui", flush=True)
+
+        self.chat_group_name = group_name
         # user = User.objects.get(id=userId)
 
         await self.channel_layer.group_add(
             self.chat_group_name,
             self.channel_name
         )
-        print("yo", flush=True)
         await self.accept()
 
     async def disconnect(self, close_code):

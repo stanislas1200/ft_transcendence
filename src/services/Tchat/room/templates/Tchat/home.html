@@ -24,7 +24,7 @@
 <body>
 
     <h2>Chat Room</h2>
-    
+    <h3 id="username"></h3>
     <!-- Recipient form -->
     <div class="form-container">
         <h3>Send a Message to a Recipient</h3>
@@ -46,9 +46,32 @@
         const recipientForm = document.getElementById('recipientForm');
         const recipientInput = document.getElementById('recipient');
         const recipientResult = document.getElementById('recipientResult');
+        // const usernameH3 = document.getElementById('username');
         let currentRecipient = 'Unknowed';
+        let chatSocket = null;
 
-        
+        loadProfile();
+        function loadProfile() {
+            const userName = document.getElementById('username');
+            var response;
+            let url = "https://localhost:8000/me";
+            url = url.replace("localhost", window.location.hostname); var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.withCredentials = true;
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200 || xhr.status === 201) {
+                        response = JSON.parse(xhr.responseText);
+                        userName.textContent = response.username;
+                    } else {
+                        alert('Error: ' + JSON.parse(xhr.responseText).error);
+                    }
+                }
+            };
+            xhr.send();
+        }
+
         // Chat functionality
         const roomName = "Oldroom";  // Adjust room name dynamically as needed
         
@@ -64,6 +87,8 @@
             
         recipientForm.addEventListener('submit', function(e) {
             e.preventDefault(); // Prevent page reload
+            if (chatSocket)
+                chatSocket.close(1000, "new conversation");
             currentRecipient = recipientInput.value;
             recipientResult.textContent = "Message will be sent to: " + currentRecipient;
             chatSocket = new WebSocket(
