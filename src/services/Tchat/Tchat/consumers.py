@@ -7,6 +7,8 @@ from .views import get_user
 from asgiref.sync import sync_to_async
 import requests 
 
+# def blocked(user):
+#     return user.blocked
 
 class TChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -31,9 +33,14 @@ class TChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
+        # blockeds = await sync_to_async(blocked)(user)
+        print("OOOOOOOOEEEEEEEEEE", flush=True)
 
+        # blockedlist = await sync_to_async(user.blocked)
+        # print(blockeds, flush=True)
+        # print(recipient_id.blocked, flush=True)
         try:
-            response = requests.get('https://auth-service:8000/list_blocked_user/', cookies={'token': token, 'userId': self.userId}, verify=False)#, params={'UserId': self.userId}) # TODO verify token instead #verify false for self signed
+            response = requests.get('https://auth-service:8000/list_blocked_user/', cookies={'token': token, 'userId': str(recipient_id.id)}, verify=False)#, params={'UserId': self.userId}) # TODO verify token instead #verify false for self signed
             # response = requests.get('https://127.0.0.1:8000/list_blocked_user/', cookies=cookies, verify=False)#, params={'UserId': self.userId}) # TODO verify token instead #verify false for self signed
             print(f"Reponse blocklist: {response.text}", flush=True)
         except requests.exceptions.RequestException as e: # TODO : remove http (used for processing)

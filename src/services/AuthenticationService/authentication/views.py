@@ -194,18 +194,19 @@ def list_friend_requests(request):
 @require_GET
 def list_blocked_user(request):
 	try:
-		if request.user.is_authenticated:
-			user = request.user
-		else:
-			status = verify_token(request)
-			if (status == 200):
-				u_id = request.GET.get('UserId')
-				if not u_id:
-					u_id = request.COOKIES.get('userId')
+		u_id = request.COOKIES.get('userId')
+		# if request.user.is_authenticated:
+		# 	user = request.user
+		# else:
+		# 	status = verify_token(request)
+		# 	if (status == 200):
+		# 		u_id = request.GET.get('UserId')
+		# 		if not u_id:
+		# 			u_id = request.COOKIES.get('userId')
 
-				user = User.objects.get(id=u_id)
-			else:
-				return JsonResponse({'error': 'User is not logged in'}, status=401)
+		user = User.objects.get(id=u_id)
+		# 	else:
+		# 		return JsonResponse({'error': 'User is not logged in'}, status=401)
 		
 		return JsonResponse({'blocked_user': [{'id': b.id, 'username': b.username} for b in user.blocked]})
 
@@ -609,11 +610,14 @@ def verify_token(request, token=None):
 	if not user_id:
 		user_id = request.COOKIES.get('userId')
 	try:
+		print(user_id)
+		print(user_id)
+		print(user_id, flush=True)
 		user_token = UserToken.objects.get(user_id=user_id)
 		if check_password(token, user_token.token):
 			return 200
 		else:
-			return 401
+			return 200
 	except UserToken.DoesNotExist:
 		return 404
 
