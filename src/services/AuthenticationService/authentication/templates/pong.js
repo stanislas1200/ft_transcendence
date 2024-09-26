@@ -96,7 +96,7 @@ function connect() {
 	});
 }
 
-game = 'tron'
+game = 'pong'
 players = []
 c = document.getElementById('c').getContext('2d')
 c.fillStyle = "#FFF"

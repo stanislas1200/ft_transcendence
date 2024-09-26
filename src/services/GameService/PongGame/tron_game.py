@@ -6,28 +6,40 @@ from asgiref.sync import sync_to_async
 party_list = {}
 
 class Party:
-	def __init__(self, prop, id):
+	def __init__(self, prop, id, user, token):
 		self.game_id = id
 		self.player_number = prop.playerNumber
 		players = prop.players.all()
-		self.players = [self.get_player_info(player) for player in players]
+		self.players = []
+		self.add_player(players, user, token)
 		self.state = 'waiting' # TODO : check
 		self.players = sorted(self.players, key=lambda x: x['n'])
 		self.date = prop.start_date
 
-	def add_player(self, players):
-		self.players = [self.get_player_info(player) for player in players]
+	def add_player(self, players, user, token):
+		player_found = False
+		for player in players:
+			player_info = self.get_player_info(player)
+			for existing_player in self.players:
+				if player.player == user and existing_player['id'] == player_info['id']:
+					player_found = True
+					existing_player['token'] = token
+					break
+			
+			if not player_found and player.player == user:
+				self.players.append(self.get_player_info(player, token))
+				break
 
-	def get_player_info(self, player):
+	def get_player_info(self, player, token):
 		return {
 			'name': player.player.username,
 			'id': player.id,
-			'token': player.token,
+			'token': token,
 			'n': player.n,
 			'x': player.n * 100,
 			'y': 0 if player.n // 2 else 600,
 			'trail': [],
-			'direction': "down" if player.n // 2 else "up",
+			'direction': "doDwn" if player.n // 2 else "uDp",
 			'alive': True,
 			'color': ['red', 'green', 'yellow'][player.n-1],
 			'ai': False
@@ -72,7 +84,7 @@ class Party:
 				m.next_match.game.players.add(player.player)
 				m.next_match.game.gameProperty.players.add(player)
 
-def setup_tron(game_id, player):
+def setup_tron(game_id, player, token):
 	party = party_list.get(game_id)
 	if party and party.state == 'playing':
 		setting = "{ 'obstacles': party.map, }"
@@ -86,12 +98,12 @@ def setup_tron(game_id, player):
 		prop = game.gameProperty
 		if not party:
 			prop.start_date = game.start_date
-			party = Party(prop, game_id)
+			party = Party(prop, game_id, player, token)
 			# if party.player_number == 1: # TODO : ai
 			# 	party.add_ai_player()
 			party_list[game_id] = party
 		else:
-			party.add_player(prop.players.all())
+			party.add_player(prop.players.all(), player, token)
 
 		if party.player_number <= prop.players.count() and prop.players.filter(player__id=player.id):
 			party.state = 'playing'

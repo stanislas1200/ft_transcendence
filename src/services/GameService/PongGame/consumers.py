@@ -48,9 +48,9 @@ class GameConsumer(AsyncWebsocketConsumer):
 		if player:
 			# TODO : check game time or tournament 
 			if game.gameName == 'pong':
-				setting = await sync_to_async(setup)(self.game_id, player)
+				setting = await sync_to_async(setup)(self.game_id, player, self.token)
 			elif game.gameName == 'tron':
-				setting = await sync_to_async(setup_tron)(self.game_id, player)
+				setting = await sync_to_async(setup_tron)(self.game_id, player, self.token)
 
 			data = {
 				"message": "Setup",

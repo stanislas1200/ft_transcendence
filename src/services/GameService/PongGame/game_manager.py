@@ -118,7 +118,7 @@ def make_map3():
 	maps[3] = map3 
 
 class Party:
-	def __init__(self, prop, id):
+	def __init__(self, prop, id, user, token):
 		self.game_id = id
 		self.width = prop.width
 		self.height = prop.height
@@ -126,7 +126,8 @@ class Party:
 		self.positions = prop.playerPositions
 		self.player_number = prop.playerNumber
 		players = prop.players.all()
-		self.players = [self.get_player_info(player) for player in players]
+		self.players = [self.get_player_info(player, token) for player in players]
+		self.add_player(players, user, token)
 		self.state = 'waiting'
 		self.score = prop.maxScore
 		self.player_speed = prop.paddleSpeed
@@ -143,21 +144,47 @@ class Party:
 		self.date = prop.start_date
 		self.last_hit = 0
 
-	def add_player(self, players):
-		self.players = [self.get_player_info(player) for player in players]
+	def add_player(self, players, user, token):
+		# for player in players:
+		# 	if player.player == user and self.get_player_info(player, token) not in self.players:
+		# 		self.players.append(self.get_player_info(player, token))
+		# 		break
+		# self.players = [self.get_player_info(player) for player in players]
+		player_found = False
+		for player in players:
+			print(player)
+			player_info = self.get_player_info(player)
+			for existing_player in self.players:
+				print(existing_player)
+				print(player_info, flush=True)
+				if player.player == user and existing_player['id'] == player_info['id']:
+					player_found = True
+					print("edit token", flush= True)
+					existing_player['token'] = token
+					break
+			
+			if not player_found and player.player == user:
+				print("add player", flush= True)
+				self.players.append(self.get_player_info(player, token))
+				print(self.players, flush=True)
+				break
 
-	def get_player_info(self, player):
+	def get_player_info(self, player, token=None):
 		return {
 			'name': player.player.username,
 			'id': player.id,
 			'score': player.score,
-			'token': player.token,
+			'token': token,
 			'n': player.n,
 			'hit': 0,
 			'ai': False
 		}
 
-	def add_ai_player(self):
+	def add_ai_player(self, players):
+		for player in players:
+			if player.player.username == 'AI':
+				self.players.append(self.get_player_info(player, 'AI'))
+				break
 		# self.players.append({
 		# 	'name': 'AI',
 		# 	'id': 0,
@@ -210,7 +237,7 @@ class Party:
 				if (not m.next_match): #TODO : end tournament
 					return
 
-				player = PongPlayer.objects.create(player=winner.player, score=0, n=1, token=winner.token) # TODO : n
+				player = PongPlayer.objects.create(player=winner.player, score=0, n=1) # TODO : n
 				m.next_match.game.players.add(player.player)
 				m.next_match.game.gameProperty.players.add(player)
 			else:
@@ -223,7 +250,7 @@ class Party:
 
 party_list = {}
 
-def setup(game_id, player):
+def setup(game_id, player, token):
 	party = party_list.get(game_id)
 	# if party:
 	# 	setting = {
@@ -246,12 +273,12 @@ def setup(game_id, player):
 			prop.start_date = game.start_date
 			if not prop.ball:
 				prop.ball = {'x': prop.width/2, 'y': prop.height/2, 'dx': prop.ballSpeed, 'dy': prop.ballSpeed}
-			party = Party(prop, game_id)
+			party = Party(prop, game_id, player, token)
 			if party.player_number == 1:
-				party.add_ai_player()
+				party.add_ai_player(prop.players.all())
 			party_list[game_id] = party
 		else:
-			party.add_player(prop.players.all())
+			party.add_player(prop.players.all(), player, token)
 
 		if party.player_number <= prop.players.count() and prop.players.filter(player__id=player.id):
 			party.state = 'playing'

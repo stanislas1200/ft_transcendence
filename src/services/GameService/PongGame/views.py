@@ -120,7 +120,7 @@ def join_tournament(request, tournament_id):
 
     tournament = Tournament.objects.get(id=tournament_id)
     if tournament.players.count() < tournament.max_player:
-        player = PongPlayer.objects.create(player=player, score=0, n=1, token=token)
+        player = PongPlayer.objects.create(player=player, score=0, n=1)
         tournament.players.add(player)
         message = "Joined tournament"
         if tournament.players.count() == tournament.max_player:
@@ -315,7 +315,7 @@ def join_game(request):
             return JsonResponse({'error': 'Game is not waiting for players'}, status=400)
 
         game.players.add(player)  # Add the player to the game
-        player = PongPlayer.objects.create(player=player, score=0, n=game.players.count(), token=token)
+        player = PongPlayer.objects.create(player=player, score=0, n=game.players.count())
         game.gameProperty.players.add(player)
         game.status = 'playing' if game.players.count() >= game.gameProperty.playerNumber else 'waiting'
         game.save()
@@ -343,7 +343,7 @@ def startPong(request, player, token, gameType):
     party_name = request.POST.get('partyName', 'pong')
     game = Game.objects.create(gameName='pong', gameProperty=pong, start_date=timezone.now(), party_name=party_name)
     game.players.add(player)
-    player = PongPlayer.objects.create(player=player, score=0, n=1, token=token)
+    player = PongPlayer.objects.create(player=player, score=0, n=1)
     game.gameProperty.players.add(player)
 
     # Ai user
@@ -354,7 +354,7 @@ def startPong(request, player, token, gameType):
             player = User.objects.get(username='AI')
 
         game.players.add(player)
-        player = PongPlayer.objects.create(player=player, score=0, n=2, token='AI')
+        player = PongPlayer.objects.create(player=player, score=0, n=2)
         game.gameProperty.players.add(player)
 
     game.status = 'waiting' if int(playerNumber) > 1 else 'playing'
@@ -383,7 +383,7 @@ def startTron(request, player, token, gameType):
     party_name = request.POST.get('partyName', 'tron')
     game = Game.objects.create(gameName='tron', gameProperty=tron, start_date=timezone.now(), party_name=party_name)
     game.players.add(player)
-    player = PongPlayer.objects.create(player=player, score=0, n=1, token=token)
+    player = PongPlayer.objects.create(player=player, score=0, n=1)
     game.gameProperty.players.add(player)
 
     game.status = 'waiting' if int(playerNumber) > 1 else 'playing'

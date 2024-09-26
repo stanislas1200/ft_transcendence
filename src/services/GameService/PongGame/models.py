@@ -18,7 +18,6 @@ class PlayerGameTypeStats(models.Model):
 class PongPlayer(models.Model):
     player = models.ForeignKey(User, on_delete=models.CASCADE)
     score = models.IntegerField(default=0)
-    token = models.CharField(max_length=255)  # TODO : remove token from here
     n = models.IntegerField(default=0)
 
 def get_default_player_positions():
