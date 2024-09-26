@@ -285,7 +285,9 @@ def join_game(request):
         session_key = request.session.session_key
         game_id = request.GET.get('gameId')
         game_name = request.GET.get('gameName')
-        if not game_id and not game_name:
+        game_mode = request.GET.get('gameMode')
+        player_number = request.GET.get('nbPlayers')
+        if not game_id and not game_name and not game_mode and not player_number:
             return JsonResponse({'error': 'Missing field'}, status=400)
         token = request.COOKIES.get('token')
         user_id = request.COOKIES.get('userId')
@@ -298,11 +300,18 @@ def join_game(request):
         # Check if a player is already in a game # TODO : check waiting and playing and for start_game() 
         # if Game.objects.filter(status='waiting', players__in=[player]).exists():
         #     return JsonResponse({'error': 'Player already in a game'}, status=400)
+
+        # if game_name == 'pong':
+        #     content_type = ContentType.objects.get_for_model(Pong)
         
         if game_id:
             game = Game.objects.get(id=game_id)  # Get the game
         else:
-            game = Game.objects.filter(gameName=game_name, status='waiting').order_by('?').first() # Get random game
+            games = Game.objects.filter(gameName=game_name, status='waiting').order_by('?') # Get random game
+            game = None
+            for g in games:
+                if g.gameProperty.gameMode == game_mode:
+                    game = g
             if not game:
                 return start_game(request, game_name) # No game found, create one # TODO : use and check passed param in join like create
                 

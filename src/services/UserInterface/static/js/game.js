@@ -92,7 +92,7 @@ function randomJoinGameButton() {
         var xhr = new XMLHttpRequest();
         var url = "https://" + window.location.hostname + ":8001/game/join?gameName=pong&gameMode=" + gameModeSelect.value + "&nbPlayers=" + maxPlayersSelectRandom.value;
         xhr.withCredentials = true;
-        xhr.open("GET", url, true);
+        xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4)
