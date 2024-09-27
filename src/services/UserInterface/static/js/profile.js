@@ -29,7 +29,7 @@ function searchUser() {
 
     searchButton.addEventListener('click', function () {
         // console.log('clique');
-        console.log(searchValue.value);
+        // console.log(searchValue.value);
 
         let url = "https://localhost:8001/game/search?page=1&query=sgodin&filter=user/game";
         url = url.replace("localhost", window.location.hostname);
@@ -43,9 +43,11 @@ function searchUser() {
                 if (xhr.status === 200 || xhr.status === 201) {
                     response = JSON.parse(xhr.responseText);
                     if (response.users.length == 1) {
-                        // console.log('yo');
-                        // console.log(response.users[0].id);
                         loadHistoryFromUser(response.users[0].id);
+                    } else if (response.users.length > 0) {
+                        let foundUser = response.users.find(users => users.username === searchValue.value);
+                        if (foundUser)
+                            loadHistoryFromUser(foundUser.id);
                     }
                 } else {
                     alert('Error: ' + JSON.parse(xhr.responseText).error);
@@ -57,6 +59,8 @@ function searchUser() {
 }
 
 function loadHistoryFromUser(id) {
+    console.log('user found');
+    console.log(id);
     let url = "https://localhost:8001/game/hist?UserId={{UserId}}";
     url = url.replace("localhost", window.location.hostname);
     url = url.replace("{{UserId}}", id);
