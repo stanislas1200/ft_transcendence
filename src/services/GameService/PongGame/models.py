@@ -39,6 +39,10 @@ class Tron(models.Model):
     players = models.ManyToManyField(PongPlayer)
     playerNumber = models.IntegerField(default=1)
 
+class GAM(models.Model):
+    players = models.ManyToManyField(PongPlayer)
+    playerNumber = models.IntegerField(default=1)
+
 
 class Game(models.Model):
     players = models.ManyToManyField(User)

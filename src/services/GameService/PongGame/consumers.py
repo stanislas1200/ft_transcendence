@@ -7,6 +7,7 @@ from asgiref.sync import sync_to_async
 # from .models import Game
 from .game_manager import setup, get_n, update_pong, get_pong_state, move_pong, setup
 from .tron_game import update_tron, get_tron_state, setup_tron, get_tron_n, move_tron
+from .gun_and_monsters import setup_gam, move_gam, get_gam_state, get_gam_n, update_gam
 from .models import Game
 
 from .views import get_player
@@ -51,6 +52,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 				setting = await sync_to_async(setup)(self.game_id, player, self.token)
 			elif game.gameName == 'tron':
 				setting = await sync_to_async(setup_tron)(self.game_id, player, self.token)
+			elif game.gameName == 'gun_and_monsters':
+				setting = await sync_to_async(setup_gam)(self.game_id, player, self.token)
 
 			data = {
 				"message": "Setup",
@@ -90,6 +93,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 			elif self.game == 'tron':
 				ret, game_id = await update_tron(self.game_id) or (None, None)
 				game_state = get_tron_state(self.game_id)
+			elif self.game == 'gun_and_monsters':
+				ret, game_id = await update_gam(self.game_id) or (None, None)
+				game_state = get_gam_state(self.game_id)
+			
 
 			await self.channel_layer.group_send(
 				self.game_group_name,
@@ -112,15 +119,20 @@ class GameConsumer(AsyncWebsocketConsumer):
 			data = json.loads(text_data)
 			# if self.game == 'pong':
 			direction = data['direction']
+			# direction = None
 			token = data['token']
 			if not token or not direction:
 				return self.send(text_data=json.dumps({
 					'error': 'Invalid message'
 				}))
+			
 			if self.game == 'pong':
 				n = get_n(self.game_id, token)
 			elif self.game == 'tron':
 				n = get_tron_n(self.game_id, token)
+			elif self.game == 'gun_and_monsters':
+				n = get_gam_n(self.game_id, token)
+
 			if not n:
 				return self.send(text_data=json.dumps({
 					'error': 'Not a player'
@@ -129,6 +141,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 				move_pong(self.game_id, n, direction)
 			elif self.game == 'tron':
 				move_tron(self.game_id, n, direction)
+			elif self.game == 'gun_and_monsters':
+				move_gam(self.game_id, n, data['x'], data['y'])
 
 		except Exception as e:
 			print(e)

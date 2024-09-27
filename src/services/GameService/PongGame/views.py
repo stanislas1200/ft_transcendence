@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, Tournament, Match, Tron, GameType, UserAchievement, Achievement
+from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, Tournament, Match, Tron, GameType, UserAchievement, Achievement, GAM
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST, require_GET
 from django.forms.models import model_to_dict
@@ -403,6 +403,27 @@ def startTron(request, player, token, gameType, gameMode, playerNumber):
     game.save()
     return JsonResponse({'message': 'Game started', 'game_id': game.id})
     
+def startGAM(request, player, token, gameType, gameMode, playerNumber):
+    if not playerNumber:
+        playerNumber = request.POST.get('playerNumber', 1) # TODO : check default 1 or error ?
+
+    if not playerNumber or not gameType:
+        return JsonResponse({'error': 'Missing setting'}, status=400)
+    if int(playerNumber) < 1:
+        return JsonResponse({'error': 'Invalid player number'}, status=400)
+
+    gam = GAM.objects.create(playerNumber=playerNumber)
+    party_name = request.POST.get('partyName', 'gun_and_monsters')
+    game = Game.objects.create(gameName='gun_and_monsters', gameProperty=gam, start_date=timezone.now(), party_name=party_name)
+    game.players.add(player)
+    player = PongPlayer.objects.create(player=player, score=0, n=1)
+    game.gameProperty.players.add(player)
+
+    game.status = 'waiting' if int(playerNumber) > 1 else 'playing'
+
+    game.save()
+    return JsonResponse({'message': 'Game started', 'game_id': game.id})
+    
 # @require_POST
 @csrf_exempt # Disable CSRF protection for this view
 # create a game party
@@ -429,6 +450,8 @@ def start_game(request, gameName=None, gameMode=None, playerNumber=None):
         return startPong(request, player, token, gameType, gameMode, playerNumber)
     elif gameName == 'tron':
         return startTron(request, player, token, gameType, gameMode, playerNumber)
+    elif gameName == 'gun_and_monsters':
+        return startGAM(request, player, token, gameType, gameMode, playerNumber)
     else:
         return JsonResponse({'error': 'Game not found'}, status=404)
     # except:
@@ -559,9 +582,9 @@ def list_achievements(request):
         if not User.objects.filter(id=user_id).exists():
             return JsonResponse({'error': 'Player not found'}, status=404)
         
+        user = User.objects.get(id=user_id)
         # TODO : remove this
         # test create and add achievement
-        user = User.objects.get(id=user_id)
         ach, created = Achievement.objects.get_or_create(name='list achievements', description='list all achievements', points=0)
         UserAchievement.objects.get_or_create(user=user, achievement=ach)
         # end test

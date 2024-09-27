@@ -678,6 +678,8 @@ def get_game_page(request):
 	return HttpResponse(data)
 
 def get_js(request):
-	with open(os.path.join(os.path.dirname(__file__), 'templates/pong.js'), 'r') as file:
+	with open(os.path.join(os.path.dirname(__file__), 'templates/GAM.js'), 'r') as file:
 		data = file.read()
+	# with open(os.path.join(os.path.dirname(__file__), 'templates/pong.js'), 'r') as file:
+	# 	data = file.read()
 	return HttpResponse(data, content_type='text/javascript')
