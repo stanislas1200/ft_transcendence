@@ -14,9 +14,9 @@ class TChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.userId = self.scope["url_route"]["kwargs"]["UserId"] #get user id
         recipient   = self.scope["url_route"]["kwargs"]["Recipient"]
-        token       = self.scope["url_route"]["kwargs"]["token"]
+        self.token       = self.scope["url_route"]["kwargs"]["token"]
         print("=======Recipient: " + recipient, flush=True)
-        print("+=====token: " + token, flush=True)
+        print("+=====token: " + self.token, flush=True)
         # if not (recipient):
         #     recipient = "Guigz"
         user = await sync_to_async(get_user)(self.userId) #get user name
@@ -40,11 +40,20 @@ class TChatConsumer(AsyncWebsocketConsumer):
         # print(blockeds, flush=True)
         # print(recipient_id.blocked, flush=True)
         try:
-            response = requests.get('https://auth-service:8000/list_blocked_user/', cookies={'token': token, 'userId': str(recipient_id.id)}, verify=False)#, params={'UserId': self.userId}) # TODO verify token instead #verify false for self signed
-            # response = requests.get('https://127.0.0.1:8000/list_blocked_user/', cookies=cookies, verify=False)#, params={'UserId': self.userId}) # TODO verify token instead #verify false for self signed
+            response = requests.get('https://auth-service:8000/list_blocked_user/', cookies={'token': self.token, 'userId': str(recipient_id.id)}, verify=False)
             print(f"Reponse blocklist: {response.text}", flush=True)
-        except requests.exceptions.RequestException as e: # TODO : remove http (used for processing)
-            print(f"HTTPS request failed: {e}, trying HTTP")
+            # block_list = json.loads(response.text)
+            block_list = response.json()
+            for users in block_list['blocked_user']:
+                print(users['username'], flush=True)
+            print(block_list['blocked_user'])
+            for users in block_list['blocked_user']:
+                print("continue " + user.username, flush=True)
+                print(users['username'], flush=True)
+                if (users['username'] == user.username):
+                    print("KOIIIIII", flush=True)
+        except requests.exceptions.RequestException as e:
+            print(f"Block list request failed: {e}")
 
         print("=======Recipient_id: " + str(recipient_id.id), flush=True)
         print("---------UserName: " + user.username, flush=True)
@@ -68,6 +77,12 @@ class TChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
+
+    # async def _check_if_recipient_is_blocked(self, recipient_id):
+    #     url = 'https://auth-service:8000/list_blocked_user/'
+    #     try:
+    #         response = requests.get(url, cookies={'token': self.token, 'userId': str(recipient_id.id)}, verify=False)
+    #     pass
 
     async def disconnect(self, close_code):
         self.close()
