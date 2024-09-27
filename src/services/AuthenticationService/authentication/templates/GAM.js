@@ -153,21 +153,6 @@ function gameLoop() {
 	requestAnimationFrame(gameLoop);
 }
 
-window.addEventListener('keydown', (e) => {
-	if (e.key === 'ArrowUp') player.speed = 2;
-	if (e.key === 'z') player.speed = 2;
-	if (e.key === 'ArrowDown') player.speed = -2;
-	if (e.key === 's') player.speed = -2;
-	if (e.key === 'ArrowLeft') player.speedX = -2; // Move left
-    if (e.key === 'q') player.speedX = -2; // Move left
-	if (e.key === 'ArrowRight') player.speedX = 2; // Move right
-    if (e.key === 'd') player.speedX = 2; // Move right
-});
-
-window.addEventListener('keyup', (e) => {
-	if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'z' || e.key === 's') player.speed = 0;
-	if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'q' || e.key === 'd') player.speedX = 0; // Stop moving left/right
-});
 
 document.addEventListener('mousemove', (event) => {
     let sensitivity = 0.005; // Adjust sensitivity as needed
@@ -183,8 +168,6 @@ canvas.onclick = function() {
 };
 
 gameLoop();
-
-
 
 function getCookie(name) {
 	var value = "; " + document.cookie;
@@ -219,6 +202,8 @@ function connect() {
 
 		// Update ball position and direction
     players = serverMessage.players;
+    player.x = players[0].x;
+    player.y = players[0].y;
 	});
 
 	socket.addEventListener('close', function (event) {
@@ -229,12 +214,20 @@ function connect() {
 		console.log('Error: ', event);
 	});
 
-	document.addEventListener('keydown', function (event) {
-
+  
+  document.addEventListener('keydown', (e) => {
 		if (socket) {
 			var sessionId = getCookie('sessionid');
 			var token = getCookie('token');
-			socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', x:  player.x, y:  player.y, token: token, direction: 'nope' }));
+			socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', k: e.key, token: token, direction: 'down', angle: player.angle }));
 		}
-	});
+  });
+
+  document.addEventListener('keyup', (e) => {
+		if (socket) {
+			var sessionId = getCookie('sessionid');
+			var token = getCookie('token');
+			socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', k: e.key, token: token, direction: 'up', angle: player.angle }));
+		}
+  });
 }

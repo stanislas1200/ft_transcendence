@@ -142,7 +142,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			elif self.game == 'tron':
 				move_tron(self.game_id, n, direction)
 			elif self.game == 'gun_and_monsters':
-				move_gam(self.game_id, n, data['x'], data['y'])
+				move_gam(self.game_id, n, data['k'], direction, data['angle'])
 
 		except Exception as e:
 			print(e)

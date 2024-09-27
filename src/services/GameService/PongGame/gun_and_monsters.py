@@ -36,8 +36,11 @@ class Party:
 			'id': player.id,
 			'token': token,
 			'n': player.n,
-			'x': player.n * 100,
-			'y': 0 if player.n // 2 else 600,
+			'x': TILE_SIZE * 2,
+			'y': TILE_SIZE * 2,
+			'angle': 0,
+			'speed': 0,
+			'speedX': 0,
 			'alive': True,
 			'hp': 100,
 			'ai': False
@@ -118,6 +121,8 @@ map = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 
+import math
+TILE_SIZE = 64;
 async def update_gam(game_id):
 	"""Update the game state and handle player movement"""
 	if game_id not in party_list:
@@ -125,6 +130,20 @@ async def update_gam(game_id):
 	game = party_list[game_id]
 	if game.state != 'playing':
 		return
+	
+	for player in game.players:
+		if player['alive']:
+			newX = player['x'] - math.sin(player['angle']) * player['speedX'] + math.cos(player['angle']) * player['speed'];
+			newY = player['y'] + math.cos(player['angle']) * player['speedX'] + math.sin(player['angle']) * player['speed'];
+
+			mapX = math.floor(newX / TILE_SIZE);
+			mapY = math.floor(newY / TILE_SIZE);
+
+			if (map[math.floor(player['y'] / TILE_SIZE)][mapX] != 1):
+				player['x'] = newX;
+
+			if (map[mapY][math.floor(player['x'] / TILE_SIZE)] != 1):
+				player['y'] = newY;
 	
 
 def get_gam_n(id, token):
@@ -155,11 +174,37 @@ def get_gam_state(game_id):
 	}
 	return game_state
 
-def move_gam(game_id, n, x, y):
+def keyDown(game, n, k):
+	if (k == 'ArrowUp'): 
+		game.players[n-1]['speed']= 2
+	if (k == 'z'): 
+		game.players[n-1]['speed']= 2
+	if (k == 'ArrowDown'): 
+		game.players[n-1]['speed']= -2
+	if (k == 's'): 
+		game.players[n-1]['speed']= -2
+	
+	if (k == 'ArrowLeft'): 
+		game.players[n-1]['speedX'] = -2
+	if (k == 'q'): 
+		game.players[n-1]['speedX'] = -2
+	if (k == 'ArrowRight'): 
+		game.players[n-1]['speedX'] = 2
+	if (k == 'd'): 
+		game.players[n-1]['speedX'] = 2
+
+def keyUp(game, n, k):
+	if (k == 'ArrowUp' or k == 'z' or k == 'ArrowDown' or k == 's'): 
+		game.players[n-1]['speed']= 0
+	if (k == 'ArrowLeft' or k == 'q' or k == 'ArrowRight' or k == 'd'): 
+		game.players[n-1]['speedX'] = 0
+
+def move_gam(game_id, n, k, direction, angle):
 	game = party_list.get(game_id)
 	if not game:
 		return
-	game.players[n-1]['x'] = x
-	print(game.players[n-1]['x'])
-	game.players[n-1]['y'] = y
-	print(game.players[n-1]['y'], flush=True)
+	game.players[n-1]['angle'] = angle
+	if direction == 'down':
+		keyDown(game, n, k)
+	elif direction == 'up':
+		keyUp(game, n, k)
