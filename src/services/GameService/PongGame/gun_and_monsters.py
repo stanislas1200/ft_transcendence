@@ -121,8 +121,16 @@ map = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 
-import math
 TILE_SIZE = 64;
+monsters = [
+    {"x": TILE_SIZE * 2, "y": TILE_SIZE * 2, "hp": 100}
+]
+
+# def update_monsters(game):
+# 	for monster in monsters:
+		# TODO : monster movement and attack
+
+import math
 async def update_gam(game_id):
 	"""Update the game state and handle player movement"""
 	if game_id not in party_list:
@@ -144,8 +152,8 @@ async def update_gam(game_id):
 
 			if (map[mapY][math.floor(player['x'] / TILE_SIZE)] != 1):
 				player['y'] = newY;
+	# update_monsters(game)
 	
-
 def get_gam_n(id, token):
 	game = party_list.get(id)
 	if game is None:
@@ -170,7 +178,8 @@ def get_gam_state(game_id):
 
 	game_state = {
 		'state': game.state,
-		'players': [dict_player(player) for player in game.players]
+		'players': [dict_player(player) for player in game.players],
+		'monsters': monsters,
 	}
 	return game_state
 

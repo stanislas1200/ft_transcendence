@@ -66,6 +66,10 @@ const player = {
   speedX: 0
 };
 
+var players = []
+
+var monsters = []
+
 function castRay(angle) {
   let sin = Math.sin(angle);
   let cos = Math.cos(angle);
@@ -120,6 +124,26 @@ function movePlayer()  {
     }
 }
 
+function drawEntity(x, y, entity) {
+  const dx = x - player.x;
+  const dy = y - player.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  const size = 10000 / distance; // Arbitrary scaling factor for size
+
+  let angleToE = Math.atan2(dy, dx) - player.angle;
+  
+  angleToE = (angleToE + 2 * Math.PI) % (2 * Math.PI);
+  if (angleToE > Math.PI) angleToE -= 2 * Math.PI;
+  
+  const eScreenX = canvas.width / 2 + (angleToE / FOV) * canvas.width;
+
+  if (Math.abs(angleToE) < FOV / 2) {
+      if (entity === 'monster') ctx.fillStyle = 'red';
+      else ctx.fillStyle = 'green';
+      ctx.fillRect(eScreenX - size / 2, canvas.height / 2 - size / 2, size, size);
+  }
+}
 
 function drawCross() {
     const centerX = canvas.width / 2;
@@ -149,10 +173,15 @@ function gameLoop() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	render3DScene();
 	movePlayer();
-    drawCross();
+  monsters.forEach(monster => {
+    drawEntity(monster.x, monster.y, 'monster');
+  })
+  players.forEach(p => {
+    drawEntity(p.x, p.y, 'player');
+  })
+  drawCross();
 	requestAnimationFrame(gameLoop);
 }
-
 
 document.addEventListener('mousemove', (event) => {
     let sensitivity = 0.005; // Adjust sensitivity as needed
@@ -201,9 +230,18 @@ function connect() {
 		}
 
 		// Update ball position and direction
-    players = serverMessage.players;
-    player.x = players[0].x;
-    player.y = players[0].y;
+    // players = serverMessage.players;
+    player.x = serverMessage.players[0].x;
+    player.y = serverMessage.players[0].y;
+
+    monsters = [];
+    serverMessage.monsters.forEach(monster => {
+      monsters.push(monster);
+    })
+    players = [];
+    serverMessage.players.forEach(p => {
+      players.push(p);
+    })
 	});
 
 	socket.addEventListener('close', function (event) {
