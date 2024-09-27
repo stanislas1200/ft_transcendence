@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, Tournament, Match, Tron, GameType
+from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, Tournament, Match, Tron, GameType, UserAchievement, Achievement
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST, require_GET
 from django.forms.models import model_to_dict
@@ -544,6 +544,39 @@ def get_history(request):
             history_list.append(game_dict)
         return JsonResponse(history_list, safe=False)
     
+    except Exception as e:
+        print(e, flush=True)
+        return JsonResponse({'error': 'Error'}, status=500)
+
+@require_GET
+@csrf_exempt
+def list_achievements(request):
+    try:
+        user_id = request.GET.get('UserId')
+        if not user_id:
+            return JsonResponse({'error': 'Missing id'}, status=400)
+        
+        if not User.objects.filter(id=user_id).exists():
+            return JsonResponse({'error': 'Player not found'}, status=404)
+        
+        # TODO : remove this
+        # test create and add achievement
+        user = User.objects.get(id=user_id)
+        ach, created = Achievement.objects.get_or_create(name='list achievements', description='list all achievements', points=0)
+        UserAchievement.objects.get_or_create(user=user, achievement=ach)
+        # end test
+
+        user_achievements = UserAchievement.objects.filter(user=user)
+        unlocked_achievements_dc = [model_to_dict(ua.achievement) for ua in user_achievements]
+
+        locked_achievements = Achievement.objects.exclude(id__in=[ua.achievement.id for ua in user_achievements])
+        locked_achievements_dc = [model_to_dict(ach) for ach in locked_achievements]
+
+        return JsonResponse({'unlocked': unlocked_achievements_dc , 'locked':  locked_achievements_dc}, safe=False)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Player not found'}, status=404)
+    except (UserAchievement.DoesNotExist, Achievement.DoesNotExist):
+        return JsonResponse({'error': 'Achievements not found'}, status=404)
     except Exception as e:
         print(e, flush=True)
         return JsonResponse({'error': 'Error'}, status=500)
