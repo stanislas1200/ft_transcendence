@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Application</title>
-</head>
-
+{% load static %}
 <body>
-    <div class="spa-container">
+    <div class="spa-container chat-container">
         <div class="sidebar">
             <ul id="friend-list">
                 <!-- Les amis seront ajoutés ici dynamiquement -->
@@ -25,5 +17,5 @@
         </div>
     </div>
 </body>
-
-</html>
+<script src="{% static 'js/friend.js' %}"></script>
+<script>getElementFriend();</script>
