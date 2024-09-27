@@ -14,7 +14,7 @@ class TChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.userId = self.scope["url_route"]["kwargs"]["UserId"] #get user id
         recipient   = self.scope["url_route"]["kwargs"]["Recipient"]
-        self.token       = self.scope["url_route"]["kwargs"]["token"]
+        self.token  = self.scope["url_route"]["kwargs"]["token"]
         print("=======Recipient: " + recipient, flush=True)
         print("+=====token: " + self.token, flush=True)
         # if not (recipient):
@@ -39,21 +39,25 @@ class TChatConsumer(AsyncWebsocketConsumer):
         # blockedlist = await sync_to_async(user.blocked)
         # print(blockeds, flush=True)
         # print(recipient_id.blocked, flush=True)
-        try:
-            response = requests.get('https://auth-service:8000/list_blocked_user/', cookies={'token': self.token, 'userId': str(recipient_id.id)}, verify=False)
-            print(f"Reponse blocklist: {response.text}", flush=True)
-            # block_list = json.loads(response.text)
-            block_list = response.json()
-            for users in block_list['blocked_user']:
-                print(users['username'], flush=True)
-            print(block_list['blocked_user'])
-            for users in block_list['blocked_user']:
-                print("continue " + user.username, flush=True)
-                print(users['username'], flush=True)
-                if (users['username'] == user.username):
-                    print("KOIIIIII", flush=True)
-        except requests.exceptions.RequestException as e:
-            print(f"Block list request failed: {e}")
+        if (await self._check_if_recipient_is_blocked(recipient_id, user.username)):
+            print("Ah oui oui OUI comme dirait Niska")
+        else:
+            print("NOOON-----------------------------------------")
+        # try:
+        #     response = requests.get('https://auth-service:8000/list_blocked_user/', cookies={'token': self.token, 'userId': str(recipient_id.id)}, verify=False)
+        #     print(f"Reponse blocklist: {response.text}", flush=True)
+        #     # block_list = json.loads(response.text)
+        #     block_list = response.json()
+        #     for users in block_list['blocked_user']:
+        #         print(users['username'], flush=True)
+        #     print(block_list['blocked_user'])
+        #     for users in block_list['blocked_user']:
+        #         print("continue " + user.username, flush=True)
+        #         print(users['username'], flush=True)
+        #         if (users['username'] == user.username):
+        #             print("KOIIIIII", flush=True)
+        # except requests.exceptions.RequestException as e:
+        #     print(f"Block list request failed: {e}")
 
         print("=======Recipient_id: " + str(recipient_id.id), flush=True)
         print("---------UserName: " + user.username, flush=True)
@@ -78,11 +82,25 @@ class TChatConsumer(AsyncWebsocketConsumer):
         )
         await self.accept()
 
-    # async def _check_if_recipient_is_blocked(self, recipient_id):
-    #     url = 'https://auth-service:8000/list_blocked_user/'
-    #     try:
-    #         response = requests.get(url, cookies={'token': self.token, 'userId': str(recipient_id.id)}, verify=False)
-    #     pass
+    async def _check_if_recipient_is_blocked(self, recipient_id, username):
+        url = 'https://auth-service:8000/list_blocked_user/'
+        try:
+            response = requests.get(url, cookies={'token': self.token, 'userId': str(recipient_id.id)}, verify=False)
+            block_list = response.json()
+            ##
+            print("------------------------------------", flush=True)
+            for users in block_list['blocked_user']:
+                print(users['username'], flush=True)
+            print("------------------------------------", flush=True)
+            ##
+            for users in block_list['blocked_user']:
+                if (users['username'] == username):
+                    print("KOIIIIII", flush=True)
+                    return True
+            return False
+        except requests.exceptions.RequestException as e:
+            print(f"Block list request failed: {e}")
+            return False
 
     async def disconnect(self, close_code):
         self.close()
