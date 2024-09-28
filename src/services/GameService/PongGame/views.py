@@ -454,7 +454,6 @@ def start_game(request, gameName=None, gameMode=None, playerNumber=None):
 
 @require_POST
 @csrf_exempt # Disable CSRF protection for this view
-# record a move in the pong game # TODO : change to update game for multiple game
 def record_move(request):
     try:    
         session_key = request.session.session_key
@@ -465,36 +464,18 @@ def record_move(request):
         player = get_player(session_key, token, user_id)
         if player == None:
             return JsonResponse({'error': 'Failed to get player'}, status=400)
-        
+        # TODO : multiple game
         game = Game.objects.get(id=game_id)  # Get the game
         if not game.gameProperty.players.get(player=player):
             return JsonResponse({'error': 'Player not in game'}, status=400)
         
-        # p = game.gameProperty.players.get(player=player).n
-        # print(p)
-        
-        # players = cache.get('players')
-        # print(players)
-        # game_group_name = f'pong_game_{game_id}'
-        # channel_player = players.get(game_group_name)
-        # player = channel_player['p1']
-        # p = 'p1'
-
-
-        # if not player.get('token') == token:
-        #     player = channel_player['p2']
-        #     p = 'p2'
-        #     if not player.get('token') == token:
-        #         print("back")
-        #         return
         direction = request.POST.get('direction')  # Get the direction of the move
-        print(direction)
         move_pong(game_id, game.gameProperty.players.get(player=player).n, direction)
         return JsonResponse({'message': 'Move recorded', 'game_id': game_id})
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
-    except Player.DoesNotExist:
-        return JsonResponse({'error': 'Player not found'}, status=404)
+    except:
+        return JsonResponse({'error': 'Server error'}, status=500)
 
 @require_GET
 @csrf_exempt # Disable CSRF protection for this view

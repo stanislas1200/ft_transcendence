@@ -211,7 +211,7 @@ function connect() {
 	let token = getCookie('token');
 	let userId = getCookie('userId');
 	console.log(token);
-	let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/${token}/${userId}`;
+	let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/${userId}`;
 
 	let socket = new WebSocket(wsUrl);
 
