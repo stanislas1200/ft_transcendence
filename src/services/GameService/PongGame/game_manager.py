@@ -152,21 +152,15 @@ class Party:
 		# self.players = [self.get_player_info(player) for player in players]
 		player_found = False
 		for player in players:
-			print(player)
 			player_info = self.get_player_info(player)
 			for existing_player in self.players:
-				print(existing_player)
-				print(player_info, flush=True)
 				if player.player == user and existing_player['id'] == player_info['id']:
 					player_found = True
-					print("edit token", flush= True)
 					existing_player['token'] = token
 					break
 			
 			if not player_found and player.player == user:
-				print("add player", flush= True)
 				self.players.append(self.get_player_info(player, token))
-				print(self.players, flush=True)
 				break
 
 	def get_player_info(self, player, token=None):
@@ -336,12 +330,17 @@ def move_pong(game_id, n, direction):
 		return
 	# if game.state != 'playing':
 	# 	return
-	if game.positions[n - 1] > 50 and direction == 'up':
-		game.positions[n - 1] -= game.player_speed
-	# elif game.positions[n - 1] < game.height - 50 and direction == 'down' and (n < 3 or game.gameMode == 'team'):
-	elif game.positions[n - 1] < game.height - 50 and direction == 'down':
-		game.positions[n - 1] += game.player_speed
-	# elif game.gameMode == 'ffa' and game.position
+
+	if game.gameMode == 'ffa' and n > 2:
+		if game.positions[n - 1] > 150 and direction == 'up':
+			game.positions[n - 1] -= game.player_speed
+		elif game.positions[n - 1] < game.width - 150 and direction == 'down':
+			game.positions[n - 1] += game.player_speed
+	else:
+		if game.positions[n - 1] > 50 and direction == 'up':
+			game.positions[n - 1] -= game.player_speed
+		elif game.positions[n - 1] < game.height - 50 and direction == 'down':
+			game.positions[n - 1] += game.player_speed
 
 import time
 def ai_play(game):
@@ -433,10 +432,10 @@ def ffa_update(game):
 
 	# check collision player 4
 	paddleVertices = [
-		{'x': game.positions[2] - game.paddleHeight/2, 'y': game.width - game.paddlePadding},
-		{'x': game.positions[2] + game.paddleHeight/2, 'y': game.width - game.paddlePadding},
-		{'x': game.positions[2] + game.paddleHeight/2, 'y': game.width - game.paddlePadding - game.paddleWidth},
-		{'x': game.positions[2] - game.paddleHeight/2, 'y': game.width - game.paddlePadding - game.paddleWidth}
+		{'x': game.positions[3] - game.paddleHeight/2, 'y': game.height - game.paddlePadding - game.paddleWidth},
+		{'x': game.positions[3] + game.paddleHeight/2, 'y': game.height - game.paddlePadding - game.paddleWidth},
+		{'x': game.positions[3] + game.paddleHeight/2, 'y': game.height - game.paddlePadding},
+		{'x': game.positions[3] - game.paddleHeight/2, 'y': game.height - game.paddlePadding}
 	]
 	game.last_hit = check_collision(game, paddleVertices, 3)
 

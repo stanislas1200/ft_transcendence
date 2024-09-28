@@ -128,8 +128,8 @@ function draw() {
 			c.fillRect(800 - 40 - 10, p4 - 100/2, 10, 100)
 		}
 		else if (mode == "ffa") {
-			c.fillRect(p3, 40, 100, 10)
-			c.fillRect(p4, 600 - 40, 100, 10)
+			c.fillRect(p3 - 100/2, 40, 100, 10)
+			c.fillRect(p4 - 100/2, 600 - 40, 100, 10)
 		}
 		// c.fillRect(x, y, 10, 10)
 		

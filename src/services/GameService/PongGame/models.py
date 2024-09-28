@@ -21,7 +21,7 @@ class PongPlayer(models.Model):
     n = models.IntegerField(default=0)
 
 def get_default_player_positions():
-    return [250, 250, 250, 250] # TODO : ADDAPT based on player nb
+    return [300, 300, 400, 400] # TODO : ADDAPT based on player nb
 class Pong(models.Model):
     width = models.IntegerField(default=800)
     height = models.IntegerField(default=600)
