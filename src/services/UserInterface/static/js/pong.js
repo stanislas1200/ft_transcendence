@@ -38,6 +38,26 @@ function connect() {
 			return;
 		}
 
+		if (serverMessage.message === 'Setup') {
+			obstacles = serverMessage.setting.obstacles
+			offc.fillStyle = "#e24091";
+			if (obstacles) {
+				obstacles.forEach((obstacle) => {
+					// draw using vertices
+					let vertices = obstacle.vertices;
+					offc.beginPath();
+					offc.moveTo(vertices[0].x, vertices[0].y);
+					for (i = 1; i < vertices.length; i++) {
+						offc.lineTo(vertices[i].x, vertices[i].y);
+					}
+					offc.closePath();
+					offc.fill();
+					offc.stroke();
+				})
+				obstaclesDrawn = true;
+			}
+		}
+
 		// Update ball position and direction
 		x = serverMessage.x;
 		y = serverMessage.y;
@@ -78,6 +98,12 @@ function connect() {
 }
 connect();
 c = document.getElementById('pongCanvas').getContext('2d')
+offScreenC = document.createElement('canvas');
+offScreenC.width = c.width = 800; // Match main canvas dimensions
+offScreenC.height = c.height = 600;
+offc = offScreenC.getContext('2d');
+obstaclesDrawn = false;
+
 c.fillStyle = "#FFF"
 c.font = "60px monospace"
 w = s = 1
@@ -87,6 +113,7 @@ p1 = p2 = p3 = p4 = 250
 x = 400; y = 300
 r = 5; v = 3
 mode = "ffa"
+obstacles = []
 function draw() {
 
 	// c.clearRect(0, 0, 800, 600)
@@ -111,6 +138,15 @@ function draw() {
 	// c.fillRect(x, y, 10, 10)
 	
 	// c.fillStyle = "#e24091";
+
+	// draw obstacles
+	if (obstaclesDrawn)
+	{
+		c.drawImage(offScreenC, 0, 0); // TODO : optimise
+		// obstaclesDrawn = false;
+	}
+	
+
     c.beginPath();
     c.moveTo(x, y);
     c.arc(x, y, r, 0, Math.PI * 2, true); // Left eye

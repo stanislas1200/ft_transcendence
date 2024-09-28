@@ -138,6 +138,47 @@ class Party:
 		if prop.mapId == 3:
 			make_map3()
 		self.map = maps[prop.mapId]
+		if prop.gameMode == 'ffa' and self.player_number > 2:
+			borders = [
+				{
+					'type': 'rectangle',
+					'vertices': [
+						{'x': 0, 'y': 0},
+						{'x': 0, 'y': self.paddleWidth + self.paddlePadding},
+						{'x': 150, 'y': self.paddleWidth + self.paddlePadding},
+						{'x': 150, 'y': 0}
+					]
+				},
+				{
+					'type': 'rectangle',
+					'vertices': [
+						{'x': 0, 'y': self.height},
+						{'x': 0, 'y': self.height - self.paddleWidth - self.paddlePadding},
+						{'x': 150, 'y': self.height - self.paddleWidth - self.paddlePadding},
+						{'x': 150, 'y': self.height}
+					]
+				},
+				{
+					'type': 'rectangle',
+					'vertices': [
+						{'x': self.width, 'y': 0},
+						{'x': self.width, 'y': self.paddleWidth + self.paddlePadding},
+						{'x': self.width - 150, 'y': self.paddleWidth + self.paddlePadding},
+						{'x': self.width - 150, 'y': 0}
+					]
+				},
+				{
+					'type': 'rectangle',
+					'vertices': [
+						{'x': self.width, 'y': self.height},
+						{'x': self.width, 'y': self.height - self.paddleWidth - self.paddlePadding},
+						{'x': self.width - 150, 'y': self.height - self.paddleWidth - self.paddlePadding},
+						{'x': self.width - 150, 'y': self.height}
+					]
+				}
+
+			]
+			self.map += borders
 		self.gameMode = prop.gameMode
 
 		self.players = sorted(self.players, key=lambda x: x['n'])
