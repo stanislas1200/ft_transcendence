@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN chmod +x start_services.sh
-RUN chmod +x /usr/src/app/start_services.sh # FIXME : not working on mac ?
+RUN chmod +x /usr/src/app/start_services.sh
 
 EXPOSE 8000
 

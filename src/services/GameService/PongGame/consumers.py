@@ -9,6 +9,7 @@ from .game_manager import setup, get_n, update_pong, get_pong_state, move_pong, 
 from .tron_game import update_tron, get_tron_state, setup_tron, get_tron_n, move_tron
 from .gun_and_monsters import setup_gam, move_gam, get_gam_state, get_gam_n, update_gam
 from .models import Game
+import http.cookies
 
 from .views import get_player
 from django.core.cache import cache
@@ -16,8 +17,17 @@ from django.core.cache import cache
 class GameConsumer(AsyncWebsocketConsumer):
 	connected_users = 0
 	async def connect(self):
+
+		# TODO : remove token in routing better to store n instead of token but lazy
+		headers = dict(self.scope['headers'])
+		if b'cookie' in headers:
+			cookie = headers[b'cookie'].decode()
+			cookie = http.cookies.SimpleCookie(cookie)
+			self.token = cookie['token'].value if 'token' in cookie else None
+		else:
+			self.token = None
+		
 		self.game_id = self.scope['url_route']['kwargs']['game_id']
-		self.token = self.scope['url_route']['kwargs']['token'] # TODO : token in header 
 		user_id = self.scope['url_route']['kwargs']['UserId']
 		player = await sync_to_async(get_player)(None, self.token, user_id)
 
@@ -33,9 +43,9 @@ class GameConsumer(AsyncWebsocketConsumer):
 		game = await sync_to_async(Game.objects.get)(id=self.game_id)
 		if game.status == 'finished':
 			await self.accept()
-			await asyncio.sleep(0.5)  # FIXME : ws don't wait that client got the message not working
+			await asyncio.sleep(0.5)
 			await self.send(text_data="Game is finished. Closing connection.")
-			await self.close(code=4001) # FIXME : close_code not pass
+			await self.close(code=4001)
 			return
 
 		self.game = game.gameName
@@ -117,21 +127,14 @@ class GameConsumer(AsyncWebsocketConsumer):
 	async def receive(self, text_data):
 		try:
 			data = json.loads(text_data)
-			# if self.game == 'pong':
 			direction = data['direction']
-			# direction = None
-			token = data['token']
-			if not token or not direction:
-				return self.send(text_data=json.dumps({
-					'error': 'Invalid message'
-				}))
-			
+
 			if self.game == 'pong':
-				n = get_n(self.game_id, token)
+				n = get_n(self.game_id, self.token)
 			elif self.game == 'tron':
-				n = get_tron_n(self.game_id, token)
+				n = get_tron_n(self.game_id, self.token)
 			elif self.game == 'gun_and_monsters':
-				n = get_gam_n(self.game_id, token)
+				n = get_gam_n(self.game_id, self.token)
 
 			if not n:
 				return self.send(text_data=json.dumps({

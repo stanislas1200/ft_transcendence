@@ -9,10 +9,8 @@ function connect() {
 	console.log(sessionId)
 	let partyId = localStorage.getItem('gameId');
 	localStorage.removeItem('gameId');
-	let token = getCookie('token');
 	let userId = getCookie('userId');
-	console.log(token);
-	let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/${token}/${userId}`;
+	let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/${userId}`;
 	wsUrl = wsUrl.replace('localhost', window.location.hostname);
 
 	let socket = new WebSocket(wsUrl);
@@ -91,8 +89,7 @@ function connect() {
 		if (direction && socket) {
 			console.log(direction)
 			var sessionId = getCookie('sessionid');
-			var token = getCookie('token');
-			socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', player: 'p1', direction: direction, token: token }));
+			socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', player: 'p1', direction: direction}));
 		}
 	});
 }

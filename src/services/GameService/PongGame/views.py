@@ -14,25 +14,20 @@ from django.db import transaction
 
 
 # service comunication
-def get_player(session_key, token, user_id):
+def verify_token(session_key, token, user_id):
     try:
-        response = requests.get('https://auth-service:8000/get_user/', params={'session_key': session_key, 'token': token, 'UserId': user_id}, verify=False) # TODO verify token instead #verify false for self signed
-    except requests.exceptions.RequestException as e: # TODO : remove http (used for processing)
-        print(f"HTTPS request failed: {e}, trying HTTP")
-        response = requests.get('http://auth-service:8000/get_user/', params={'session_key': session_key, 'token': token, 'UserId': user_id})
-    
-    if response.status_code == 200:
-        # user = response.json()
-        user = User.objects.get(id=user_id)
-        return user
+        response = requests.get('https://auth-service:8000/verify_token/', cookies={'session_key': session_key, 'token': token, 'userId': user_id}, verify=False)
+        if response.status_code == 200:
+            return True
+        return False
+    except:
+        return False
 
-        # Check if player exist
-        # if Player.objects.filter(name=user['username'], email=user['email']).exists(): # TODO : check not empty
-        #     player = Player.objects.get(name=user['username'], email=user['email'])
-        # else:
-        #     player = Player.objects.create(name=user['username'], email=user['email'])
-        return user
-    return None
+def get_player(session_key, token, user_id):
+    if not verify_token(session_key, token, user_id):
+        return None
+    user = User.objects.get(id=user_id)
+    return user
 
 
 @csrf_exempt
@@ -224,7 +219,7 @@ def leave_game(request):
             return JsonResponse({'error': 'Failed to get player'}, status=400)
 
         game = Game.objects.get(id=game_id)  # Get the game
-        game.delete()  # End the game # TODO : change this ( delete for now)
+        game.delete()  # End the game # TODO : change this ( delete for now) remove and just disconect ws
         return JsonResponse({'message': 'Game ended', 'game_id': game.id})
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
@@ -313,7 +308,7 @@ def join_game(request):
                 if g.gameProperty.gameMode == game_mode:
                     game = g
             if not game:
-                return start_game(request, game_name, game_mode, player_number) # No game found, create one # TODO : use and check passed param in join like create
+                return start_game(request, game_name, game_mode, player_number)
                 
 
         # Check if party accept player
@@ -384,7 +379,7 @@ def startPong(request, player, token, gameType, gameMode, playerNumber):
 
 def startTron(request, player, token, gameType, gameMode, playerNumber):
     if not playerNumber:
-        playerNumber = request.POST.get('playerNumber', 1) # TODO : check default 1 or error ?
+        playerNumber = request.POST.get('playerNumber', 1)
 
     if not playerNumber or not gameType:
         return JsonResponse({'error': 'Missing setting'}, status=400)
@@ -405,7 +400,7 @@ def startTron(request, player, token, gameType, gameMode, playerNumber):
     
 def startGAM(request, player, token, gameType, gameMode, playerNumber):
     if not playerNumber:
-        playerNumber = request.POST.get('playerNumber', 1) # TODO : check default 1 or error ?
+        playerNumber = request.POST.get('playerNumber', 1)
 
     if not playerNumber or not gameType:
         return JsonResponse({'error': 'Missing setting'}, status=400)
@@ -528,7 +523,7 @@ def get_stats(request):
     
     except:
         return JsonResponse({'error': 'Error'}, status=500)
- 
+
 @require_GET
 @csrf_exempt # Disable CSRF protection for this view   
 def get_history(request):
