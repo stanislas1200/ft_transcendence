@@ -441,6 +441,9 @@ def start_game(request, gameName=None, gameMode=None, playerNumber=None):
     if not gameName:
         gameName = request.POST.get('game')
     gameType = request.POST.get('gameType', 'simple')  # Get the game type from the request, default to 'simple'
+
+    ach, created = Achievement.objects.get_or_create(name='first game', description='first game', points=0)
+    UserAchievement.objects.get_or_create(user=player, achievement=ach)
     if gameName == 'pong':
         return startPong(request, player, token, gameType, gameMode, playerNumber)
     elif gameName == 'tron':
