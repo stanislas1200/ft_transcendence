@@ -176,3 +176,9 @@ button:hover {
     font-size: 0.7em;
     margin: 8px 10px;
 }
+
+.spa-flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

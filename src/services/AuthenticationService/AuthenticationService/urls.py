@@ -14,7 +14,7 @@ urlpatterns = [
     path('me', views.me),
     path('get_user/', views.get_user_from_session),
     path('users/<int:user_id>/edit', views.update_user),
-    path('users/<int:user_id>/avatar', views.get_avatar),
+    path('users/<int:user_id>/avatar', views.get_avatar), # call pour la pp
 
 	path('game/main.css', views.get_css, name='views_game'),
 	path('game/', views.get_game_page, name='views_game'),

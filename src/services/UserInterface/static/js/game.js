@@ -81,6 +81,7 @@ function gameModeDisabler() {
             gameModeCreateTeam.disabled = false;
         }
     });
+
 }
 
 function randomJoinGameButton() {
@@ -90,7 +91,7 @@ function randomJoinGameButton() {
 
     randomGameButton.addEventListener('click', function () {
         var xhr = new XMLHttpRequest();
-        var url = "https://" + window.location.href + ":8001/game/join?gameName=pong&gameMode=" + gameModeSelect.value + "&nbPlayers=" + maxPlayersSelectRandom.value;
+        var url = "https://" + window.location.hostname + ":8001/game/join?gameName=pong&gameMode=" + gameModeSelect.value + "&nbPlayers=" + maxPlayersSelectRandom.value;
         xhr.withCredentials = true;
         xhr.open("GET", url, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -98,7 +99,11 @@ function randomJoinGameButton() {
             if (xhr.readyState === 4)
                 if (xhr.status === 200) {
                     console.log('Game joined');
+                    var gameId = JSON.parse(xhr.responseText).game_id;
+                    console.log("game id :" + gameId);
+                    localStorage.setItem("gameId", gameId);
                     console.log(xhr.responseText);
+                    window.location.replace('/pong');
                 }
                 else {
                     console.log('Error joining game'); // TODO put a message
@@ -130,7 +135,11 @@ function createGameButton() {
             if (xhr.readyState === 4)
                 if (xhr.status === 200) {
                     console.log('Game created');
+                    var gameId = JSON.parse(xhr.responseText).game_id;
+                    console.log("game id :" + gameId);
+                    localStorage.setItem("gameId", gameId);
                     console.log(xhr.responseText);
+                    window.location.replace('/pong');
                 }
                 else {
                     console.log('Error creating game'); // TODO put a message
@@ -204,6 +213,11 @@ function inputAnimation() {
     }
 
     inputs.forEach((input) => {
+        const span = input.previousElementSibling;
+        if (input.value !== '' && span) {
+            span.classList.add('span-active'); // Ajoute la classe si l'input a déjà du texte
+        }
+
         input.addEventListener('focus', handleFocus);
         input.addEventListener('blur', handleFocusOut);
     });

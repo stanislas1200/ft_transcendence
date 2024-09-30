@@ -14,24 +14,21 @@ function loadSettings() {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status === 200 || xhr.status === 201) {
-                // console.log('Login Success:', xhr.responseText);
                 response = JSON.parse(xhr.responseText);
-                // localStorage.setItem('token', response.token);
-                // Here you can store the session ID or token if needed
-                // window.location.replace("/home");
+                email.value = response.email;
+                firstName.value = response.firstname;
+                lastName.value = response.lastname;
+                userName.value = response.username;
+                loadProfilePicture(response.id);
+                saveChangement(response.id);
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
-        email.value = response.email;
-        firstName.value = response.firstname;
-        lastName.value = response.lastname;
-        userName.value = response.username;
     };
     xhr.send();
     button = document.getElementById('saveButton');
-    // pp = document.getElementById('profilePicture');
-    validateForm();
+    // validateForm();
     inputsChangement();
 }
 
@@ -78,76 +75,98 @@ function checkPassword(pwd) {
 
 // function validateForm() {
 function validateForm() {
-    button.addEventListener("click", () => {
-        console.log('button press');
-        // console.log('button press');
-        let valid = true;
+    console.log('button press');
+    let valid = 1;
 
-        // Effacer les erreurs précédentes
-        document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
+    const newFirstName = document.getElementById('firstName');
+    const spanNewFirstName = document.getElementById('span-firstname');
+    if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(newFirstName.value)) {
+        console.log('firstname error');
+        valid = 0;
+        newFirstName.classList.add('error');
+        spanNewFirstName.style.color = 'var(--accent)';
+    } else {
+        newFirstName.classList.remove('error');
+        spanNewFirstName.style.color = 'var(--secondary)';
+    }
 
-        // Vérifier le prénom (uniquement des lettres)
-        const newFirstName = document.getElementById('firstName').value;
-        if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(newFirstName)) {
-            document.getElementById('firstNameError').textContent = "Le prénom ne doit contenir que des lettres.";
-            document.getElementById('firstNameError').style.display = 'block';
-            valid = false;
-        }
+    // Vérifier le nom (uniquement des lettres)
+    const newLastName = document.getElementById('lastName');
+    const spanNewLastName = document.getElementById('span-lastname');
+    if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(newLastName.value)) {
+        console.log('lastname error');
+        valid = 0;
+        newLastName.classList.add('error');
+        spanNewLastName.style.color = 'var(--accent)';
+    } else {
+        newLastName.classList.remove('error');
+        spanNewLastName.style.color = 'var(--secondary)';
+    }
 
-        // Vérifier le nom (uniquement des lettres)
-        const newLastName = document.getElementById('lastName').value;
-        if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(newLastName)) {
-            document.getElementById('lastNameError').textContent = "Le nom ne doit contenir que des lettres.";
-            document.getElementById('lastNameError').style.display = 'block';
-            valid = false;
-        }
+    const username = document.getElementById('username');
+    const spanusername = document.getElementById('span-username');
+    if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(username.value)) {
+        console.log('lastname error');
+        valid = 0;
+        username.classList.add('error');
+        spanusername.style.color = 'var(--accent)';
+    } else {
+        username.classList.remove('error');
+        spanusername.style.color = 'var(--secondary)';
+    }
 
-        // Vérifier l'adresse e-mail
-        const newEmail = document.getElementById('email').value;
-        if (!/\S+@\S+\.\S+/.test(newEmail)) {
-            document.getElementById('emailError').textContent = "Veuillez entrer une adresse e-mail valide.";
-            document.getElementById('emailError').style.display = 'block';
-            valid = false;
-        }
+    // Vérifier l'adresse e-mail
+    const newEmail = document.getElementById('email');
+    const spanNewEmail = document.getElementById('span-email');
+    if (!/\S+@\S+\.\S+/.test(newEmail.value)) {
+        console.log('email error');
+        valid = 0;
+        newEmail.classList.add('error');
+        spanNewEmail.style.color = 'var(--accent)';
+    } else {
+        newEmail.classList.remove('error');
+        spanNewEmail.style.color = 'var(--secondary)';
+    }
 
-        const currentPassword = document.getElementById('oldPassword').value;
+    const currentPassword = document.getElementById('oldPassword');
+    const spanCurrentPassword = document.getElementById('span-oldpwd');
 
-        const newPassword = document.getElementById('newPassword').value;
-        if (currentPassword === newPassword) {
-            document.getElementById('newPasswordError').textContent = "password must be different from the current!";
-            valid = false;
-        }
-        else if (checkPassword(newPassword) != 0) {
-            valid = false;
-        }
-        document.getElementById('newPasswordError').style.display = 'block';
-        if (valid == true) {
-            // ajouter ici l'envoie pour le back!!
-        }
-        // return valid;
-    });
+    const newPassword = document.getElementById('newPassword');
+    const spanNewPassword = document.getElementById('span-newpwd');
+    if (currentPassword.value == '') {
+        console.log('no password enter');
+        valid = 0;
+    }
+    if (newPassword == '') {
+        console.log('no new password');
+        valid = 0;
+    }
+    if (currentPassword.value === newPassword.value) {
+        console.log('same pwd than before error');
+        valid = 0;
+    }
+    if (checkPassword(newPassword.value) != 0) {
+        console.log('new pwd error');
+        valid = 0;
+    }
+    return valid;
 }
 
 function triggerFileInput() {
-    console.log('click');
     document.getElementById('profilePic').click(); // Simule un clic sur l'input
 }
 
 function previewImage(event) {
-    // pp.addEventListener("click", () => {
-    console.log('ici');
     const reader = new FileReader();
     reader.onload = function () {
         const output = document.getElementById('profileImage');
         output.src = reader.result;
     };
     reader.readAsDataURL(event.target.files[0]);
-    // });
 }
 
 function inputsChangement() {
     const inputs = document.querySelectorAll('.input');
-    console.log('je suis ici');
 
     const handleFocus = ({ target }) => {
         const span = target.previousElementSibling;
@@ -165,20 +184,80 @@ function inputsChangement() {
         }
     }
 
-    // const handleChange = () => {
-    //     const [username, password] = inputs;
-
-    //     if (username.value && password.value) {
-    //         button.removeAttribute('disabled');
-    //     } else {
-    //         button.setAttribute('disabled', '');
-    //     }
-    // }
-
     inputs.forEach((input) => {
-        console.log('test');
         input.addEventListener('focus', handleFocus);
         input.addEventListener('blur', handleFocusOut);
-        // input.addEventListener('input', handleChange);
     });
 }
+
+function loadProfilePicture(id) {
+    const profilePicture = document.getElementById('profileImage');
+    var response;
+    let url = "https://localhost:8000/users/<int:user_id>/avatar";
+    url = url.replace("localhost", window.location.hostname); var xhr = new XMLHttpRequest();
+    url = url.replace("<int:user_id>", id);
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.withCredentials = true;
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 3) {
+            if (xhr.status === 200 || xhr.status === 201) {
+                response = xhr.responseText;
+            } else {
+                alert('Error: ' + JSON.parse(xhr.responseText).error);
+            }
+        }
+        var newProfilePicture = url.replace("/users/<int:user_id>/avatar".replace("<int:user_id>", id), response);
+        profilePicture.src = newProfilePicture;
+    };
+    xhr.send();
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function saveChangement(id) {
+    const saveButton = document.getElementById('saveButton');
+    saveButton.addEventListener('click', function () {
+        let verif = 1
+        verif = validateForm();
+        if (verif == 1) {
+            const firstName = document.getElementById('firstName');
+            const lastName = document.getElementById('lastName');
+            const userName = document.getElementById('username');
+            const email = document.getElementById('email');
+            const profilePicture = document.getElementById('profilePic');
+            let url = "https://localhost:8000/users/<int:user_id>/edit";
+            url = url.replace("localhost", window.location.hostname); var xhr = new XMLHttpRequest();
+            url = url.replace("<int:user_id>", id);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', url, false);
+            xhr.withCredentials = true;
+            formData = new FormData();
+            console.log(profilePicture);
+            formData.append("avatar", profilePicture.files[0]);
+            formData.append("username", userName.value);
+            formData.append("email", email.value);
+            formData.append("first_name", firstName.value);
+            formData.append("last_name", lastName.value);
+            console.log(formData);
+            xhr.send(formData);
+            saveButton.innerHTML = 'save with sucess!';
+            saveButton.classList.add('sucess-saving');
+            sleep(1000).then(() => {
+                saveButton.innerHTML = 'save changement';
+                saveButton.classList.remove('sucess-saving');
+            });
+        }
+        else {
+            console.log('error');
+        }
+    });
+}
+
+
+
+email.classList.add('error');
+emailSpan.style.color = 'var(--accent)';

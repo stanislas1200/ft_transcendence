@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, Tournament, Match, Test, GameType
+from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, Tournament, Match, Tron, GameType
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST, require_GET
 from django.forms.models import model_to_dict
@@ -371,7 +371,7 @@ def startPong(request, player, token, gameType):
     return JsonResponse({'message': 'Game started', 'game_id': game.id})
 
 
-def startTest(request, player, token, gameType):
+def startTron(request, player, token, gameType):
     playerNumber = request.POST.get('playerNumber', 1) # TODO : check default 1 or error ?
 
     if not playerNumber or not gameType:
@@ -379,9 +379,9 @@ def startTest(request, player, token, gameType):
     if int(playerNumber) < 1:
         return JsonResponse({'error': 'Invalid player number'}, status=400)
 
-    test = Test.objects.create(playerNumber=playerNumber)
-    party_name = request.POST.get('partyName', 'test')
-    game = Game.objects.create(gameName='test', gameProperty=test, start_date=timezone.now(), party_name=party_name)
+    tron = Tron.objects.create(playerNumber=playerNumber)
+    party_name = request.POST.get('partyName', 'tron')
+    game = Game.objects.create(gameName='tron', gameProperty=tron, start_date=timezone.now(), party_name=party_name)
     game.players.add(player)
     player = PongPlayer.objects.create(player=player, score=0, n=1, token=token)
     game.gameProperty.players.add(player)
@@ -415,8 +415,8 @@ def start_game(request, gameName=None):
     gameType = request.POST.get('gameType', 'simple')  # Get the game type from the request, default to 'simple'
     if gameName == 'pong':
         return startPong(request, player, token, gameType)
-    elif gameName == 'test':
-        return startTest(request, player, token, gameType)
+    elif gameName == 'tron':
+        return startTron(request, player, token, gameType)
     else:
         return JsonResponse({'error': 'Game not found'}, status=404)
     # except:
