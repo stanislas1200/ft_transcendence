@@ -5,6 +5,7 @@
     /* height: 100%; */
     border: 1px solid var(--secondary);
     height: 90vh!important;
+    border-radius: 30px;
 }
 
 /* .chat-container {

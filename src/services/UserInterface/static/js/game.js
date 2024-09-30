@@ -81,6 +81,7 @@ function gameModeDisabler() {
             gameModeCreateTeam.disabled = false;
         }
     });
+
 }
 
 function randomJoinGameButton() {
@@ -212,6 +213,11 @@ function inputAnimation() {
     }
 
     inputs.forEach((input) => {
+        const span = input.previousElementSibling;
+        if (input.value !== '' && span) {
+            span.classList.add('span-active'); // Ajoute la classe si l'input a déjà du texte
+        }
+
         input.addEventListener('focus', handleFocus);
         input.addEventListener('blur', handleFocusOut);
     });
