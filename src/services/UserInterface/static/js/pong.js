@@ -57,6 +57,9 @@ function connect() {
 		}
 
 		// Update ball position and direction
+		usernames = serverMessage.usernames
+		scores = serverMessage.scores
+		positions = serverMessage.positions
 		x = serverMessage.x;
 		y = serverMessage.y;
 		name1 = serverMessage.usernames[0];
@@ -78,18 +81,24 @@ function connect() {
 		console.log('Error: ', event);
 	});
 
+
 	document.addEventListener('keydown', function (event) {
 		var direction;
 		if (event.key === "ArrowUp") {
 			direction = "up";
 		} else if (event.key === "ArrowDown") {
 			direction = "down";
+		} else if (event.key === "ArrowLeft") {
+			direction = "up";
+		} else if (event.key === "ArrowRight") { // todo : decompte
+			direction = "down";
 		}
 
 		if (direction && socket) {
 			console.log(direction)
 			var sessionId = getCookie('sessionid');
-			socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', player: 'p1', direction: direction}));
+			var token = getCookie('token');
+			socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', player: 'p1', direction: direction }));
 		}
 	});
 }
@@ -101,16 +110,52 @@ offScreenC.height = c.height = 600;
 offc = offScreenC.getContext('2d');
 obstaclesDrawn = false;
 
-c.fillStyle = "#FFF"
 c.font = "60px monospace"
 w = s = 1
 p = q = s1 = s2 = 0
-name1 = name2 = null
-p1 = p2 = p3 = p4 = 250
 x = 400; y = 300
 r = 5; v = 3
 mode = "ffa"
 obstacles = []
+usernames = null
+positions = null
+
+function drawPlayers() {
+	colors = ['green', 'red', 'yellow', 'white']
+	c.fillStyle = colors[0]
+	if (positions) {
+		c.fillRect(40, positions[0] - 100/2, 10, 100)
+		c.fillStyle = colors[1]
+		c.fillRect(800 - 40 - 10, positions[1] - 100/2, 10, 100)
+		if (mode == "team") {
+			c.fillStyle = colors[2]
+			c.fillRect(40, positions[2] - 100/2, 10, 100)
+			c.fillStyle = colors[3]
+			c.fillRect(800 - 40 - 10, positions[3] - 100/2, 10, 100)
+		}
+		else if (mode == "ffa") {
+			c.fillStyle = colors[2]
+			c.fillRect(positions[2] - 100/2, 40, 100, 10)
+			c.fillStyle = colors[3]
+			c.fillRect(positions[3] - 100/2, 600 - 40, 100, 10)
+		}
+	}
+}
+
+function drawNS() {
+	c.font = "20px monospace";
+	if (usernames) {
+		spaceB = c.width / usernames.length
+		colors = ['green', 'red', 'yellow', 'white']
+		usernames.forEach((player, index) => {
+			c.fillStyle = colors[index]
+			c.fillText(player + ':', spaceB * index, 100)
+			c.fillText(scores[index], spaceB * index + c.measureText(player).width + 10, 100)
+		})
+	}
+	
+}
+
 function draw() {
 
 	// c.clearRect(0, 0, 800, 600)
@@ -118,24 +163,9 @@ function draw() {
 	c.fillRect(0, 0, 800, 600);
 	c.fillStyle = "#8791ed";
 	for (i = 5; i < 600; i += 20)c.fillRect(400, i, 4, 10)
+	drawPlayers()
+	drawNS()
 	c.fillStyle = "#FFFFFF";
-	c.fillText(name1, 0, 60)
-	c.fillText(name2, 800 - c.measureText(name2).width, 60)
-	c.fillText(s1 + " " + s2 , 350, 60)
-	c.fillRect(40, p1 - 100/2, 10, 100)
-	c.fillRect(800 - 40 - 10, p2 - 100/2, 10, 100)
-	if (mode == "team") {
-		c.fillRect(40, p3 - 100/2, 10, 100)
-		c.fillRect(800 - 40 - 10, p4 - 100/2, 10, 100)
-	}
-	else if (mode == "ffa") {
-		c.fillRect(p3 - 100/2, 40, 100, 10)
-		c.fillRect(p4 - 100/2, 600 - 40, 100, 10)
-	}
-	// c.fillRect(x, y, 10, 10)
-	
-	// c.fillStyle = "#e24091";
-
 	// draw obstacles
 	if (obstaclesDrawn)
 	{
@@ -143,7 +173,6 @@ function draw() {
 		// obstaclesDrawn = false;
 	}
 	
-
     c.beginPath();
     c.moveTo(x, y);
     c.arc(x, y, r, 0, Math.PI * 2, true); // Left eye
