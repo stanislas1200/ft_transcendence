@@ -137,7 +137,7 @@ def decline_friend_request(request, request_id):
 		if not FriendRequest.objects.filter(id=request_id).exists():
 			return JsonResponse({'error': 'Request not found'}, status=404)
 		friend_request = FriendRequest.objects.get(id=request_id)
-		if friend_request.receiver == user: # TODO : use decline to remove request so or friend_request.sender == user
+		if friend_request.receiver == user or friend_request.sender == user:
 			friend_request.delete()
 			return JsonResponse({'message': 'Successfully declined request'})
 			
@@ -148,19 +148,10 @@ def decline_friend_request(request, request_id):
 @require_GET
 def list_friends(request, user_id):
 	try:
-		# TODO: private ??
+		# TODO: add option to set as private
 		if not User.objects.filter(id=user_id).exists():
 			return JsonResponse({'error': 'User not found'}, status=404)
 		user = User.objects.get(id=user_id)
-		# user = get_object_or_404(User, id=user_id)
-		# friendships = Friendship.objects.filter(user1=user) | Friendship.objects.filter(user2=user)
-		# friends = []
-		# for friendship in friendships:
-		# 	if friendship.user1 == user:
-		# 		friends.append(friendship.user2)
-		# 	else:
-		# 		friends.append(friendship.user1)
-
 		friends = user.friends
 		return JsonResponse({'friends': [{'id': friend.id, 'username': friend.username} for friend in friends]})
 	except:
@@ -194,18 +185,18 @@ def list_friend_requests(request):
 @require_GET
 def list_blocked_user(request):
 	try:
-		if request.user.is_authenticated:
-			user = request.user
-		else:
-			status = verify_token(request)
-			if (status == 200):
-				u_id = request.GET.get('UserId')
-				if not u_id:
-					u_id = request.COOKIES.get('userId')
+		# if request.user.is_authenticated:
+		# 	user = request.user
+		# else:
+		# 	status = verify_token(request) # TODO : check cuz not working for tchat
+		# 	if (status == 200):
+		# 		u_id = request.GET.get('UserId')
+		# 		if not u_id:
+		# 			u_id = request.COOKIES.get('userId')
 
-				user = User.objects.get(id=u_id)
-			else:
-				return JsonResponse({'error': 'User is not logged in'}, status=401)
+		# 		user = User.objects.get(id=u_id)
+		# 	else:
+		# 		return JsonResponse({'error': 'User is not logged in'}, status=401)
 		
 		return JsonResponse({'blocked_user': [{'id': b.id, 'username': b.username} for b in user.blocked]})
 
@@ -392,7 +383,7 @@ def update_user(request, user_id):
 
 		# Check authorisation
 		if user_id != user.id:
-			if not user.is_staff: # TODO accept token accepted
+			if not user.is_staff:
 				return JsonResponse({'error': 'Unauthorized'}, status=403)
 			if not User.objects.filter(id=user_id).exists():
 				return JsonResponse({'error': 'User not found'}, status=404)
@@ -496,8 +487,8 @@ def oauth42(request):
 		if not User.objects.filter(email=email).exists():
 			if User.objects.filter(username=username).exists():
 				username += secrets.token_hex(4)
-				if User.objects.filter(username=username).exists(): # TODO : improve
-					return JsonResponse({'error': 'Username already taken'}, status=400)
+				if User.objects.filter(username=username).exists():
+					return JsonResponse({'error': 'Username already taken, please retry'}, status=400)
 			# Create a new user
 			profile = User.objects.create_user(username=username, email=email, first_name=data['first_name'], last_name=data['last_name'])
 			make_avatar = True
@@ -601,8 +592,9 @@ def user_to_dict(user):
 		'lastname': user.last_name
 	}
 
-def verify_token(request, token=None):
-	user_id = request.GET.get('UserId') # need to be in url to work
+def verify_token(request, token=None, user_id=None):
+	if not user_id:
+		user_id = request.GET.get('UserId') # need to be in url to work
 
 	if not token:
 		token = request.COOKIES.get('token')
@@ -640,23 +632,42 @@ def me(request):
 		return JsonResponse({'error': 'Server error'}, status=500)
 
 @csrf_exempt # Disable CSRF protection for this view
+@require_GET
+def get_user_info(request, user_id):
+	try:
+		user = User.objects.get(id=user_id)
+		user = {
+			'id': user.id,
+			'username': user.username,
+			'avatar_url': get_avatar(None, user_id).content.decode()
+		}
+		return JsonResponse(user)
+	except ObjectDoesNotExist:
+		return JsonResponse({'error': 'User not found'}, status=404)
+	except:
+		return JsonResponse({'error': 'Server error'}, status=500)
+
+@csrf_exempt # Disable CSRF protection for this view
 # service comunication
-def get_user_from_session(request): # TODO : make a verif token for comunication and a get_user to get user info and /me to get personal info
-	session_key = request.GET.get('session_key')
-	token = request.GET.get('token') # TODO : HTTP_AUTHORIZATION or cookie 
-	if not session_key:
-		status = verify_token(request, token)
-		if (status == 200):
-			user = User.objects.get(id=request.GET.get('UserId'))
-			return JsonResponse({'username': user.username, 'email': user.email})
-		elif (status == 401):
-			return JsonResponse({'error': 'Invalid token'}, status=401)
-		return JsonResponse({'error': 'User token not found'}, status=404)
-	else:
-		sess = Session.objects.get(session_key=session_key)
-		uid = sess.get_decoded().get('_auth_user_id')
-		user = User.objects.get(id=uid)
-	return JsonResponse({'username': user.username, 'email': user.email})
+def verify_user_token(request): # TODO :add uuid
+	try:
+		session_key = request.COOKIES.get('session_key')
+		session_key = None
+		token = request.COOKIES.get('token')
+		if not session_key:
+			status = verify_token(request, token)
+			if (status == 200):
+				return JsonResponse({'message': 'Valid token'})
+			elif (status == 401):
+				return JsonResponse({'error': 'Invalid token'}, status=401)
+			return JsonResponse({'error': 'User token not found'}, status=404)
+		else:
+			sess = Session.objects.get(session_key=session_key)
+			uid = sess.get_decoded().get('_auth_user_id')
+			verify_token(request, token, uid)
+		return JsonResponse({'message': 'Valid token'})
+	except:
+		return JsonResponse({'error': 'Server error'}, status=500)
 
 
 # dev
@@ -678,6 +689,8 @@ def get_game_page(request):
 	return HttpResponse(data)
 
 def get_js(request):
-	with open(os.path.join(os.path.dirname(__file__), 'templates/pong.js'), 'r') as file:
+	with open(os.path.join(os.path.dirname(__file__), 'templates/GAM.js'), 'r') as file:
 		data = file.read()
+	# with open(os.path.join(os.path.dirname(__file__), 'templates/pong.js'), 'r') as file:
+	# 	data = file.read()
 	return HttpResponse(data, content_type='text/javascript')

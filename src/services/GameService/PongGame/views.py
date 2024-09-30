@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, Tournament, Match, Tron, GameType
+from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, Tournament, Match, Tron, GameType, UserAchievement, Achievement, GAM
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST, require_GET
 from django.forms.models import model_to_dict
@@ -14,25 +14,20 @@ from django.db import transaction
 
 
 # service comunication
-def get_player(session_key, token, user_id):
+def verify_token(session_key, token, user_id):
     try:
-        response = requests.get('https://auth-service:8000/get_user/', params={'session_key': session_key, 'token': token, 'UserId': user_id}, verify=False) # TODO verify token instead #verify false for self signed
-    except requests.exceptions.RequestException as e: # TODO : remove http (used for processing)
-        print(f"HTTPS request failed: {e}, trying HTTP")
-        response = requests.get('http://auth-service:8000/get_user/', params={'session_key': session_key, 'token': token, 'UserId': user_id})
-    
-    if response.status_code == 200:
-        # user = response.json()
-        user = User.objects.get(id=user_id)
-        return user
+        response = requests.get('https://auth-service:8000/verify_token/', cookies={'session_key': session_key, 'token': token, 'userId': user_id}, verify=False)
+        if response.status_code == 200:
+            return True
+        return False
+    except:
+        return False
 
-        # Check if player exist
-        # if Player.objects.filter(name=user['username'], email=user['email']).exists(): # TODO : check not empty
-        #     player = Player.objects.get(name=user['username'], email=user['email'])
-        # else:
-        #     player = Player.objects.create(name=user['username'], email=user['email'])
-        return user
-    return None
+def get_player(session_key, token, user_id):
+    if not verify_token(session_key, token, user_id):
+        return None
+    user = User.objects.get(id=user_id)
+    return user
 
 
 @csrf_exempt
@@ -120,7 +115,7 @@ def join_tournament(request, tournament_id):
 
     tournament = Tournament.objects.get(id=tournament_id)
     if tournament.players.count() < tournament.max_player:
-        player = PongPlayer.objects.create(player=player, score=0, n=1, token=token)
+        player = PongPlayer.objects.create(player=player, score=0, n=1)
         tournament.players.add(player)
         message = "Joined tournament"
         if tournament.players.count() == tournament.max_player:
@@ -224,7 +219,7 @@ def leave_game(request):
             return JsonResponse({'error': 'Failed to get player'}, status=400)
 
         game = Game.objects.get(id=game_id)  # Get the game
-        game.delete()  # End the game # TODO : change this ( delete for now)
+        game.delete()  # End the game # TODO : change this ( delete for now) remove and just disconect ws
         return JsonResponse({'message': 'Game ended', 'game_id': game.id})
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
@@ -285,7 +280,9 @@ def join_game(request):
         session_key = request.session.session_key
         game_id = request.GET.get('gameId')
         game_name = request.GET.get('gameName')
-        if not game_id and not game_name:
+        game_mode = request.GET.get('gameMode')
+        player_number = request.GET.get('nbPlayers')
+        if not game_id and not game_name and not game_mode and not player_number:
             return JsonResponse({'error': 'Missing field'}, status=400)
         token = request.COOKIES.get('token')
         user_id = request.COOKIES.get('userId')
@@ -298,13 +295,20 @@ def join_game(request):
         # Check if a player is already in a game # TODO : check waiting and playing and for start_game() 
         # if Game.objects.filter(status='waiting', players__in=[player]).exists():
         #     return JsonResponse({'error': 'Player already in a game'}, status=400)
+
+        # if game_name == 'pong':
+        #     content_type = ContentType.objects.get_for_model(Pong)
         
         if game_id:
             game = Game.objects.get(id=game_id)  # Get the game
         else:
-            game = Game.objects.filter(gameName=game_name, status='waiting').order_by('?').first() # Get random game
+            games = Game.objects.filter(gameName=game_name, status='waiting').order_by('?') # Get random game
+            game = None
+            for g in games:
+                if g.gameProperty.gameMode == game_mode:
+                    game = g
             if not game:
-                return start_game(request, game_name) # No game found, create one # TODO : use and check passed param in join like create
+                return start_game(request, game_name, game_mode, player_number)
                 
 
         # Check if party accept player
@@ -315,7 +319,7 @@ def join_game(request):
             return JsonResponse({'error': 'Game is not waiting for players'}, status=400)
 
         game.players.add(player)  # Add the player to the game
-        player = PongPlayer.objects.create(player=player, score=0, n=game.players.count(), token=token)
+        player = PongPlayer.objects.create(player=player, score=0, n=game.players.count())
         game.gameProperty.players.add(player)
         game.status = 'playing' if game.players.count() >= game.gameProperty.playerNumber else 'waiting'
         game.save()
@@ -326,9 +330,11 @@ def join_game(request):
     except User.DoesNotExist:
         return JsonResponse({'error': 'Player not found'}, status=404)
 
-def startPong(request, player, token, gameType):
-    playerNumber = request.POST.get('playerNumber', 1)
-    gameMode = request.POST.get('gameMode', 'ffa')
+def startPong(request, player, token, gameType, gameMode, playerNumber):
+    if not playerNumber:
+        playerNumber = request.POST.get('playerNumber', 1)
+    if not gameMode:
+        gameMode = request.POST.get('gameMode', 'ffa')
     map = request.POST.get('map', 0)
 
     if not playerNumber or not gameType:
@@ -343,7 +349,7 @@ def startPong(request, player, token, gameType):
     party_name = request.POST.get('partyName', 'pong')
     game = Game.objects.create(gameName='pong', gameProperty=pong, start_date=timezone.now(), party_name=party_name)
     game.players.add(player)
-    player = PongPlayer.objects.create(player=player, score=0, n=1, token=token)
+    player = PongPlayer.objects.create(player=player, score=0, n=1)
     game.gameProperty.players.add(player)
 
     # Ai user
@@ -354,7 +360,7 @@ def startPong(request, player, token, gameType):
             player = User.objects.get(username='AI')
 
         game.players.add(player)
-        player = PongPlayer.objects.create(player=player, score=0, n=2, token='AI')
+        player = PongPlayer.objects.create(player=player, score=0, n=2)
         game.gameProperty.players.add(player)
 
     game.status = 'waiting' if int(playerNumber) > 1 else 'playing'
@@ -371,8 +377,9 @@ def startPong(request, player, token, gameType):
     return JsonResponse({'message': 'Game started', 'game_id': game.id})
 
 
-def startTron(request, player, token, gameType):
-    playerNumber = request.POST.get('playerNumber', 1) # TODO : check default 1 or error ?
+def startTron(request, player, token, gameType, gameMode, playerNumber):
+    if not playerNumber:
+        playerNumber = request.POST.get('playerNumber', 1)
 
     if not playerNumber or not gameType:
         return JsonResponse({'error': 'Missing setting'}, status=400)
@@ -383,7 +390,28 @@ def startTron(request, player, token, gameType):
     party_name = request.POST.get('partyName', 'tron')
     game = Game.objects.create(gameName='tron', gameProperty=tron, start_date=timezone.now(), party_name=party_name)
     game.players.add(player)
-    player = PongPlayer.objects.create(player=player, score=0, n=1, token=token)
+    player = PongPlayer.objects.create(player=player, score=0, n=1)
+    game.gameProperty.players.add(player)
+
+    game.status = 'waiting' if int(playerNumber) > 1 else 'playing'
+
+    game.save()
+    return JsonResponse({'message': 'Game started', 'game_id': game.id})
+    
+def startGAM(request, player, token, gameType, gameMode, playerNumber):
+    if not playerNumber:
+        playerNumber = request.POST.get('playerNumber', 1)
+
+    if not playerNumber or not gameType:
+        return JsonResponse({'error': 'Missing setting'}, status=400)
+    if int(playerNumber) < 1:
+        return JsonResponse({'error': 'Invalid player number'}, status=400)
+
+    gam = GAM.objects.create(playerNumber=playerNumber)
+    party_name = request.POST.get('partyName', 'gun_and_monsters')
+    game = Game.objects.create(gameName='gun_and_monsters', gameProperty=gam, start_date=timezone.now(), party_name=party_name)
+    game.players.add(player)
+    player = PongPlayer.objects.create(player=player, score=0, n=1)
     game.gameProperty.players.add(player)
 
     game.status = 'waiting' if int(playerNumber) > 1 else 'playing'
@@ -394,7 +422,7 @@ def startTron(request, player, token, gameType):
 # @require_POST
 @csrf_exempt # Disable CSRF protection for this view
 # create a game party
-def start_game(request, gameName=None):
+def start_game(request, gameName=None, gameMode=None, playerNumber=None):
     # try:
     # get user
     session_key = request.session.session_key
@@ -414,9 +442,11 @@ def start_game(request, gameName=None):
         gameName = request.POST.get('game')
     gameType = request.POST.get('gameType', 'simple')  # Get the game type from the request, default to 'simple'
     if gameName == 'pong':
-        return startPong(request, player, token, gameType)
+        return startPong(request, player, token, gameType, gameMode, playerNumber)
     elif gameName == 'tron':
-        return startTron(request, player, token, gameType)
+        return startTron(request, player, token, gameType, gameMode, playerNumber)
+    elif gameName == 'gun_and_monsters':
+        return startGAM(request, player, token, gameType, gameMode, playerNumber)
     else:
         return JsonResponse({'error': 'Game not found'}, status=404)
     # except:
@@ -424,7 +454,6 @@ def start_game(request, gameName=None):
 
 @require_POST
 @csrf_exempt # Disable CSRF protection for this view
-# record a move in the pong game # TODO : change to update game for multiple game
 def record_move(request):
     try:    
         session_key = request.session.session_key
@@ -435,36 +464,18 @@ def record_move(request):
         player = get_player(session_key, token, user_id)
         if player == None:
             return JsonResponse({'error': 'Failed to get player'}, status=400)
-        
+        # TODO : multiple game
         game = Game.objects.get(id=game_id)  # Get the game
         if not game.gameProperty.players.get(player=player):
             return JsonResponse({'error': 'Player not in game'}, status=400)
         
-        # p = game.gameProperty.players.get(player=player).n
-        # print(p)
-        
-        # players = cache.get('players')
-        # print(players)
-        # game_group_name = f'pong_game_{game_id}'
-        # channel_player = players.get(game_group_name)
-        # player = channel_player['p1']
-        # p = 'p1'
-
-
-        # if not player.get('token') == token:
-        #     player = channel_player['p2']
-        #     p = 'p2'
-        #     if not player.get('token') == token:
-        #         print("back")
-        #         return
         direction = request.POST.get('direction')  # Get the direction of the move
-        print(direction)
         move_pong(game_id, game.gameProperty.players.get(player=player).n, direction)
         return JsonResponse({'message': 'Move recorded', 'game_id': game_id})
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
-    except Player.DoesNotExist:
-        return JsonResponse({'error': 'Player not found'}, status=404)
+    except:
+        return JsonResponse({'error': 'Server error'}, status=500)
 
 @require_GET
 @csrf_exempt # Disable CSRF protection for this view
@@ -493,7 +504,7 @@ def get_stats(request):
     
     except:
         return JsonResponse({'error': 'Error'}, status=500)
- 
+
 @require_GET
 @csrf_exempt # Disable CSRF protection for this view   
 def get_history(request):
@@ -532,6 +543,39 @@ def get_history(request):
             history_list.append(game_dict)
         return JsonResponse(history_list, safe=False)
     
+    except Exception as e:
+        print(e, flush=True)
+        return JsonResponse({'error': 'Error'}, status=500)
+
+@require_GET
+@csrf_exempt
+def list_achievements(request):
+    try:
+        user_id = request.GET.get('UserId')
+        if not user_id:
+            return JsonResponse({'error': 'Missing id'}, status=400)
+        
+        if not User.objects.filter(id=user_id).exists():
+            return JsonResponse({'error': 'Player not found'}, status=404)
+        
+        user = User.objects.get(id=user_id)
+        # TODO : remove this
+        # test create and add achievement
+        ach, created = Achievement.objects.get_or_create(name='list achievements', description='list all achievements', points=0)
+        UserAchievement.objects.get_or_create(user=user, achievement=ach)
+        # end test
+
+        user_achievements = UserAchievement.objects.filter(user=user)
+        unlocked_achievements_dc = [model_to_dict(ua.achievement) for ua in user_achievements]
+
+        locked_achievements = Achievement.objects.exclude(id__in=[ua.achievement.id for ua in user_achievements])
+        locked_achievements_dc = [model_to_dict(ach) for ach in locked_achievements]
+
+        return JsonResponse({'unlocked': unlocked_achievements_dc , 'locked':  locked_achievements_dc}, safe=False)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Player not found'}, status=404)
+    except (UserAchievement.DoesNotExist, Achievement.DoesNotExist):
+        return JsonResponse({'error': 'Achievements not found'}, status=404)
     except Exception as e:
         print(e, flush=True)
         return JsonResponse({'error': 'Error'}, status=500)
