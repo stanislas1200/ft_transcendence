@@ -28,6 +28,7 @@
     <!-- <script src="{% static 'js/pong.js' %}"></script> -->
     <script src="{% static 'js/settings.js' %}"></script>
     <script src="{% static 'js/profile.js' %}"></script>
+    <script src="{% static 'js/friendProfile.js' %}"></script>
 </head>
 
 <body>
@@ -82,8 +83,6 @@
                 </ul>
             </nav>
             <nav class="navbar-top">
-                <input id="searchValue" type="text" placeholder="Search..">
-                <button type="submit" id="searchButton"></i></button>
                 <ul>
                     <li>
                         <a href="#friend" onclick="setActive(this, 'friend')">
@@ -101,6 +100,14 @@
                         </a>
                     </li>
                 </ul>
+                <input class="searchValue" id="searchValue" type="search" placeholder="Search..">
+                <!-- <friend id="proposition"> -->
+                <ul id="proposition" class="proposition">
+                    <li>Cours HTML et CSS</li>
+                    <li>Cours JavaScript</li>
+                    <li>Cours PHP et MySQL</li>
+                </ul>
+                <!-- </friend> -->
             </nav>
         </div>
         <div class="spa" id="spa-content">
@@ -108,5 +115,6 @@
         </div>
     </main>
 </body>
+<script>searchFriend();</script>
 
 </html>
