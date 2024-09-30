@@ -1,11 +1,11 @@
 .achievement-page {
-	display: flex;
-	flex-direction: column;
-	gap: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .achievement-title {
-	font-size: 3em;
+    font-size: 3em;
 }
 
 .achievements {
@@ -34,11 +34,11 @@
     aspect-ratio: 1 / 1;
     background-color: var(--primary);
     margin-right: 5px;
-	border: 2px solid var(--background);
-	border-radius: 30px;
-	border-bottom-left-radius: 0;
-	border-top-right-radius: 0;
-	flex-shrink: 0;
+    border: 2px solid var(--background);
+    border-radius: 30px;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 0;
+    flex-shrink: 0;
 }
 
 .achievement-info {
@@ -47,10 +47,10 @@
     align-items: flex-start;
     justify-content: flex-start;
     height: 100%;
-	flex-grow: 1;
-	border: 2px solid var(--secondary);
-	border-radius: 8px;
-	padding: 10px;
+    flex-grow: 1;
+    border: 2px solid var(--secondary);
+    border-radius: 8px;
+    padding: 10px;
 }
 
 .achievement-name {
@@ -59,21 +59,32 @@
 }
 
 .achievement-desc {
-	flex-grow: 1;
-	display: flex;
-	align-items: center;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
     font-size: 0.9em;
     color: var(--text);
 }
 
 .achievement-trophy {
-	font-size: 3em;
-	height: unset;
-	width: unset;
+    font-size: 3em;
+    height: unset;
+    width: unset;
 }
 
 .achievement.disabled {
     opacity: 0.5;
     pointer-events: none;
     filter: grayscale(100%);
+}
+
+.achievement.disabled .achievement-name span, 
+.achievement.disabled .achievement-desc span {
+    visibility: hidden;
+}
+
+.achievement.disabled .achievement-name span::before, 
+.achievement.disabled .achievement-desc span::before {
+    visibility: visible;
+    content: "???";
 }
