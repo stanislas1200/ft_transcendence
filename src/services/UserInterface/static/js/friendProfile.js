@@ -76,10 +76,35 @@ function loadHistoryFromUser(id) {
             if (xhr.status === 200 || xhr.status === 201) {
                 response = JSON.parse(xhr.responseText);
                 console.log(response);
+                displayHistorique(response);
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
     };
     xhr.send();
+}
+
+function displayHistorique(response) {
+    const historySpace = document.getElementById('history');
+    if (response.length == 0) {
+        // no historique for the moment
+        historySpace.innerHTML = "<p class=\"game\">no history for the moment<\/p>";
+    }
+    for (let i = 0; i < response.length; i++) {
+        let date = response[i].start_date.substr(0, 10);
+        let tmp = "<p class=\"game\">";
+        console.log(response[i].win);
+        if (response[i].win == 'false')
+            tmp += "<a class=\"victory\" style=\"color: green;\">" + "Win" + "<\/a>"
+        else
+            tmp += "<a class=\"victory\" style=\"color: red;\">" + "Loose" + "<\/a>"
+        tmp += "<a class=\"mode\">" + response[i].gameName + "<\/a>"
+        tmp += "<a class=\"score\">" + response[i].scores + "<\/a>"
+        tmp += "<a class=\"date\">" + date + "<\/a>"
+        tmp += "<a class=\"status\">" + response[i].status + "<\/a>"
+        // tmp += response[i].id + "  " + response[i].status + "  " + date + "  " + response[i].gameName;
+        tmp += "<\/p>";
+        historySpace.innerHTML += tmp;
+    }
 }

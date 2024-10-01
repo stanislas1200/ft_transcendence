@@ -134,7 +134,7 @@ nav.navbar-top li.active>a {
 .searchValue {
     float: right;
     height: 40px;
-    width: calc(93vw - (60px * 3) + 46px);
+    width: calc(93vw - (60px * 4) + 46px);
     margin-top: 10px;
     background-color: var(--background);
     opacity: 50%;
