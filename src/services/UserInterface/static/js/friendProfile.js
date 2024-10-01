@@ -27,7 +27,7 @@ function searchUser(usernameSearching) {
                     // if (response.users.length != 1) {
                     numUser = findGoodUser(usernameSearching, response);
                     // console.log(response.users[numUser]);
-                    console.log(userNameFriend);
+                    // console.log(userNameFriend);
                     var tmp = userNameFriend.textContent;
                     userNameFriend.innerHTML = response.users[numUser].username;
                     // console.log("innerHTML: " + userNameFriend.innerHTML);
@@ -39,6 +39,7 @@ function searchUser(usernameSearching) {
                     // console.log(userName.textContent);
                     // console.log('fin search user');
                     loadProfilePicture(response.users[numUser].id);
+                    loadHistoryFromUser(response.users[numUser].id);
                     // } else {
                     //     userName.textContent = response.users[0].username;
                     //     loadProfilePicture(response.users[0].id);
@@ -62,8 +63,6 @@ function searchUser(usernameSearching) {
 }
 
 function loadHistoryFromUser(id) {
-    const userName = document.getElementById('userName');
-    // console.log('user found');
     let url = "https://localhost:8001/game/hist?UserId={{UserId}}";
     url = url.replace("localhost", window.location.hostname);
     url = url.replace("{{UserId}}", id);
@@ -76,7 +75,7 @@ function loadHistoryFromUser(id) {
         if (xhr.readyState === 4) {
             if (xhr.status === 200 || xhr.status === 201) {
                 response = JSON.parse(xhr.responseText);
-                // console.log(response);
+                console.log(response);
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
