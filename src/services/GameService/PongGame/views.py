@@ -543,6 +543,19 @@ def get_history(request):
             game_dict.pop('players')
             game_dict.pop('content_type')
             game_dict.pop('object_id')
+            game_dict.pop('winners')
+
+            game_dict['win'] = game.winners.filter(id=user_id).exists()
+
+            party = game.gameProperty
+            score = ''
+            for player in party.players.all():
+                if int(player.player.id) == int(user_id):
+                    score = f'{str(player.score)}{score}'
+                else:
+                    score = f'{score}/{str(player.score)}'
+            game_dict['scores'] = score
+
             history_list.append(game_dict)
         return JsonResponse(history_list, safe=False)
     

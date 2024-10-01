@@ -54,6 +54,7 @@ class Game(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     gameProperty = GenericForeignKey('content_type', 'object_id')
+    winners = models.ManyToManyField(User, related_name='games_as_winner', blank=True)
 
     # def __str__(self):
     #     return self.gameName
