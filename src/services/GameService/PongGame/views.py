@@ -441,6 +441,9 @@ def start_game(request, gameName=None, gameMode=None, playerNumber=None):
     if not gameName:
         gameName = request.POST.get('game')
     gameType = request.POST.get('gameType', 'simple')  # Get the game type from the request, default to 'simple'
+
+    ach, created = Achievement.objects.get_or_create(name='first game', description='first game', points=0)
+    UserAchievement.objects.get_or_create(user=player, achievement=ach)
     if gameName == 'pong':
         return startPong(request, player, token, gameType, gameMode, playerNumber)
     elif gameName == 'tron':
@@ -540,6 +543,19 @@ def get_history(request):
             game_dict.pop('players')
             game_dict.pop('content_type')
             game_dict.pop('object_id')
+            game_dict.pop('winners')
+
+            game_dict['win'] = game.winners.filter(id=user_id).exists()
+
+            party = game.gameProperty
+            score = ''
+            for player in party.players.all():
+                if int(player.player.id) == int(user_id):
+                    score = f'{str(player.score)}{score}'
+                else:
+                    score = f'{score}/{str(player.score)}'
+            game_dict['scores'] = score
+
             history_list.append(game_dict)
         return JsonResponse(history_list, safe=False)
     
