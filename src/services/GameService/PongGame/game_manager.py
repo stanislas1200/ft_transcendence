@@ -250,6 +250,7 @@ class Party:
 				stats, created = PlayerGameTypeStats.objects.get_or_create(player=p, game_type=game_type)
 				stats.games_played = F('games_played') + 1
 				if player['score'] >= self.score: 
+					game.winners.add(p)
 					stats.games_won = F('games_won') + 1
 				else:
 					stats.games_lost = F('games_lost') + 1

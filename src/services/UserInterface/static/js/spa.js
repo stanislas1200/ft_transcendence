@@ -39,6 +39,9 @@ async function loadPage(page) {
         case 'profile':
             loadProfile();
             break;
+        case 'achievements':
+            loadArchievements();
+            break;
         default:
             break;
     }
