@@ -466,12 +466,20 @@ def check_collision(game, vertices, n):
 import threading
 
 def randomize_direction(game):
-	angle = random.uniform(0, 2 * math.pi)  # Full circle (0 to 2π)
-
+	# angle = random.uniform(0, 2 * math.pi)  # Full circle (0 to 2π)
+	angle = random.uniform(math.radians(-60), math.radians(60))
+    #|/-45
+	#|---0
+	#|\ 45
 	dx = math.cos(angle)
 	dy = math.sin(angle)
 
-	dx *= game.ballSpeed
+	# dx *= game.ballSpeed
+	# dy *= game.ballSpeed
+
+	direction_x = random.choice([-1, 1])  # horizontal direction
+
+	dx *= direction_x * game.ballSpeed
 	dy *= game.ballSpeed
 	return dx, dy
 
@@ -479,7 +487,7 @@ def reset_ball(game):
 	game.ball['y'] = game.height/2
 	game.ball['x'] = game.width/2
 	game.ball['dx'], game.ball['dy'] = randomize_direction(game)
-	time.sleep(1)
+	# time.sleep(1)
 
 def ffa_update(game):
 	if game.ball['y'] <= game.paddlePadding/4 + game.ballR or game.ball['y'] >= game.height - game.paddlePadding/4 - game.ballR:

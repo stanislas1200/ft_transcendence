@@ -265,6 +265,7 @@ def get_party(request):
             game_dict['players'] = [user_to_dict(player) for player in game.players.all()]
             game_dict.pop('content_type')
             game_dict.pop('object_id')
+            game_dict.pop('winners')
             game_list.append(game_dict)
         return JsonResponse(game_list, safe=False)
     except Game.DoesNotExist:
