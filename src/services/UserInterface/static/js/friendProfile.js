@@ -95,7 +95,7 @@ function displayHistorique(response) {
         let date = response[i].start_date.substr(0, 10);
         let tmp = "<p class=\"game\">";
         console.log(response[i].win);
-        if (response[i].win == 'false')
+        if (response[i].win == true)
             tmp += "<a class=\"victory\" style=\"color: green;\">" + "Win" + "<\/a>"
         else
             tmp += "<a class=\"victory\" style=\"color: red;\">" + "Loose" + "<\/a>"
@@ -108,3 +108,6 @@ function displayHistorique(response) {
         historySpace.innerHTML += tmp;
     }
 }
+
+// retirer sur pas finish
+// changer la couleur
