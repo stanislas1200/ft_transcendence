@@ -81,6 +81,7 @@ function gameModeDisabler() {
             gameModeCreateTeam.disabled = false;
         }
     });
+
 }
 
 function randomJoinGameButton() {
@@ -92,7 +93,7 @@ function randomJoinGameButton() {
         var xhr = new XMLHttpRequest();
         var url = "https://" + window.location.hostname + ":8001/game/join?gameName=pong&gameMode=" + gameModeSelect.value + "&nbPlayers=" + maxPlayersSelectRandom.value;
         xhr.withCredentials = true;
-        xhr.open("GET", url, true);
+        xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4)
@@ -212,6 +213,11 @@ function inputAnimation() {
     }
 
     inputs.forEach((input) => {
+        const span = input.previousElementSibling;
+        if (input.value !== '' && span) {
+            span.classList.add('span-active'); // Ajoute la classe si l'input a déjà du texte
+        }
+
         input.addEventListener('focus', handleFocus);
         input.addEventListener('blur', handleFocusOut);
     });

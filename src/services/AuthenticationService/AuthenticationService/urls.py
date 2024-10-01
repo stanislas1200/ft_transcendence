@@ -12,7 +12,8 @@ urlpatterns = [
     path('logout', views.logout_view),
     path('oauth42', views.oauth42),
     path('me', views.me),
-    path('get_user/', views.get_user_from_session),
+    path('verify_token/', views.verify_user_token),
+    path('users/<int:user_id>', views.get_user_info),
     path('users/<int:user_id>/edit', views.update_user),
     path('users/<int:user_id>/avatar', views.get_avatar), # call pour la pp
 
