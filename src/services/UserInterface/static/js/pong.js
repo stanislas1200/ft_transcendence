@@ -4,16 +4,18 @@ function getCookie(name) {
 	if (parts.length == 2) return parts.pop().split(";").shift();
 }
 
+let partyId = localStorage.getItem('gameId');
+localStorage.removeItem('gameId');
+let userId = getCookie('userId');
+let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/${userId}`;
+wsUrl = wsUrl.replace('localhost', window.location.hostname);
+let socket = new WebSocket(wsUrl);
+const keyState = {};
+
 function connect() {
 	let sessionId = getCookie('sessionid');
 	console.log(sessionId)
-	let partyId = localStorage.getItem('gameId');
-	localStorage.removeItem('gameId');
-	let userId = getCookie('userId');
-	let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/${userId}`;
-	wsUrl = wsUrl.replace('localhost', window.location.hostname);
 
-	let socket = new WebSocket(wsUrl);
 	
 	function closeWebSocket() {
 		socket.close();
@@ -71,6 +73,7 @@ function connect() {
 		s1 = serverMessage.scores[0];
 		s2 = serverMessage.scores[1];
 		mode = serverMessage.gameMode;
+
 	});
 
 	socket.addEventListener('close', function (event) {
@@ -81,25 +84,12 @@ function connect() {
 		console.log('Error: ', event);
 	});
 
-
 	document.addEventListener('keydown', function (event) {
-		var direction;
-		if (event.key === "ArrowUp") {
-			direction = "up";
-		} else if (event.key === "ArrowDown") {
-			direction = "down";
-		} else if (event.key === "ArrowLeft") {
-			direction = "up";
-		} else if (event.key === "ArrowRight") { // todo : decompte
-			direction = "down";
-		}
-
-		if (direction && socket) {
-			console.log(direction)
-			var sessionId = getCookie('sessionid');
-			var token = getCookie('token');
-			socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', player: 'p1', direction: direction }));
-		}
+		keyState[event.key] = true;
+	});
+	
+	document.addEventListener('keyup', function (event) {
+		keyState[event.key] = false;
 	});
 }
 connect();
@@ -119,6 +109,25 @@ mode = "ffa"
 obstacles = []
 usernames = null
 positions = null
+scores = null
+
+function updatePlayers() {
+	var direction
+	if (keyState["ArrowUp"]) {
+		direction = "up";
+	} else if (keyState["ArrowDown"]) {
+		direction = "down";
+	} else if (keyState["ArrowLeft"]) {
+		direction = "up";
+	} else if (keyState["ArrowRight"]) { // todo : decompte
+		direction = "down";
+	}
+
+	if (direction && socket) {
+		var sessionId = getCookie('sessionid');
+		socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', player: 'p1', direction: direction }));
+	}
+}
 
 function drawPlayers() {
 	colors = ['#7e3047', '#498d14', '#a891d5', 'white']
@@ -195,6 +204,19 @@ function draw() {
 
 function gameLoop() {
 	draw();
+	updatePlayers()
+	if (scores) {
+		if (scores[0] > 10)
+		{
+			c.fillText("Team 1 won", 800/2, 600/2)
+			return
+		}
+		else if (scores[1] > 10)
+		{
+			c.fillText("Team 2 won", 800/2, 600/2)
+			return
+		}
+	}
 	requestAnimationFrame(gameLoop);
 }
 

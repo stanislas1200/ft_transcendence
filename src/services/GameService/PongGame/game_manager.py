@@ -433,12 +433,12 @@ def ai_play(game):
 			for _ in range(20):
 				if future_y < game.positions[1] - 10:
 					move_pong(game.game_id, 2, 'up')
-					time.sleep(0.05)
+					time.sleep(0.01)
 					if future_y >= game.positions[1]:
 						break
 				elif future_y > game.positions[1] + 10:
 					move_pong(game.game_id, 2, 'down')
-					time.sleep(0.05)
+					time.sleep(0.01)
 					if future_y <= game.positions[1]:
 						break
 		else:
