@@ -138,7 +138,8 @@ class Party:
 		self.ballR = 5
 		if prop.mapId == 3:
 			make_map3()
-		self.map = maps[prop.mapId]
+		self.map = maps[prop.mapId].copy()
+
 		if prop.gameMode == 'ffa' and self.player_number > 2:
 			borders = [
 				{
@@ -432,12 +433,12 @@ def ai_play(game):
 			for _ in range(20):
 				if future_y < game.positions[1] - 10:
 					move_pong(game.game_id, 2, 'up')
-					time.sleep(0.05)
+					time.sleep(0.01)
 					if future_y >= game.positions[1]:
 						break
 				elif future_y > game.positions[1] + 10:
 					move_pong(game.game_id, 2, 'down')
-					time.sleep(0.05)
+					time.sleep(0.01)
 					if future_y <= game.positions[1]:
 						break
 		else:
@@ -466,12 +467,20 @@ def check_collision(game, vertices, n):
 import threading
 
 def randomize_direction(game):
-	angle = random.uniform(0, 2 * math.pi)  # Full circle (0 to 2π)
-
+	# angle = random.uniform(0, 2 * math.pi)  # Full circle (0 to 2π)
+	angle = random.uniform(math.radians(-60), math.radians(60))
+    #|/-45
+	#|---0
+	#|\ 45
 	dx = math.cos(angle)
 	dy = math.sin(angle)
 
-	dx *= game.ballSpeed
+	# dx *= game.ballSpeed
+	# dy *= game.ballSpeed
+
+	direction_x = random.choice([-1, 1])  # horizontal direction
+
+	dx *= direction_x * game.ballSpeed
 	dy *= game.ballSpeed
 	return dx, dy
 
@@ -479,7 +488,7 @@ def reset_ball(game):
 	game.ball['y'] = game.height/2
 	game.ball['x'] = game.width/2
 	game.ball['dx'], game.ball['dy'] = randomize_direction(game)
-	time.sleep(1)
+	# time.sleep(1)
 
 def ffa_update(game):
 	if game.ball['y'] <= game.paddlePadding/4 + game.ballR or game.ball['y'] >= game.height - game.paddlePadding/4 - game.ballR:

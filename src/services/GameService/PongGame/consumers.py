@@ -13,6 +13,15 @@ import http.cookies
 
 from .views import get_player
 from django.core.cache import cache
+import time
+
+
+async def closeWithMessage(ws, str):
+	await self.accept()
+	await asyncio.sleep(0.5)
+	await self.send(text_data=str)
+	await self.close(code=4001)
+
 
 class GameConsumer(AsyncWebsocketConsumer):
 	connected_users = 0
@@ -34,18 +43,12 @@ class GameConsumer(AsyncWebsocketConsumer):
 		# Check game id
 		game_exist = await sync_to_async(Game.objects.filter(id=self.game_id).exists)()
 		if not game_exist:
-			await self.accept()
-			await asyncio.sleep(0.5)  # FIXME : ws don't wait that client got the message not working
-			await self.send(text_data="Game not found. Closing connection.")
-			await self.close(code=4001) # FIXME : close_code not pass
+			closeWithMessage(self, "Game not found. Closing connection.")
 			return
 
 		game = await sync_to_async(Game.objects.get)(id=self.game_id)
 		if game.status == 'finished':
-			await self.accept()
-			await asyncio.sleep(0.5)
-			await self.send(text_data="Game is finished. Closing connection.")
-			await self.close(code=4001)
+			closeWithMessage(self, "Game is finished. Closing connection.")
 			return
 
 		self.game = game.gameName
@@ -94,31 +97,37 @@ class GameConsumer(AsyncWebsocketConsumer):
 			return
 
 	async def game_loop(self):
+		last_time = time.time()
+		ret = 0
 		while True:
-			if self.game == 'pong':
-				ret, game_id = await update_pong(self.game_id) or (None, None)
-				# if not ret:
-				# 	continue
-				game_state = get_pong_state(self.game_id)
-			elif self.game == 'tron':
-				ret, game_id = await update_tron(self.game_id) or (None, None)
-				game_state = get_tron_state(self.game_id)
-			elif self.game == 'gun_and_monsters':
-				ret, game_id = await update_gam(self.game_id) or (None, None)
-				game_state = get_gam_state(self.game_id)
-			
+			current_time = time.time()
+			elapsed_time = current_time - last_time
+			if elapsed_time >= (1/60): # TODO : best ?
+				if self.game == 'pong':
+					ret, game_id = await update_pong(self.game_id) or (None, None)
+					game_state = get_pong_state(self.game_id)
+				elif self.game == 'tron':
+					ret, game_id = await update_tron(self.game_id) or (None, None)
+					game_state = get_tron_state(self.game_id)
+				elif self.game == 'gun_and_monsters':
+					ret, game_id = await update_gam(self.game_id) or (None, None)
+					game_state = get_gam_state(self.game_id)
+				
 
-			await self.channel_layer.group_send(
-				self.game_group_name,
-				{
-					'type': 'update_game_state',
-					'game_state': game_state
-				}
-			)
+				await self.channel_layer.group_send(
+					self.game_group_name,
+					{
+						'type': 'update_game_state',
+						'game_state': game_state
+					}
+				)
+				last_time = current_time
+
 			if ret:
 				await self.close()
 				break # TODO : circle game solo
-			await asyncio.sleep(1/60)
+			# await asyncio.sleep(1/60)
+			await asyncio.sleep(0)
 
 	async def update_game_state(self, event):
 		await self.send(text_data=json.dumps(event['game_state']))
