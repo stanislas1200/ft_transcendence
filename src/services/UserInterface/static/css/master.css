@@ -132,9 +132,11 @@ nav.navbar-top li.active>a {
 }
 
 .searchValue {
-    float: right;
+    /* float: right; */
     height: 40px;
-    width: calc(93vw - (60px * 4) + 46px);
+    /* left: 60px; */
+    margin-left: 70px;
+    width: calc(95vw - ((60px * 5) + 70px));
     margin-top: 10px;
     background-color: var(--background);
     opacity: 50%;
@@ -150,28 +152,32 @@ nav.navbar-top li.active>a {
 }
 
 .proposition {
+    float: left!important;
     color: var(--text);
-    /* color: red; */
+    margin-left: 70px;
     display: flex;
     flex-direction: column;
-    /* width: calc(95vw - (60px * 3) + 46px); */
-    width: 100%;
-    padding-left: 130px;
-    margin-bottom: 0px;
-    margin-top: 0px;
+    width: calc(95vw - (60px * 5) + 70px);
+    z-index: 2;
+    background-color: var(--background);
 }
 
 .hide {
     opacity: 0%;
 }
 
-ul.proposition {
-    list-style-type: disc;
-    /* padding-left: 60px; */
+.proposition-item {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
 }
 
-li:hover {
-    background-color: green;
+.proposition>ul {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-left: 0px;
 }
 
 /* notif css */
