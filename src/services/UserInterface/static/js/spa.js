@@ -23,7 +23,6 @@ async function loadPage(page) {
             console.error('There was a problem with the fetch operation:', error);
             // Optionally load an error page or show an error message
         });
-
     switch (page) {
         case 'friend':
             getElementFriend();
