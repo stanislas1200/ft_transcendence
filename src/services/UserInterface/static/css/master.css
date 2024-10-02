@@ -130,3 +130,40 @@ nav.navbar-top li.active>a {
     width: 100%;
     height: 100%;
 }
+
+/* notif css */
+.notif {
+    position: fixed;
+    top: 65px;
+    right: 5px;
+    width: 300px;
+    overflow: hidden;
+    z-index: 1;
+    float: right;
+}
+
+.notif-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.notif-item {
+    margin: 5px;
+    padding: 10px;
+
+}
+
+.notif-text {
+    /* width: 80%; */
+}
+
+.notif-close {
+    float: right;
+    cursor: pointer;
+    height: 100%;
+}
+
+.succes-notif {
+    background-color: #edfbd8;
+    border: solid 1px #84d65a;
+}

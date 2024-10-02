@@ -9,6 +9,7 @@
     <title>Home Page</title>
 
     <link rel="icon" href="{% static 'images/pong.png' %}" type="image/x-icon">
+    <script src="https://kit.fontawesome.com/e02cd193eb.js" crossorigin="anonymous"></script>
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/spa.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
@@ -107,6 +108,13 @@
                     </li>
                 </ul>
             </nav>
+        </div>
+        <div class="notif">
+            <div class="notif-list">
+                <div class="notif-item succes-notif">
+                    <p class="notif-text" >this is a notif<i class="fa-solid fa-xmark notif-close"></i></p>
+                </div>
+            </div>
         </div>
         <div class="spa" id="spa-content">
             {% include content %}
