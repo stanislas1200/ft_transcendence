@@ -33,7 +33,7 @@ nav li {
     z-index: 1000;
 
     /* STYLE */
-    background: var(--background);
+    background: var(--tertiary);
     border-right: 1px solid var(--secondary);
     transition: width 0.05s ease;
     overflow: hidden;
@@ -95,7 +95,7 @@ nav.navbar-left li.active>a {
     z-index: 999;
 
     /* STYLE */
-    background-color: var(--background);
+    background-color: var(--tertiary);
     border-bottom: 1px solid var(--secondary);
 }
 
@@ -127,6 +127,6 @@ nav.navbar-top li.active>a {
     margin-left: 90px;
     margin-bottom: 30px;
     margin-right: 30px;
-    width: 100%;
-    height: 100%;
+    width: calc(100vw - 120px);
+    height: calc(100vh - 120px);
 }
