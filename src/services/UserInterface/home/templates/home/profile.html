@@ -25,14 +25,40 @@
         </div>
     </div>
     <div class="settings-grid-userInformation">
-        player information
         <div class="info-area">
-            <div class="history">
-                history
+            <div class="legend">
+                <p class="history_win_loose">Win/Loose</p>
+                <p class="pipe">|</p>
+                <p class="history_game_mode">Game mode</p>
+                <p class="pipe">|</p>
+                <p class="history_score">Score</p>
+                <p class="pipe">|</p>
+                <p class="history_date">Date</p>
+                <p class="pipe">|</p>
+                <p class="history_status">Status</p>
             </div>
-            <div class="achivement">
+            <div class="border_history">
+                <div class="history" id="history">
+                </div>
+            </div>
+            <!-- <div class="achivement">
                 achivement
-            </div>
+            </div> -->
+        </div>
+        <div class="directionColumn">
+            <svg viewBox="0 0 36 36" class="circle-svg">
+
+                <path class="around" stroke-dasharray="100, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <path id="percent" class="percent" stroke-dasharray="80, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <text id="text" class="text" x="18" y="14" text-anchor="middle" fill="var(--text)" dy="7"
+                    font-size="20">3/10</text>
+
+            </svg>
+            <p id="totalScore">Total of points scored: </p>
         </div>
     </div>
 </div>

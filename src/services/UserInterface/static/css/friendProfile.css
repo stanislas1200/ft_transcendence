@@ -31,6 +31,8 @@
     grid-column: 3 / 10;
     grid-row: 1 / 4;
     max-height: 75vh;
+    display: flex;
+    flex-direction: row;
 }
 
 #profile-container {
@@ -88,7 +90,7 @@
 }
 
 .info-area {
-    width: 100%;
+    width: 50%;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -101,6 +103,10 @@
     height: 70px;
     display: flex;
     flex-direction: row;
+}
+
+.game:hover {
+    background-color: var(--primary);
 }
 
 .legend {
@@ -147,4 +153,38 @@
     max-height: 75vw;
     overflow-y: auto;
     scrollbar-color: var(--background) var(--background);
+}
+
+/* *************************************************************************************************** */
+
+@keyframes progress {
+    0% {
+        stroke-dasharray: 0 100;
+    }
+}
+
+.circle-svg {
+    display: block;
+    margin: 10px auto;
+    max-height: 200px;
+}
+
+#text {
+    text-align: center;
+    color: var(--text);
+    font-size: 10px;
+}
+
+.circle-svg path.percent {
+    stroke: var(--primary);
+    fill: none;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    animation: progress 1s ease-out forwards;
+}
+
+.circle-svg path.around {
+    stroke: #c4c4c4;
+    fill: none;
+    stroke-width: 2.8;
 }

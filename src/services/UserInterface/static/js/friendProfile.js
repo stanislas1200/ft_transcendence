@@ -1,7 +1,6 @@
 function findGoodUser(usernameSearching, response) {
     for (let i = 0; i < response.users.length; i++) {
         if (response.users[i].username === usernameSearching) {
-            // console.log(response.users[i]);
             return (i);
         }
     }
@@ -71,12 +70,11 @@ function loadHistoryFromUser(id) {
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.withCredentials = true;
     xhr.onreadystatechange = function () {
-        // console.log(xhr.readyState);
         if (xhr.readyState === 4) {
             if (xhr.status === 200 || xhr.status === 201) {
                 response = JSON.parse(xhr.responseText);
                 console.log(response);
-                displayHistorique(response);
+                displayHistorique(id, response);
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
@@ -85,29 +83,96 @@ function loadHistoryFromUser(id) {
     xhr.send();
 }
 
-function displayHistorique(response) {
+// function loadHistoryFromGame(id, gameId) {
+//     console.log("userId: " + id + "gameId: " + gameId);
+//     let url = "https://localhost:8001/game/hist?UserId={{UserId}}&GameId={{gameId}}";
+//     url = url.replace("localhost", window.location.hostname);
+//     url = url.replace("{{UserId}}", id);
+//     url = url.replace("{{gameId}}", gameId);
+//     var xhr = new XMLHttpRequest();
+//     xhr.open('GET', url, true);
+//     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+//     xhr.withCredentials = true;
+//     xhr.onreadystatechange = function () {
+//         // console.log(xhr.readyState);
+//         if (xhr.readyState === 4) {
+//             if (xhr.status === 200 || xhr.status === 201) {
+//                 response = JSON.parse(xhr.responseText);
+//                 console.log(response);
+//             } else {
+//                 alert('Error: ' + JSON.parse(xhr.responseText).error);
+//             }
+//         }
+//     };
+//     xhr.send();
+// }
+
+function getStats(id) {
+    let url = "https://localhost:8001/game/stats?UserId={{UserId}}";
+    url = url.replace("localhost", window.location.hostname);
+    url = url.replace("{{UserId}}", id);
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.withCredentials = true;
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200 || xhr.status === 201) {
+                response = JSON.parse(xhr.responseText);
+                graphique(response);
+            } else {
+                alert('Error: ' + JSON.parse(xhr.responseText).error);
+            }
+        }
+    };
+    xhr.send();
+}
+
+function displayHistorique(userId, response) {
     const historySpace = document.getElementById('history');
     if (response.length == 0) {
         // no historique for the moment
         historySpace.innerHTML = "<p class=\"game\">no history for the moment<\/p>";
     }
+    let nbrWin = 0;
+    let totalGauche = 0;
+    let totalDroite = 0;
     for (let i = 0; i < response.length; i++) {
         let date = response[i].start_date.substr(0, 10);
         let tmp = "<p class=\"game\">";
-        console.log(response[i].win);
-        if (response[i].win == true)
-            tmp += "<a class=\"victory\" style=\"color: green;\">" + "Win" + "<\/a>"
-        else
-            tmp += "<a class=\"victory\" style=\"color: red;\">" + "Loose" + "<\/a>"
-        tmp += "<a class=\"mode\">" + response[i].gameName + "<\/a>"
-        tmp += "<a class=\"score\">" + response[i].scores + "<\/a>"
-        tmp += "<a class=\"date\">" + date + "<\/a>"
-        tmp += "<a class=\"status\">" + response[i].status + "<\/a>"
-        // tmp += response[i].id + "  " + response[i].status + "  " + date + "  " + response[i].gameName;
-        tmp += "<\/p>";
-        historySpace.innerHTML += tmp;
+        if (response[i].status != 'playing') {
+            if (response[i].win == true) {
+                tmp += "<a class=\"victory\" style=\"color: green;\">" + "Win" + "<\/a>"
+                nbrWin++;
+            }
+            else
+                tmp += "<a class=\"victory\" style=\"color: red;\">" + "Loose" + "<\/a>"
+            tmp += "<a class=\"mode\">" + response[i].gameName + "<\/a>"
+            tmp += "<a class=\"score\">" + response[i].scores + "<\/a>"
+            tmp += "<a class=\"date\">" + date + "<\/a>"
+            tmp += "<a class=\"status\">" + response[i].status + "<\/a>"
+            tmp += "<\/p>";
+            historySpace.innerHTML += tmp;
+        }
     }
+    getStats(userId);
 }
 
 // retirer sur pas finish
-// changer la couleur
+
+function graphique(stats) {
+    const percent = document.getElementById('percent');
+    const text = document.getElementById('text');
+    const totalScore = document.getElementById('totalScore');
+
+    let nbrGame = stats.pong.games_played;
+    let nbrWin = stats.pong.games_won;
+    // console.log(nbrWin + "/" + nbrGame);
+    // console.log(text);
+    const winPercent = (nbrWin / nbrGame) * 100;
+    let tmp = winPercent + ", 100";
+    text.innerHTML = nbrWin + "/" + nbrGame;
+    percent.setAttribute('stroke-dasharray', tmp);
+    totalScore.innerHTML += stats.pong.total_score;
+    // console.log(percent);
+}
