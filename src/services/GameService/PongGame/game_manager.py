@@ -138,7 +138,8 @@ class Party:
 		self.ballR = 5
 		if prop.mapId == 3:
 			make_map3()
-		self.map = maps[prop.mapId]
+		self.map = maps[prop.mapId].copy()
+
 		if prop.gameMode == 'ffa' and self.player_number > 2:
 			borders = [
 				{

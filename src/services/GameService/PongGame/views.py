@@ -336,6 +336,12 @@ def startPong(request, player, token, gameType, gameMode, playerNumber):
         playerNumber = request.POST.get('playerNumber', 1)
     if not gameMode:
         gameMode = request.POST.get('gameMode', 'ffa')
+    if gameMode not in ['team', 'ffa', 'solo-ia']:
+        return JsonResponse({'error': 'Invalid game mode'}, status=400)
+    if gameMode == 'team' and int(playerNumber) < 4:
+        return JsonResponse({'error': 'Invalid setting, need 4 player to play in team'}, status=400)
+    if gameMode == 'solo-ia' and int(playerNumber) > 1:
+        gameMode = 'ffa'
     map = request.POST.get('map', 0)
 
     if not playerNumber or not gameType:
@@ -355,7 +361,7 @@ def startPong(request, player, token, gameType, gameMode, playerNumber):
 
     # Ai user
     if int(playerNumber) == 1:
-        if not User.objects.filter(username='AI').exists():
+        if not User.objects.filter(username='AI').exists(): # get_or_create
             player = User.objects.create_user(username='AI')
         else:
             player = User.objects.get(username='AI')

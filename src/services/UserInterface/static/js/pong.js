@@ -38,7 +38,7 @@ function connect() {
 
 		if (serverMessage.message === 'Setup') {
 			obstacles = serverMessage.setting.obstacles
-			offc.fillStyle = "#e24091";
+			offc.fillStyle = "white";
 			if (obstacles) {
 				obstacles.forEach((obstacle) => {
 					// draw using vertices
@@ -121,7 +121,7 @@ usernames = null
 positions = null
 
 function drawPlayers() {
-	colors = ['green', 'red', 'yellow', 'white']
+	colors = ['#7e3047', '#498d14', '#a891d5', 'white']
 	c.fillStyle = colors[0]
 	if (positions) {
 		c.fillRect(40, positions[0] - 100/2, 10, 100)
@@ -133,7 +133,7 @@ function drawPlayers() {
 			c.fillStyle = colors[3]
 			c.fillRect(800 - 40 - 10, positions[3] - 100/2, 10, 100)
 		}
-		else if (mode == "ffa") {
+		else if (mode == "ffa" && usernames[2]) {
 			c.fillStyle = colors[2]
 			c.fillRect(positions[2] - 100/2, 40, 100, 10)
 			c.fillStyle = colors[3]
@@ -146,12 +146,25 @@ function drawNS() {
 	c.font = "20px monospace";
 	if (usernames) {
 		spaceB = c.width / usernames.length
-		colors = ['green', 'red', 'yellow', 'white']
-		usernames.forEach((player, index) => {
-			c.fillStyle = colors[index]
-			c.fillText(player + ':', spaceB * index, 100)
-			c.fillText(scores[index], spaceB * index + c.measureText(player).width + 10, 100)
-		})
+		colors = ['#7e3047', '#498d14', '#a891d5', 'white']
+		c.textBaseline = "middle"
+		// c.textAlign = "end"
+
+		c.fillStyle = 'white'
+		c.fillRect(0, 600, 800, 2)
+		if (mode == "team") {
+			c.fillText('Team 1: ', spaceB * 0, 625, 100)
+			c.fillText(scores[0], spaceB * 0 + c.measureText('Team 1: '), 625)
+			c.fillText('Team 2: ', spaceB * c.width / 2, 625, 100)
+			c.fillText(scores[2], spaceB * c.width / 2 + c.measureText('Team 2: '), 625) // TODO : username
+		}
+		else
+			usernames.forEach((player, index) => {
+				c.fillStyle = colors[index]
+				c.fillText(player, spaceB * index, 625, 100)
+				c.fillStyle = 'white'
+				c.fillText(': ' + scores[index], spaceB * index + Math.min(c.measureText(player).width, 100), 625)
+			})
 	}
 	
 }
@@ -160,7 +173,7 @@ function draw() {
 
 	// c.clearRect(0, 0, 800, 600)
 	c.fillStyle = "rgb(0 0 0 / 20%)";
-	c.fillRect(0, 0, 800, 600);
+	c.fillRect(0, 0, 800, 650);
 	c.fillStyle = "#8791ed";
 	for (i = 5; i < 600; i += 20)c.fillRect(400, i, 4, 10)
 	drawPlayers()
