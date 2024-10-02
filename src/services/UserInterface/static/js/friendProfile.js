@@ -73,7 +73,7 @@ function loadHistoryFromUser(id) {
         if (xhr.readyState === 4) {
             if (xhr.status === 200 || xhr.status === 201) {
                 response = JSON.parse(xhr.responseText);
-                console.log(response);
+                // console.log(response);
                 displayHistorique(id, response);
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
@@ -83,29 +83,29 @@ function loadHistoryFromUser(id) {
     xhr.send();
 }
 
-// function loadHistoryFromGame(id, gameId) {
-//     console.log("userId: " + id + "gameId: " + gameId);
-//     let url = "https://localhost:8001/game/hist?UserId={{UserId}}&GameId={{gameId}}";
-//     url = url.replace("localhost", window.location.hostname);
-//     url = url.replace("{{UserId}}", id);
-//     url = url.replace("{{gameId}}", gameId);
-//     var xhr = new XMLHttpRequest();
-//     xhr.open('GET', url, true);
-//     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-//     xhr.withCredentials = true;
-//     xhr.onreadystatechange = function () {
-//         // console.log(xhr.readyState);
-//         if (xhr.readyState === 4) {
-//             if (xhr.status === 200 || xhr.status === 201) {
-//                 response = JSON.parse(xhr.responseText);
-//                 console.log(response);
-//             } else {
-//                 alert('Error: ' + JSON.parse(xhr.responseText).error);
-//             }
-//         }
-//     };
-//     xhr.send();
-// }
+function loadHistoryFromGame(id, gameId) {
+    // console.log("userId: " + id + "gameId: " + gameId);
+    let url = "https://localhost:8001/game/hist?UserId={{UserId}}&GameId={{gameId}}";
+    url = url.replace("localhost", window.location.hostname);
+    url = url.replace("{{UserId}}", id);
+    url = url.replace("{{gameId}}", gameId);
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.withCredentials = true;
+    xhr.onreadystatechange = function () {
+        // console.log(xhr.readyState);
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200 || xhr.status === 201) {
+                response = JSON.parse(xhr.responseText);
+                // console.log(response);
+            } else {
+                alert('Error: ' + JSON.parse(xhr.responseText).error);
+            }
+        }
+    };
+    xhr.send();
+}
 
 function getStats(id) {
     let url = "https://localhost:8001/game/stats?UserId={{UserId}}";
@@ -128,6 +128,27 @@ function getStats(id) {
     xhr.send();
 }
 
+function friendRequest(id) {
+    let url = "https://localhost:8000/send-request/";
+    url = url.replace("localhost", window.location.hostname);
+    url += id + '/';
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.withCredentials = true;
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200 || xhr.status === 201) {
+                response = JSON.parse(xhr.responseText);
+                // console.log(response);
+            } else {
+                alert('Error: ' + JSON.parse(xhr.responseText).error);
+            }
+        }
+    };
+    xhr.send();
+}
+
 function displayHistorique(userId, response) {
     const historySpace = document.getElementById('history');
     if (response.length == 0) {
@@ -140,6 +161,7 @@ function displayHistorique(userId, response) {
     for (let i = 0; i < response.length; i++) {
         let date = response[i].start_date.substr(0, 10);
         let tmp = "<p class=\"game\">";
+        tmp += "<a class=\"id\" style=\"visibility: collapse;\">" + i + "<\/a>"
         if (response[i].status != 'playing') {
             if (response[i].win == true) {
                 tmp += "<a class=\"victory\" style=\"color: green;\">" + "Win" + "<\/a>"
@@ -155,9 +177,47 @@ function displayHistorique(userId, response) {
             historySpace.innerHTML += tmp;
         }
     }
-    getStats(userId);
-}
+    const inputs = document.querySelectorAll('.history');
 
+    const click = async ({ target }) => {
+        // console.log(target);
+        while (target.previousElementSibling) {
+            target = target.previousElementSibling;
+        }
+        let gameId = target.innerHTML;
+        if (!isNaN(gameId)) {
+            // console.log(gameId);
+            loadHistoryFromGame(userId, gameId);
+        }
+        else
+            console.log('not a number');
+        // console.log(target);
+    }
+
+    inputs.forEach((input) => {
+        input.addEventListener('click', click);
+    });
+    getStats(userId);
+    const addFriend = document.getElementById('addFriend');
+    const message = document.getElementById('message');
+    const duel = document.getElementById('duel');
+
+    if (addFriend) {
+        addFriend.addEventListener('click', function () {
+            friendRequest(userId);
+        });
+    }
+    if (message) {
+        message.addEventListener('click', function () {
+            // console.log('message');
+        });
+    }
+    if (duel) {
+        duel.addEventListener('click', function () {
+            // console.log('duel');
+        });
+    }
+}
 // retirer sur pas finish
 
 function graphique(stats) {

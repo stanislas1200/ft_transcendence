@@ -155,6 +155,12 @@
     scrollbar-color: var(--background) var(--background);
 }
 
+.center {
+    /* justify-content: center; */
+    align-items: center;
+    width: 100%;
+}
+
 /* *************************************************************************************************** */
 
 @keyframes progress {

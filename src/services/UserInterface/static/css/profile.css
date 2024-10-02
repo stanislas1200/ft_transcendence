@@ -92,3 +92,19 @@
     display: flex;
     flex-direction: row;
 }
+
+.request-recieve {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.my-fa {
+    position: relative;
+    display: table-cell;
+    width: 60px;
+    height: 20px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 20px;
+}
