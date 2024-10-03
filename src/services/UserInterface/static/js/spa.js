@@ -23,12 +23,10 @@ async function loadPage(page) {
             console.error('There was a problem with the fetch operation:', error);
             // Optionally load an error page or show an error message
         });
+    testIfLoggedIn()
     switch (page) {
         case 'friend':
             getElementFriend();
-            break;
-        case 'pong':
-            getElementPong();
             break;
         case 'game':
             getElementGame();
@@ -41,6 +39,12 @@ async function loadPage(page) {
             break;
         case 'achievements':
             loadArchievements();
+            break;
+        case 'pong':
+            loadPong();
+            break;
+        case 'localpong':
+            loadLocalPong();
             break;
         default:
             break;

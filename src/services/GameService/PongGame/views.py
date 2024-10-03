@@ -32,26 +32,29 @@ def get_player(session_key, token, user_id):
     return user
 
 @csrf_exempt
-def send_notification(request, user_id, message=None):
-    internal_secret = request.headers.get('X-Internal-Secret')
+def send_notification(request, message=None):
+    if request:
+        internal_secret = request.headers.get('X-Internal-Secret')
 
-    if internal_secret != 'my_internal_secret_token': # TODO : secret
-        return JsonResponse({'error': 'Unauthorized access'}, status=403)
+        if internal_secret != 'my_internal_secret_token': # TODO : secret
+            return JsonResponse({'error': 'Unauthorized access'}, status=403)
         
-    channel_layer = get_channel_layer()
-    group_name = f'notifications_{user_id}'
     if not message:
         data = request.body.decode()
         data = json.loads(data)
         message = data.get('message')
+        user_id = data.get('user_id')
 
-    async_to_sync(channel_layer.group_send)(
-        group_name,
-        {
-            'type': 'send_notification',
-            'message': message
-        }
-    )
+    channel_layer = get_channel_layer()
+    for uid in users_id:
+        group_name = f'notifications_{uid}'
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': 'send_notification',
+                'message': message
+            }
+        )
     return JsonResponse({'status': 'Message sent'})
 
 @csrf_exempt
@@ -406,7 +409,6 @@ def startPong(request, player, token, gameType, gameMode, playerNumber):
     game.save()
     return JsonResponse({'message': 'Game started', 'game_id': game.id})
 
-
 def startTron(request, player, token, gameType, gameMode, playerNumber):
     if not playerNumber:
         playerNumber = request.POST.get('playerNumber', 1)
@@ -609,7 +611,7 @@ def achievement_notif(user_id, achievement):
                 }
             }
         }
-    send_notification(None, user_id, message)
+    send_notification(None, [user_id], message)
 
 @require_GET
 @csrf_exempt

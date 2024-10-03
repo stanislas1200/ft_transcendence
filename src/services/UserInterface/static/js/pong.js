@@ -4,22 +4,28 @@ function getCookie(name) {
 	if (parts.length == 2) return parts.pop().split(";").shift();
 }
 
-let partyId = localStorage.getItem('gameId');
-localStorage.removeItem('gameId');
-let userId = getCookie('userId');
-let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/${userId}`;
-wsUrl = wsUrl.replace('localhost', window.location.hostname);
-let socket = new WebSocket(wsUrl);
+let isGameLoopRunning = false;
+let socket = null;
 const keyState = {};
+
+function keyDown(event) {
+	keyState[event.key] = true;
+}
+function keyUp(event) {
+	keyState[event.key] = false;
+}
+
+function closeWebSocket() {
+	socket.close();
+	window.removeEventListener('popstate', closeWebSocket);
+	socket = null;
+	isGameLoopRunning = false
+}
 
 function connect() {
 	let sessionId = getCookie('sessionid');
 	console.log(sessionId)
 
-	function closeWebSocket() {
-		socket.close();
-		window.removeEventListener('popstate', closeWebSocket);
-	}
 
 	window.addEventListener('popstate', closeWebSocket);
 
@@ -58,30 +64,19 @@ function connect() {
 	});
 
 	socket.addEventListener('close', function (event) {
+		isGameLoopRunning = false;
 		console.log('WebSocket is closed now.');
 	});
 
 	socket.addEventListener('error', function (event) {
 		console.log('Error: ', event);
 	});
-
-	document.addEventListener('keydown', function (event) {
-		keyState[event.key] = true;
-	});
-	
-	document.addEventListener('keyup', function (event) {
-		keyState[event.key] = false;
-	});
 }
 
-connect();
-c = document.getElementById('pongCanvas').getContext('2d')
-offScreenC = document.createElement('canvas');
-offScreenC.width = c.width = 800;
-offScreenC.height = c.height = 600;
-offc = offScreenC.getContext('2d');
-obstaclesDrawn = false;
-c.font = "60px monospace"
+let c = null;
+let offScreenC = null;
+let offc = null;
+let obstaclesDrawn = false;
 
 game_state = {
 	ball: {
@@ -184,21 +179,53 @@ function draw() {
 }
 
 function gameLoop() {
-	draw();
-	updatePlayers()
-	if (game_state.scores) {
-		if (game_state.scores[0] > 10)
-		{
-			c.fillText("Team 1 won", 800/2, 600/2)
-			return
+	try {
+		if (isGameLoopRunning) {
+			draw();
+			updatePlayers()
+			if (game_state.scores) {
+				if (game_state.scores[0] > 9)
+				{
+					c.fillText("Team 1 won", 800/2, 600/2)
+					return
+				}
+				else if (game_state.scores[1] > 9)
+				{
+					c.fillText("Team 2 won", 800/2, 600/2)
+					return
+				}
+			}
+			requestAnimationFrame(gameLoop);
 		}
-		else if (game_state.scores[1] > 10)
-		{
-			c.fillText("Team 2 won", 800/2, 600/2)
-			return
-		}
+	} catch (error) {
+		console.log(error)
 	}
-	requestAnimationFrame(gameLoop);
 }
 
-gameLoop();
+function loadPong() {
+	let partyId = localStorage.getItem('gameId');
+	// localStorage.removeItem('gameId');
+	let userId = getCookie('userId');
+	let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/${userId}`;
+	wsUrl = wsUrl.replace('localhost', window.location.hostname);
+	document.removeEventListener('keydown', keyDown)
+	document.removeEventListener('keyup', keyUp)
+	document.addEventListener('keydown', keyDown);
+	document.addEventListener('keyup', keyUp);
+	if (socket)
+		closeWebSocket()
+	socket = new WebSocket(wsUrl);
+	
+	c = document.getElementById('pongCanvas').getContext('2d')
+	offScreenC = document.createElement('canvas');
+	offScreenC.width = c.width = 800;
+	offScreenC.height = c.height = 600;
+	offc = offScreenC.getContext('2d');
+	obstaclesDrawn = false;
+	c.font = "60px monospace"
+	connect();
+	if (!isGameLoopRunning) {
+        isGameLoopRunning = true;
+        gameLoop();
+    }
+}
