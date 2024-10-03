@@ -132,16 +132,20 @@ nav.navbar-top li.active>a {
 }
 
 .searchValue {
-    float: right;
-    height: 40px;
-    width: calc(93vw - (60px * 4) + 46px);
-    margin-top: 10px;
+    /* float: right; */
+    height: 59px;
+    /* left: 60px; */
+    margin-left: 60px;
+    width: calc(95vw - ((60px * 5) + 70px));
+    margin-top: 0;
     background-color: var(--background);
-    opacity: 50%;
+    /* opacity: 50%; */
     color: var(--text);
-    /* border: 2px solid var(--secondary); */
+    border-right: 1px solid var(--secondary);
     /* border-radius: 5px; */
     border: none;
+    /* margin-top: 0; */
+    padding-left: 10px;
 }
 
 .searchValue:focus {
@@ -150,26 +154,78 @@ nav.navbar-top li.active>a {
 }
 
 .proposition {
+    float: left!important;
     color: var(--text);
-    /* color: red; */
+    margin-left: 60px;
     display: flex;
     flex-direction: column;
-    /* width: calc(95vw - (60px * 3) + 46px); */
-    width: 100%;
-    padding-left: 130px;
-    margin-bottom: 0px;
-    margin-top: 0px;
+    width: calc(95vw - ((60px * 5) + 70px));
+    z-index: 2;
+    background-color: var(--background);
+    border: 1px solid var(--secondary);
+    border-top: none;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-left: none;
+    max-width: 400px;
 }
 
 .hide {
     opacity: 0%;
 }
 
-ul.proposition {
-    list-style-type: disc;
-    /* padding-left: 60px; */
+.proposition-item {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
 }
 
-li:hover {
-    background-color: green;
+.proposition-item:hover {
+    transform: scale(1.2);
+    transform-origin: left center;
+}
+
+.proposition>ul {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-left: 0px;
+}
+
+/* notif css */
+.notif {
+    position: fixed;
+    top: 65px;
+    right: 5px;
+    width: 300px;
+    overflow: hidden;
+    z-index: 1;
+    float: right;
+}
+
+.notif-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.notif-item {
+    margin: 5px;
+    padding: 10px;
+
+}
+
+.notif-text {
+    /* width: 80%; */
+}
+
+.notif-close {
+    float: right;
+    cursor: pointer;
+    height: 100%;
+}
+
+.succes-notif {
+    background-color: #edfbd8;
+    border: solid 1px #84d65a;
 }

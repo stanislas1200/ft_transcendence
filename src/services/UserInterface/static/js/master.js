@@ -40,13 +40,14 @@ function searchFriend() {
     const proposition = document.getElementById('proposition');
 
     // Écouter l'événement "input"
-    proposition.classList.add('hide');
+    // proposition.classList.add('hide');
     searchFriend.addEventListener('input', function (event) {
         if (event.target.value) {
             searchAllUser(event.target.value, proposition);
-            proposition.classList.remove('hide');
-        } else {
-            proposition.classList.add('hide');
+            // proposition.classList.remove('hide');
+        } else if (event.target.value === "") {
+            proposition.innerHTML = "";
+            // proposition.classList.add('hide');
         }
     });
 }
@@ -77,16 +78,20 @@ function searchAllUser(searchName, proposition) {
 function printAllResponse(response, proposition) {
     proposition.innerHTML = "";
     for (let i = 0; i < response.users.length; i++) {
-        var newLi = document.createElement('li');
-        newLi.innerHTML = response.users[i].username;
-        newLi.classList.add('selection');
-        proposition.appendChild(newLi);
+        var newSearchItem = document.createElement('div');
+        newSearchItem.classList.add('proposition-item');
+        newSearchItem.innerHTML = response.users[i].username;
+        proposition.appendChild(newSearchItem);
+        // var newLi = document.createElement('li');
+        // newLi.innerHTML = response.users[i].username;
+        // newLi.classList.add('selection');
+        // proposition.appendChild(newLi);
     }
 }
 
 
 function findFriend() {
-    const inputs = document.querySelectorAll('.selection');
+    const inputs = document.querySelectorAll('.proposition-item');
 
     const click = async ({ target }) => {
         await loadPage('friendProfile');
@@ -94,7 +99,8 @@ function findFriend() {
         const searchFriend = document.getElementById('searchValue');
         const proposition = document.getElementById('proposition');
         searchFriend.value = "";
-        proposition.classList.add('hide');
+        // proposition.classList.add('hide');
+        proposition.innerHTML = "";
     }
 
     inputs.forEach((input) => {
