@@ -20,6 +20,7 @@ urlpatterns = [
 	path('join_tournament/<int:tournament_id>', views.join_tournament),
 	path('get_tournament/<int:tournament_id>', views.get_tournament),
 	path('list_achievements', views.list_achievements),
+	path('send-notification/<int:user_id>', views.send_notification),
 
 	path('search', views.search)
 	

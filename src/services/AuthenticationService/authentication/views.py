@@ -17,8 +17,25 @@ from django.core.files.images import get_image_dimensions
 from PIL import Image, ImageSequence
 from io import BytesIO
 from django.core.files.base import ContentFile
+from django.utils import timezone
 
 from django.shortcuts import get_object_or_404
+
+def make_notifications_message(sender, receiver):
+	message = {
+		"type": "friend_request",
+		"data": {
+			"title": "Friend Request",
+			"content": f"{sender.username} sent you a friend request",
+			"timestamp": timezone.now().isoformat(),
+			"user_id": receiver.id,
+			"metadata": {
+				"requester_id": sender.id,
+				"requester_name": sender.username
+			}
+		}
+	}
+	return message
 
 @csrf_exempt # Disable CSRF protection for this view
 @require_POST
@@ -48,6 +65,11 @@ def send_friend_request(request, user_id):
 		
 		friend_request, created = FriendRequest.objects.get_or_create(sender=sender, receiver=receiver)
 		
+		headers = {
+			'X-Internal-Secret': 'my_internal_secret_token'
+		}
+		message = make_notifications_message(sender, receiver)
+		response = requests.post(f'https://game-service:8001/game/send-notification/{receiver.id}', headers=headers, json={"user_id": user_id, "message": message}, verify=False)
 		if created:
 			return JsonResponse({'message': 'Successfully sent request'})
 		else:
