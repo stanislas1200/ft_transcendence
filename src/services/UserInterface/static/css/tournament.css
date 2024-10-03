@@ -1,0 +1,224 @@
+.tournament-container {
+  max-width: 100%;
+  max-height: 100%;
+  display: grid;
+  grid-template-rows: 1fr 1fr 6fr;
+  grid-template-columns: 4fr 3fr;
+  grid-template-areas:
+    'name date'
+    'join players'
+    'bracket game';
+}
+
+.info {
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+}
+
+.tournament-name>span {
+  font-size: 4rem;
+}
+
+.join-button>span {
+  /* background-color: var(--tertiary); */
+  border: 1px solid var(--secondary);
+  border-radius: 5px;
+  padding: 7px;
+  font-size: 1rem;
+}
+
+.join-button>span:hover {
+  cursor: pointer;
+  background-color: var(--secondary);
+  color: var(--text);
+}
+
+.date {
+  justify-content: flex-end;
+  padding-right: 10px;
+}
+
+.date>span {
+  font-size: 2rem;
+}
+
+.players {
+  justify-content: flex-end;
+  padding-right: 10px;
+}
+
+.players>span {
+  font-size: 2rem;
+}
+
+.border-bottom {
+  border-bottom: 1px solid var(--accent);
+}
+
+.wrapper-bracket {
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  overflow: visible;
+}
+
+.wrapper-bracket>div {
+  color: var(--text);
+}
+
+.item {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.item .bracket-user {
+  cursor: pointer;
+  width: 200px;
+  overflow: hidden;
+  padding: 5px;
+  margin: 0;
+  background-color: var(--secondary);
+  /* aspect-ratio: 1 / 1; */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.item .bracket-user>.bracket-user-img {
+  background-color: var(--background);
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+}
+
+.item-parent {
+  position: relative;
+  margin-left: 50px;
+  display: flex;
+  align-items: center;
+}
+
+.item-parent:after {
+  position: absolute;
+  content: '';
+  width: 25px;
+  height: 2px;
+  left: 0;
+  top: 50%;
+  background-color: var(--text);
+  transform: translateX(-100%);
+}
+
+.item-childrens {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.item-child {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.item-child:before {
+  content: '';
+  position: absolute;
+  background-color: var(--text);
+  right: 0;
+  top: 50%;
+  transform: translateX(100%);
+  width: 25px;
+  height: 2px;
+}
+
+.item-child:after {
+  content: '';
+  position: absolute;
+  background-color: var(--text);
+  right: -25px;
+  height: calc(50% + 22px);
+  width: 2px;
+  top: 50%;
+}
+
+.item-child:last-child:after {
+  transform: translateY(-100%);
+}
+
+.item-child:only-child:after {
+  display: none;
+}
+
+.current-game {
+  background-color: var(--tertiary);
+  border: 1px solid var(--secondary);
+  border-radius: 8px;
+  margin: 50px;
+  padding: 40px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--secondary);
+}
+
+.match-number {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  font-size: 2.5rem;
+}
+
+.match-number>.left-right-button {
+  cursor: pointer;
+  font-size: 4rem;
+}
+
+.spectate-button {
+  border: 1px solid var(--secondary);
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 2rem;
+  text-transform: capitalize;
+}
+
+.player-versus {
+  display: flex;
+  gap: 50px;
+}
+
+.player {
+  cursor: pointer;
+  background-color: var(--background);
+  border: 1px solid var(--secondary);
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px;
+}
+
+.current-score {
+  align-self: center;
+  font-size: 2rem;
+}
+
+.spectate-button:hover {
+  cursor: pointer;
+  background-color: var(--secondary);
+  color: var(--text);
+}
