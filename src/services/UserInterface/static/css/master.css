@@ -138,7 +138,7 @@ nav.navbar-top li.active>a {
     margin-left: 60px;
     width: calc(95vw - ((60px * 5) + 70px));
     margin-top: 0;
-    background-color: var(--background);
+    background-color: var(--tertiary);
     /* opacity: 50%; */
     color: var(--text);
     border-right: 1px solid var(--secondary);
