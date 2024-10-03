@@ -552,6 +552,11 @@ def register(request):
 		password = request.POST.get('password')
 		cpassword = request.POST.get('c_password')
 		email = request.POST.get('email')
+
+		if not User.objects.filter(username='AI').exists(): # get_or_create Temp so ai have a profile image 
+			ai = User.objects.create_user(username='AI')
+			UserToken.objects.update_or_create(user=ai, defaults={'token': 'TODO : check if can connect as ai'}) # TODO : check if can connect as ai
+
 		#TODO : uncoment
 		# if not username or not password or not email or not first_name or not last_name or not cpassword:
 		# 	return JsonResponse({'error': 'Missing required fields'}, status=400)
