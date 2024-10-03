@@ -11,7 +11,9 @@ from django.core.cache import cache
 import random
 from django.utils import timezone
 from django.db import transaction
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+import json
 
 # service comunication
 def verify_token(session_key, token, user_id):
@@ -29,6 +31,28 @@ def get_player(session_key, token, user_id):
     user = User.objects.get(id=user_id)
     return user
 
+@csrf_exempt
+def send_notification(request, user_id, message=None):
+    internal_secret = request.headers.get('X-Internal-Secret')
+
+    if internal_secret != 'my_internal_secret_token': # TODO : secret
+        return JsonResponse({'error': 'Unauthorized access'}, status=403)
+        
+    channel_layer = get_channel_layer()
+    group_name = f'notifications_{user_id}'
+    if not message:
+        data = request.body.decode()
+        data = json.loads(data)
+        message = data.get('message')
+
+    async_to_sync(channel_layer.group_send)(
+        group_name,
+        {
+            'type': 'send_notification',
+            'message': message
+        }
+    )
+    return JsonResponse({'status': 'Message sent'})
 
 @csrf_exempt
 @require_GET
@@ -75,7 +99,6 @@ def search(request):
         print(e, flush=True)
         return JsonResponse({'error': 'Server error'}, status=500)
     
-
 @csrf_exempt
 @require_POST
 def create_tournament(request):
@@ -173,7 +196,6 @@ def make_pong_tournament_game(player1, player2):
         game.gameProperty.players.add(player2)
     return game
 
-
 @csrf_exempt
 @require_GET
 def get_tournament(request, tournament_id):
@@ -188,6 +210,7 @@ def get_tournament(request, tournament_id):
     matches = Match.objects.filter(tournament=tournament)
     matches_data = [{
         'id': match.id,
+        'game_id': match.game.id,
         'player_one': match.game.players.first().id if match.game.players.exists() else None,
         'player_two': match.game.players.last().id if match.game.players.exists() and match.game.players.count() > 1 else None,
         'winner': match.winner.id if match.winner else None,
@@ -198,7 +221,8 @@ def get_tournament(request, tournament_id):
         'name': tournament.name,
         'start_date': tournament.start_date.strftime('%Y-%m-%d %H:%M:%S'),
         'end_date': tournament.end_date.strftime('%Y-%m-%d %H:%M:%S') if tournament.end_date else None,
-        'player_number': tournament.max_player,
+        'max_player_number': tournament.max_player,
+        'player_number': players.length(),
         'matches': matches_data
     }
     
@@ -234,7 +258,6 @@ def get_game_state(request):
         return JsonResponse(game_state)
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
-
 
 @require_GET # return a list of all game
 def list_game(request):
@@ -450,7 +473,9 @@ def start_game(request, gameName=None, gameMode=None, playerNumber=None):
     gameType = request.POST.get('gameType', 'simple')  # Get the game type from the request, default to 'simple'
 
     ach, created = Achievement.objects.get_or_create(name='first game', description='first game', points=0)
-    UserAchievement.objects.get_or_create(user=player, achievement=ach)
+    _, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
+    if created:
+        achievement_notif(user_id, ach)
     if gameName == 'pong':
         return startPong(request, player, token, gameType, gameMode, playerNumber)
     elif gameName == 'tron':
@@ -570,6 +595,22 @@ def get_history(request):
         print(e, flush=True)
         return JsonResponse({'error': 'Error'}, status=500)
 
+def achievement_notif(user_id, achievement):
+    message = {
+            "type": "achievement",
+            "data": {
+                "title": "Achievement Unlocked",
+                "content": f"You unlocked the '{achievement.name}' achievement!",
+                "timestamp": timezone.now().isoformat(),
+                "user_id": user_id,
+                "metadata": {
+                    "achievement_id": achievement.id,
+                    "achievement_name": achievement.name
+                }
+            }
+        }
+    send_notification(None, user_id, message)
+
 @require_GET
 @csrf_exempt
 def list_achievements(request):
@@ -585,7 +626,9 @@ def list_achievements(request):
         # TODO : remove this
         # test create and add achievement
         ach, created = Achievement.objects.get_or_create(name='list achievements', description='list all achievements', points=0)
-        UserAchievement.objects.get_or_create(user=user, achievement=ach)
+        _, created = UserAchievement.objects.get_or_create(user=user, achievement=ach)
+        if created:
+            achievement_notif(user_id, ach)
         # end test
 
         user_achievements = UserAchievement.objects.filter(user=user)

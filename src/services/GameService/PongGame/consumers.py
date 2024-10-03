@@ -23,11 +23,47 @@ async def closeWithMessage(ws, str):
 	await self.close(code=4001)
 
 
+class NotificationConsumer(AsyncWebsocketConsumer):
+	async def connect(self):
+
+		headers = dict(self.scope['headers']) # TODO : connect when login or conenct and if login send user_id ?
+		if b'cookie' in headers:
+			cookie = headers[b'cookie'].decode()
+			cookie = http.cookies.SimpleCookie(cookie)
+			self.token = cookie['token'].value if 'token' in cookie else None
+		else:
+			self.token = None
+
+		self.user_id = self.scope['url_route']['kwargs']['UserId']
+		self.group_name = f'notifications_{self.user_id}'
+
+		await self.channel_layer.group_add(
+			self.group_name,
+			self.channel_name
+		)
+		await self.accept()
+
+	async def disconnect(self):
+		await self.channel_layer.group_discard(
+			self.group_name,
+			self.channel_name
+		)
+
+	async def receive(self, text_data):
+		return
+	
+	async def send_notification(self, event):
+		message = event['message']
+
+		# Send message to WebSocket
+		await self.send(text_data=json.dumps(message))
+	
+
 class GameConsumer(AsyncWebsocketConsumer):
 	connected_users = 0
 	async def connect(self):
 
-		# TODO : remove token in routing better to store n instead of token but lazy
+		# TODO : better to store n instead of token but lazy
 		headers = dict(self.scope['headers'])
 		if b'cookie' in headers:
 			cookie = headers[b'cookie'].decode()
