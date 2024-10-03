@@ -30,7 +30,7 @@ function connect() {
 	let token = getCookie('token');
 	let userId = getCookie('userId');
 	console.log(token);
-	let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/${token}/${userId}`;
+	let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/${userId}`;
 
 	let socket = new WebSocket(wsUrl);
 
@@ -91,12 +91,12 @@ function connect() {
 			console.log(direction)
 			var sessionId = getCookie('sessionid');
 			var token = getCookie('token');
-			socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', player: 'p1', direction: direction, token: token }));
+			socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', player: 'p1', direction: direction }));
 		}
 	});
 }
 
-game = 'tron'
+game = 'pong'
 players = []
 c = document.getElementById('c').getContext('2d')
 c.fillStyle = "#FFF"
@@ -128,8 +128,8 @@ function draw() {
 			c.fillRect(800 - 40 - 10, p4 - 100/2, 10, 100)
 		}
 		else if (mode == "ffa") {
-			c.fillRect(p3, 40, 100, 10)
-			c.fillRect(p4, 600 - 40, 100, 10)
+			c.fillRect(p3 - 100/2, 40, 100, 10)
+			c.fillRect(p4 - 100/2, 600 - 40, 100, 10)
 		}
 		// c.fillRect(x, y, 10, 10)
 		

@@ -7,10 +7,11 @@
             <div class="profile-picture" id="profile-picture">
                 <img id="profileImage" class="profileImage" src="{% static 'images/pp.png' %}" alt="">
             </div>
-            <p id="userName">
+            <p id="userNameFriend">
+                test
                 <!-- UserName -->
             </p>
-            <!-- <div class="buttonFriendMessage">
+            <div class="buttonFriendMessage">
                 <div class="addFriend">
                     <span class="plus">+</span>
                     <span class="text">Add Friend</span>
@@ -21,14 +22,25 @@
             </div>
             <div class="addFriend">
                 <span class="text">Challenge me</span>
-            </div> -->
+            </div>
         </div>
     </div>
     <div class="settings-grid-userInformation">
-        player information
         <div class="info-area">
-            <div class="history">
-                history
+            <div class="legend">
+                <p class="history_win_loose">Win/Loose</p>
+                <p class="pipe">|</p>
+                <p class="history_game_mode">Game mode</p>
+                <p class="pipe">|</p>
+                <p class="history_score">Score</p>
+                <p class="pipe">|</p>
+                <p class="history_date">Date</p>
+                <p class="pipe">|</p>
+                <p class="history_status">Status</p>
+            </div>
+            <div class="border_history">
+                <div class="history" id="history">
+                </div>
             </div>
             <div class="achivement">
                 achivement
@@ -36,4 +48,4 @@
         </div>
     </div>
 </div>
-<script>loadProfile();</script>
+<!-- <script>searchUser("");</script> -->

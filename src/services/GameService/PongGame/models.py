@@ -18,11 +18,10 @@ class PlayerGameTypeStats(models.Model):
 class PongPlayer(models.Model):
     player = models.ForeignKey(User, on_delete=models.CASCADE)
     score = models.IntegerField(default=0)
-    token = models.CharField(max_length=255)  # TODO : remove token from here
     n = models.IntegerField(default=0)
 
 def get_default_player_positions():
-    return [250, 250, 250, 250] # TODO : ADDAPT based on player nb
+    return [300, 300, 400, 400] # TODO : ADDAPT based on player nb
 class Pong(models.Model):
     width = models.IntegerField(default=800)
     height = models.IntegerField(default=600)
@@ -40,6 +39,10 @@ class Tron(models.Model):
     players = models.ManyToManyField(PongPlayer)
     playerNumber = models.IntegerField(default=1)
 
+class GAM(models.Model):
+    players = models.ManyToManyField(PongPlayer)
+    playerNumber = models.IntegerField(default=1)
+
 
 class Game(models.Model):
     players = models.ManyToManyField(User)
@@ -51,6 +54,7 @@ class Game(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     gameProperty = GenericForeignKey('content_type', 'object_id')
+    winners = models.ManyToManyField(User, related_name='games_as_winner', blank=True)
 
     # def __str__(self):
     #     return self.gameName
@@ -76,3 +80,13 @@ class Match(models.Model):
     match_date = models.DateTimeField()
     round_number = models.PositiveIntegerField()
     next_match = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='previous_matches')
+
+class Achievement(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    points = models.IntegerField(default=0)
+
+class UserAchievement(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
+    unlocked_at = models.DateTimeField(auto_now_add=True)

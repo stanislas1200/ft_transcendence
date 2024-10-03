@@ -4,18 +4,18 @@ function getCookie(name) {
 	if (parts.length == 2) return parts.pop().split(";").shift();
 }
 
+let partyId = localStorage.getItem('gameId');
+localStorage.removeItem('gameId');
+let userId = getCookie('userId');
+let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/${userId}`;
+wsUrl = wsUrl.replace('localhost', window.location.hostname);
+let socket = new WebSocket(wsUrl);
+const keyState = {};
+
 function connect() {
 	let sessionId = getCookie('sessionid');
 	console.log(sessionId)
-	let partyId = localStorage.getItem('gameId');
-	localStorage.removeItem('gameId');
-	let token = getCookie('token');
-	let userId = getCookie('userId');
-	console.log(token);
-	let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/${token}/${userId}`;
 
-	let socket = new WebSocket(wsUrl);
-	
 	function closeWebSocket() {
 		socket.close();
 		window.removeEventListener('popstate', closeWebSocket);
@@ -31,24 +31,30 @@ function connect() {
 		console.log('Message from server: ', event.data);
 		let serverMessage = JSON.parse(event.data);
 
-		// checl error
 		if (serverMessage.error) {
 			console.error('Error:', serverMessage.error);
 			return;
 		}
 
-		// Update ball position and direction
-		x = serverMessage.x;
-		y = serverMessage.y;
-		name1 = serverMessage.usernames[0];
-		name2 = serverMessage.usernames[1];
-		p1 = serverMessage.positions[0]; // Assuming player 0 is the player on the left
-		p2 = serverMessage.positions[1]; // Assuming player 1 is the player on the right
-		p3 = serverMessage.positions[2];
-		p4 = serverMessage.positions[3];
-		s1 = serverMessage.scores[0];
-		s2 = serverMessage.scores[1];
-		mode = serverMessage.gameMode;
+		if (serverMessage.message === 'Setup') {
+			obstacles = serverMessage.setting.obstacles
+			offc.fillStyle = "white";
+			if (obstacles) {
+				obstacles.forEach((obstacle) => {
+					let vertices = obstacle.vertices;
+					offc.beginPath();
+					offc.moveTo(vertices[0].x, vertices[0].y);
+					for (i = 1; i < vertices.length; i++) {
+						offc.lineTo(vertices[i].x, vertices[i].y);
+					}
+					offc.closePath();
+					offc.fill();
+					offc.stroke();
+				})
+				obstaclesDrawn = true;
+			}
+		}
+		game_state = serverMessage;
 	});
 
 	socket.addEventListener('close', function (event) {
@@ -60,65 +66,138 @@ function connect() {
 	});
 
 	document.addEventListener('keydown', function (event) {
-		var direction;
-		if (event.key === "ArrowUp") {
-			direction = "up";
-		} else if (event.key === "ArrowDown") {
-			direction = "down";
-		}
-
-		if (direction && socket) {
-			console.log(direction)
-			var sessionId = getCookie('sessionid');
-			var token = getCookie('token');
-			socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', player: 'p1', direction: direction, token: token }));
-		}
+		keyState[event.key] = true;
+	});
+	
+	document.addEventListener('keyup', function (event) {
+		keyState[event.key] = false;
 	});
 }
+
 connect();
 c = document.getElementById('pongCanvas').getContext('2d')
-c.fillStyle = "#FFF"
+offScreenC = document.createElement('canvas');
+offScreenC.width = c.width = 800;
+offScreenC.height = c.height = 600;
+offc = offScreenC.getContext('2d');
+obstaclesDrawn = false;
 c.font = "60px monospace"
-w = s = 1
-p = q = s1 = s2 = 0
-name1 = name2 = null
-p1 = p2 = p3 = p4 = 250
-x = 400; y = 300
-r = 5; v = 3
-mode = "ffa"
+
+game_state = {
+	ball: {
+		x: 400,
+		y: 300,
+		r: 5
+	},
+	mode: "ffa",
+	obstacles: [],
+	usernames: null,
+	positions: null,
+	scores: null
+}
+
+function updatePlayers() {
+	var direction
+	if (keyState["ArrowUp"]) {
+		direction = "up";
+	} else if (keyState["ArrowDown"]) {
+		direction = "down";
+	} else if (keyState["ArrowLeft"]) {
+		direction = "up";
+	} else if (keyState["ArrowRight"]) {
+		direction = "down";
+	}
+
+	if (direction && socket) {
+		var sessionId = getCookie('sessionid');
+		socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', player: 'p1', direction: direction }));
+	}
+}
+
+function drawPlayers() {
+	colors = ['#7e3047', '#498d14', '#a891d5', 'white']
+	c.fillStyle = colors[0]
+	if (game_state.positions) {
+		c.fillRect(40, game_state.positions[0] - 100/2, 10, 100)
+		c.fillStyle = colors[1]
+		c.fillRect(800 - 40 - 10, game_state.positions[1] - 100/2, 10, 100)
+		if (game_state.mode == "team") {
+			c.fillStyle = colors[2]
+			c.fillRect(40, game_state.positions[2] - 100/2, 10, 100)
+			c.fillStyle = colors[3]
+			c.fillRect(800 - 40 - 10, game_state.positions[3] - 100/2, 10, 100)
+		}
+		else if (game_state.mode == "ffa" && usernames[2]) {
+			c.fillStyle = colors[2]
+			c.fillRect(game_state.positions[2] - 100/2, 40, 100, 10)
+			c.fillStyle = colors[3]
+			c.fillRect(game_state.positions[3] - 100/2, 600 - 40, 100, 10)
+		}
+	}
+}
+
+function drawNS() {
+	c.font = "20px monospace";
+	if (game_state.usernames) {
+		spaceB = c.width / game_state.usernames.length
+		colors = ['#7e3047', '#498d14', '#a891d5', 'white']
+		c.textBaseline = "middle"
+		c.fillStyle = 'white'
+		c.fillRect(0, 600, 800, 2)
+		if (game_state.mode == "team") {
+			c.fillText('Team 1: ', spaceB * 0, 625, 100)
+			c.fillText(game_state.scores[0], spaceB * 0 + c.measureText('Team 1: '), 625)
+			c.fillText('Team 2: ', spaceB * c.width / 2, 625, 100)
+			c.fillText(game_state.scores[2], spaceB * c.width / 2 + c.measureText('Team 2: '), 625) // TODO : username
+		}
+		else
+			game_state.usernames.forEach((player, index) => {
+				c.fillStyle = colors[index]
+				c.fillText(player, spaceB * index, 625, 100)
+				c.fillStyle = 'white'
+				c.fillText(': ' + game_state.scores[index], spaceB * index + Math.min(c.measureText(player).width, 100), 625)
+			})
+	}
+}
+
 function draw() {
 
 	// c.clearRect(0, 0, 800, 600)
 	c.fillStyle = "rgb(0 0 0 / 20%)";
-	c.fillRect(0, 0, 800, 600);
+	c.fillRect(0, 0, 800, 650);
 	c.fillStyle = "#8791ed";
 	for (i = 5; i < 600; i += 20)c.fillRect(400, i, 4, 10)
+	drawPlayers()
+	drawNS()
 	c.fillStyle = "#FFFFFF";
-	c.fillText(name1, 0, 60)
-	c.fillText(name2, 800 - c.measureText(name2).width, 60)
-	c.fillText(s1 + " " + s2 , 350, 60)
-	c.fillRect(40, p1 - 100/2, 10, 100)
-	c.fillRect(800 - 40 - 10, p2 - 100/2, 10, 100)
-	if (mode == "team") {
-		c.fillRect(40, p3 - 100/2, 10, 100)
-		c.fillRect(800 - 40 - 10, p4 - 100/2, 10, 100)
+	// draw obstacles
+	if (obstaclesDrawn) {
+		c.drawImage(offScreenC, 0, 0); // TODO : optimise
+		// obstaclesDrawn = false;
 	}
-	else if (mode == "ffa") {
-		c.fillRect(p3, 40, 100, 10)
-		c.fillRect(p4, 600 - 40, 100, 10)
-	}
-	// c.fillRect(x, y, 10, 10)
 	
-	// c.fillStyle = "#e24091";
     c.beginPath();
-    c.moveTo(x, y);
-    c.arc(x, y, r, 0, Math.PI * 2, true); // Left eye
+    c.moveTo(game_state.x, game_state.y);
+    c.arc(game_state.x, game_state.y, 5, 0, Math.PI * 2, true);
     c.stroke();
     c.fill()
 }
 
 function gameLoop() {
 	draw();
+	updatePlayers()
+	if (game_state.scores) {
+		if (game_state.scores[0] > 10)
+		{
+			c.fillText("Team 1 won", 800/2, 600/2)
+			return
+		}
+		else if (game_state.scores[1] > 10)
+		{
+			c.fillText("Team 2 won", 800/2, 600/2)
+			return
+		}
+	}
 	requestAnimationFrame(gameLoop);
 }
 

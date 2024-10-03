@@ -52,20 +52,20 @@ function checkPassword(pwd) {
     let check = 0;
 
     if (!containsUpperCase(pwd)) {
-        document.getElementById('newPasswordError').textContent = "the password must contain at least one capital letter";
+        // document.getElementById('newPasswordError').textContent = "the password must contain at least one capital letter";
         check++;
     }
     if (!containsLowerCase(pwd)) {
-        document.getElementById('newPasswordError').textContent = "password must contain at least one lowercase letter";
+        // document.getElementById('newPasswordError').textContent = "password must contain at least one lowercase letter";
         check++;
     }
     if (!containsNumber(pwd)) {
-        document.getElementById('newPasswordError').textContent = "password must contain at least one number";
+        // document.getElementById('newPasswordError').textContent = "password must contain at least one number";
         check++;
     }
     if (!containsSpecialCharacter(pwd)) {
-        console.log(containsSpecialCharacter(pwd));
-        document.getElementById('newPasswordError').textContent = "password must contain at least one special caracter";
+        // console.log(containsSpecialCharacter(pwd));
+        // document.getElementById('newPasswordError').textContent = "password must contain at least one special caracter";
         check++;
     }
     if (check != 0)
@@ -133,21 +133,38 @@ function validateForm() {
 
     const newPassword = document.getElementById('newPassword');
     const spanNewPassword = document.getElementById('span-newpwd');
-    if (currentPassword.value == '') {
+    var newPwd = 0;
+    var oldPwd = 0;
+    if (currentPassword.value == '' && newPassword.value != '') {
+        oldPwd = 1;
         console.log('no password enter');
-        valid = 0;
+    } else if (currentPassword.value != '' && newPassword.value == '') {
+        //
+    } else if (currentPassword.value != '' && newPassword != '') {
+        if (currentPassword.value === newPassword.value) {
+            console.log('same pwd than before error');
+            newPwd = 1;
+        }
+        if (checkPassword(newPassword.value) != 0) {
+            console.log('new pwd error');
+            newPwd = 1;
+        }
     }
-    if (newPassword == '') {
-        console.log('no new password');
+    if (newPwd == 1) {
         valid = 0;
+        newPassword.classList.add('error');
+        spanNewPassword.style.color = 'var(--accent)';
+    } else {
+        newPassword.classList.remove('error');
+        spanNewPassword.style.color = 'var(--secondary)';
     }
-    if (currentPassword.value === newPassword.value) {
-        console.log('same pwd than before error');
+    if (oldPwd == 1) {
         valid = 0;
-    }
-    if (checkPassword(newPassword.value) != 0) {
-        console.log('new pwd error');
-        valid = 0;
+        currentPassword.classList.add('error');
+        spanCurrentPassword.style.color = 'var(--accent)';
+    } else {
+        currentPassword.classList.remove('error');
+        spanCurrentPassword.style.color = 'var(--secondary)';
     }
     return valid;
 }
@@ -256,8 +273,3 @@ function saveChangement(id) {
         }
     });
 }
-
-
-
-email.classList.add('error');
-emailSpan.style.color = 'var(--accent)';

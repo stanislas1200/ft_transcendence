@@ -30,18 +30,19 @@ class Party:
 				self.players.append(self.get_player_info(player, token))
 				break
 
-	def get_player_info(self, player, token):
+	def get_player_info(self, player, token=None):
 		return {
 			'name': player.player.username,
 			'id': player.id,
 			'token': token,
 			'n': player.n,
-			'x': player.n * 100,
-			'y': 0 if player.n // 2 else 600,
-			'trail': [],
-			'direction': "doDwn" if player.n // 2 else "uDp",
+			'x': TILE_SIZE * 2,
+			'y': TILE_SIZE * 2,
+			'angle': 0,
+			'speed': 0,
+			'speedX': 0,
 			'alive': True,
-			'color': ['red', 'green', 'yellow'][player.n-1],
+			'hp': 100,
 			'ai': False
 		} 
 
@@ -57,7 +58,7 @@ class Party:
 			p.save()
 
 			p = User.objects.get(username=player['name'])
-			game_type = GameType.objects.get(name='tron')
+			game_type = GameType.objects.get(name='gun_and_monsters')
 
 			stats, created = PlayerGameTypeStats.objects.get_or_create(player=p, game_type=game_type)
 			stats.game_played = F('games_played') + 1
@@ -84,7 +85,7 @@ class Party:
 				m.next_match.game.players.add(player.player)
 				m.next_match.game.gameProperty.players.add(player)
 
-def setup_tron(game_id, player, token):
+def setup_gam(game_id, player, token):
 	party = party_list.get(game_id)
 	if party and party.state == 'playing':
 		setting = "{ 'obstacles': party.map, }"
@@ -111,56 +112,49 @@ def setup_tron(game_id, player, token):
 		return "{'obstacles': party.map}"
 	return None
 
-grid_size = 800
+map = [
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 1, 0, 1, 1, 0, 1, 0, 1],
+  [1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+  [1, 0, 0, 0, 1, 1, 0, 0, 0, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+];
 
-async def update_tron(game_id):
+TILE_SIZE = 64;
+monsters = [
+    {"x": TILE_SIZE * 2, "y": TILE_SIZE * 2, "hp": 100}
+]
+
+# def update_monsters(game):
+# 	for monster in monsters:
+		# TODO : monster movement and attack
+
+import math
+async def update_gam(game_id):
 	"""Update the game state and handle player movement"""
 	if game_id not in party_list:
 		return
 	game = party_list[game_id]
 	if game.state != 'playing':
 		return
-
-	players_alive = 0
-	for player in game.players:
-		if not player['alive']:
-			continue
-		players_alive +=1
-			
-		if player['direction'] == 'up':
-			player['y'] -= 3
-		elif player['direction'] == 'down':
-			player['y'] += 3
-		elif player['direction'] == 'left':
-			player['x'] -= 3
-		elif player['direction'] == 'right':
-			player['x'] += 3
 	
-		player['trail'].append((player['x'], player['y']))
+	for player in game.players:
+		if player['alive']:
+			newX = player['x'] - math.sin(player['angle']) * player['speedX'] + math.cos(player['angle']) * player['speed'];
+			newY = player['y'] + math.cos(player['angle']) * player['speedX'] + math.sin(player['angle']) * player['speed'];
 
-		if player['x'] < 0 or player['x'] > grid_size or player['y'] < 0 or player['y'] > grid_size:
-			print(f"Player {player['id']} crashed!", flush=True)
-			player['alive'] = False
+			mapX = math.floor(newX / TILE_SIZE);
+			mapY = math.floor(newY / TILE_SIZE);
 
-		# Check if the player hits a trail
-		for player in game.players:
-			if not player['alive']:
-				continue
-			head = (player['x'], player['y'])
+			if (map[math.floor(player['y'] / TILE_SIZE)][mapX] != 1):
+				player['x'] = newX;
 
-			for other_player in game.players:
-				filtered_trail = other_player['trail'][:-1]
-				if head in filtered_trail:
-					print(f"Player {player['id']} crashed into Player {other_player['id']}'s trail!", flush=True)
-					player['alive'] = False
-				if not player['alive']:
-					break
-	if players_alive == 1:
-		game.state = 'finished'
-		await sync_to_async(game.save)()
-		return game.state, game.game_id
-
-def get_tron_n(id, token):
+			if (map[mapY][math.floor(player['x'] / TILE_SIZE)] != 1):
+				player['y'] = newY;
+	# update_monsters(game)
+	
+def get_gam_n(id, token):
 	game = party_list.get(id)
 	if game is None:
 		return
@@ -174,23 +168,52 @@ def dict_player(player):
 		"username": player['name'],
 		"x": player['x'],
 		"y": player['y'],
-		"alive": player['alive'],
-		"color": player['color'],
+		"alive": player['alive']
 	}
 
-def get_tron_state(game_id):
+def get_gam_state(game_id):
 	game = party_list.get(game_id)
 	if game is None:
 		return {'error': f'Game ID {game_id} not found in party list.'}
 
 	game_state = {
 		'state': game.state,
-		'players': [dict_player(player) for player in game.players]
+		'players': [dict_player(player) for player in game.players],
+		'monsters': monsters,
 	}
 	return game_state
 
-def move_tron(game_id, n, direction):
+def keyDown(game, n, k):
+	if (k == 'ArrowUp'): 
+		game.players[n-1]['speed']= 2
+	if (k == 'z'): 
+		game.players[n-1]['speed']= 2
+	if (k == 'ArrowDown'): 
+		game.players[n-1]['speed']= -2
+	if (k == 's'): 
+		game.players[n-1]['speed']= -2
+	
+	if (k == 'ArrowLeft'): 
+		game.players[n-1]['speedX'] = -2
+	if (k == 'q'): 
+		game.players[n-1]['speedX'] = -2
+	if (k == 'ArrowRight'): 
+		game.players[n-1]['speedX'] = 2
+	if (k == 'd'): 
+		game.players[n-1]['speedX'] = 2
+
+def keyUp(game, n, k):
+	if (k == 'ArrowUp' or k == 'z' or k == 'ArrowDown' or k == 's'): 
+		game.players[n-1]['speed']= 0
+	if (k == 'ArrowLeft' or k == 'q' or k == 'ArrowRight' or k == 'd'): 
+		game.players[n-1]['speedX'] = 0
+
+def move_gam(game_id, n, k, direction, angle):
 	game = party_list.get(game_id)
 	if not game:
 		return
-	game.players[n-1]['direction'] = direction
+	game.players[n-1]['angle'] = angle
+	if direction == 'down':
+		keyDown(game, n, k)
+	elif direction == 'up':
+		keyUp(game, n, k)
