@@ -160,6 +160,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 				last_time = current_time
 
 			if ret:
+				await self.channel_layer.group_send(
+					self.game_group_name,
+					{
+						'type': 'update_game_state',
+						'game_state': game_state
+					}
+				)
 				await self.close()
 				break # TODO : circle game solo
 			# await asyncio.sleep(1/60)

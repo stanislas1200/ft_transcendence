@@ -1,5 +1,24 @@
 testIfLoggedIn();
 
+
+function logout() {
+    let url = "https://localhost:8000/logout";
+    url = url.replace("localhost", window.location.hostname);
+
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+    xhr.withCredentials = true;
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status == 200 ) {
+                testIfLoggedIn()
+            }
+        }
+    };
+    xhr.send();
+}
+
 function setActive(element, pageName) {
     // Retirer la classe 'active' de tous les liens
     const links = document.querySelectorAll('ul li a');

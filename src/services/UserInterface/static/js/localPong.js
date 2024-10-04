@@ -1,29 +1,14 @@
-paddleHeight = 100
+let paddleHeight = 100;
+let w = s = 1;
+let p = q = s1 = s2 = 0;
+let x = 400; y = 300;
+let r = 5; v = 3;
+let dx = 4; dy = 4;
+let mode = "ffa";
+let positions = [250,250];
+let scores = [0,0];
 
-c = document.getElementById('pongCanvas').getContext('2d')
-
-c.font = "60px monospace"
-w = s = 1
-p = q = s1 = s2 = 0
-x = 400; y = 300
-r = 5; v = 3
-dx = 4; dy = 4;
-mode = "ffa"
-positions = [250,250]
-scores = [0,0]
-
-
-const keyState = {};
-
-document.addEventListener('keydown', function (event) {
-    keyState[event.key] = true;
-});
-
-document.addEventListener('keyup', function (event) {
-    keyState[event.key] = false;
-});
-
-function updatePositions() {
+function localupdatePositions() {
     if (keyState["w"] && positions[0] > 50) {
         positions[0] -= 5;
     }
@@ -39,31 +24,31 @@ function updatePositions() {
     }
 }
 
-function drawPlayers() {
+function localdrawPlayers() {
 	colors = ['#7e3047', '#498d14', '#a891d5', 'white']
-	c.fillStyle = colors[0]
-    c.fillRect(40, positions[0] - 100/2, 10, 100)
-    c.fillStyle = colors[1]
-    c.fillRect(800 - 40 - 10, positions[1] - 100/2, 10, 100)
+	canv.fillStyle = colors[0]
+    canv.fillRect(40, positions[0] - 100/2, 10, 100)
+    canv.fillStyle = colors[1]
+    canv.fillRect(800 - 40 - 10, positions[1] - 100/2, 10, 100)
 }
 
-function drawNS() {
-	c.font = "20px monospace";
-    c.textBaseline = "middle"
-    c.textAlign = 'center'
-    c.fillStyle = 'white'
-    c.fillRect(0, 600, 800, 2)
-    c.fillText(scores[0] + ' | ' + scores[1], 800/2, 625)	
+function localdrawNS() {
+	canv.font = "20px monospace";
+    canv.textBaseline = "middle"
+    canv.textAlign = 'center'
+    canv.fillStyle = 'white'
+    canv.fillRect(0, 600, 800, 2)
+    canv.fillText(scores[0] + ' | ' + scores[1], 800/2, 625)	
 }
 
-function resetBall() {
+function localresetBall() {
     x = 400;
     y = 300;
     dx = (Math.random() > 0.5 ? 4 : -4);
     dy = (Math.random() > 0.5 ? 4 : -4);
 }
 
-function updateBall() {
+function localupdateBall() {
     x += dx;
     y += dy;
 
@@ -75,49 +60,63 @@ function updateBall() {
         dx = -dx;
     if (x - r < 10) {
         scores[1]++;
-        resetBall();
+        localresetBall();
     }
 
     if (x + r > 800 - 40 - 10 && y > positions[1] - paddleHeight / 2 && y < positions[1] + paddleHeight / 2)
         dx = -dx;
     if (x + r > 800 - 10) {
         scores[0]++;
-        resetBall();
+        localresetBall();
     }
 }
 
-function draw() {
-	c.fillStyle = "rgb(0 0 0 / 20%)";
-	c.fillRect(0, 0, 800, 650);
-	c.fillStyle = "#8791ed";
-	for (i = 5; i < 600; i += 20)c.fillRect(400, i, 4, 10)
-	drawPlayers()
-	drawNS()
-	updatePositions()
-	c.fillStyle = "#FFFFFF";
-    c.beginPath();
-    c.moveTo(x, y);
-    c.arc(x, y, r, 0, Math.PI * 2, true);
-    c.stroke();
-    c.fill()
+function localdraw() {
+	canv.fillStyle = "rgb(0 0 0 / 20%)";
+	canv.fillRect(0, 0, 800, 650);
+	canv.fillStyle = "#8791ed";
+	for (i = 5; i < 600; i += 20)canv.fillRect(400, i, 4, 10)
+	localdrawPlayers()
+	localdrawNS()
+	localupdatePositions()
+	canv.fillStyle = "#FFFFFF";
+    canv.beginPath();
+    canv.moveTo(x, y);
+    canv.arc(x, y, r, 0, Math.PI * 2, true);
+    canv.stroke();
+    canv.fill()
 }
 
-function gameLoop() {
-	draw();
-    updateBall()
+function localgameLoop() {
+	localdraw();
+    localupdateBall()
     
-    c.textAlign = 'center'
+    canv.textAlign = 'center'
     if (scores[0] > 10)
 	{
-        c.fillText("player 1 won", 800/2, 600/2)
+        canv.fillText("player 1 won", 800/2, 600/2)
 		return
 	}
     else if (scores[1] > 10)
 	{
-        c.fillText("player 2 won", 800/2, 600/2)
+        canv.fillText("player 2 won", 800/2, 600/2)
 		return
 	}
-	requestAnimationFrame(gameLoop);
+	requestAnimationFrame(localgameLoop);
 }
 
-gameLoop();
+function loadLocalPong() {
+	canv = document.getElementById('pongCanvas').getContext('2d')
+	offScreenC = document.createElement('canvas');
+	offScreenC.width = canv.width = 800;
+	offScreenC.height = canv.height = 600;
+	offc = offScreenC.getContext('2d');
+	obstaclesDrawn = false;
+	canv.font = "60px monospace"
+
+	document.removeEventListener('keydown', keyDown)
+	document.removeEventListener('keyup', keyUp)
+	document.addEventListener('keydown', keyDown);
+	document.addEventListener('keyup', keyUp);
+	localgameLoop();
+}

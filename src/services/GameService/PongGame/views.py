@@ -32,26 +32,29 @@ def get_player(session_key, token, user_id):
     return user
 
 @csrf_exempt
-def send_notification(request, user_id, message=None):
-    internal_secret = request.headers.get('X-Internal-Secret')
+def send_notification(request, message=None):
+    if request:
+        internal_secret = request.headers.get('X-Internal-Secret')
 
-    if internal_secret != 'my_internal_secret_token': # TODO : secret
-        return JsonResponse({'error': 'Unauthorized access'}, status=403)
+        if internal_secret != 'my_internal_secret_token': # TODO : secret
+            return JsonResponse({'error': 'Unauthorized access'}, status=403)
         
-    channel_layer = get_channel_layer()
-    group_name = f'notifications_{user_id}'
     if not message:
         data = request.body.decode()
         data = json.loads(data)
         message = data.get('message')
+        user_id = data.get('user_id')
 
-    async_to_sync(channel_layer.group_send)(
-        group_name,
-        {
-            'type': 'send_notification',
-            'message': message
-        }
-    )
+    channel_layer = get_channel_layer()
+    for uid in users_id:
+        group_name = f'notifications_{uid}'
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': 'send_notification',
+                'message': message
+            }
+        )
     return JsonResponse({'status': 'Message sent'})
 
 @csrf_exempt
@@ -144,6 +147,7 @@ def join_tournament(request, tournament_id):
         if tournament.players.count() == tournament.max_player:
             make_matches(tournament)
             message += " and matchmaking started"
+            # TODO : notif user 
     else:
         return JsonResponse({"success": False, "message": "Tournament is full"})
     return JsonResponse({"success": True, "message": message})
@@ -207,12 +211,18 @@ def get_tournament(request, tournament_id):
     except Tournament.DoesNotExist:
         return JsonResponse({'error': 'Tournament not found'}, status=404)
 
-    matches = Match.objects.filter(tournament=tournament)
+    matches = Match.objects.filter(tournament=tournament).order_by('id')
     matches_data = [{
         'id': match.id,
         'game_id': match.game.id,
-        'player_one': match.game.players.first().id if match.game.players.exists() else None,
-        'player_two': match.game.players.last().id if match.game.players.exists() and match.game.players.count() > 1 else None,
+        'player_one': {
+            'id': match.game.players.first().id if match.game.players.exists() else None,
+            'username': match.game.players.first().username if match.game.players.exists() else None
+        },
+        'player_two': {
+            'id': match.game.players.last().id if match.game.players.exists() and match.game.players.count() > 1 else None,
+            'username': match.game.players.last().username if match.game.players.exists() and match.game.players.count() > 1 else None,
+        },
         'winner': match.winner.id if match.winner else None,
     } for match in matches]
 
@@ -222,7 +232,7 @@ def get_tournament(request, tournament_id):
         'start_date': tournament.start_date.strftime('%Y-%m-%d %H:%M:%S'),
         'end_date': tournament.end_date.strftime('%Y-%m-%d %H:%M:%S') if tournament.end_date else None,
         'max_player_number': tournament.max_player,
-        'player_number': players.length(),
+        'player_number': tournament.players.count(),
         'matches': matches_data
     }
     
@@ -405,7 +415,6 @@ def startPong(request, player, token, gameType, gameMode, playerNumber):
 
     game.save()
     return JsonResponse({'message': 'Game started', 'game_id': game.id})
-
 
 def startTron(request, player, token, gameType, gameMode, playerNumber):
     if not playerNumber:
@@ -609,7 +618,7 @@ def achievement_notif(user_id, achievement):
                 }
             }
         }
-    send_notification(None, user_id, message)
+    send_notification(None, [user_id], message)
 
 @require_GET
 @csrf_exempt

@@ -186,6 +186,7 @@ class Party:
 		self.players = sorted(self.players, key=lambda x: x['n'])
 		self.date = prop.start_date
 		self.last_hit = 0
+		self.tournament = False
 
 	def add_player(self, players, user, token):
 		# for player in players:
@@ -302,6 +303,10 @@ def setup(game_id, player, token):
 		return setting
 
 	game = Game.objects.filter(id=game_id).first()
+	tournament = False
+	if Match.objects.filter(game=game).exists():
+		tournament = True
+	
 	if timezone.now() < game.start_date:
 		return None # TODO : error message
 	
@@ -312,6 +317,7 @@ def setup(game_id, player, token):
 			if not prop.ball:
 				prop.ball = {'x': prop.width/2, 'y': prop.height/2, 'dx': prop.ballSpeed, 'dy': prop.ballSpeed}
 			party = Party(prop, game_id, player, token)
+			party.tournament = tournament
 			if party.player_number == 1:
 				party.add_ai_player(prop.players.all())
 			party_list[game_id] = party
@@ -346,7 +352,8 @@ def get_pong_state(game_id):
 		'scores': scores,
 		'usernames': username,
 		'state': game.state,
-		'gameMode': game.gameMode
+		'gameMode': game.gameMode,
+		'tournament': game.tournament
 	}
 	if (game.state == 'finished'):
 		if game.gameMode == 'team':
