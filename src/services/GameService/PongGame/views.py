@@ -129,6 +129,24 @@ def create_tournament(request):
     except Exception as e:
         return JsonResponse({"success": False, "message": "Failed to create tournament. Error: " + str(e)}, status=500)
 
+def make_tournament_notif(tournament):
+    message = {
+            "type": "tournament",
+            "data": {
+                "title": "Tournament Starting",
+                "content": f"The {tournament.name} Championship is ready!",
+                "timestamp": timezone.now().isoformat(),
+                "user_id": None,
+                "metadata": {
+                    "tournament_id": tournament.id,
+                    "start_time": tournament.start_date
+                }
+            }
+        }
+
+    users_id = [player.id for player in tournament.players.all()]
+    send_notification(None, users_id, message)
+
 @csrf_exempt
 @require_POST
 def join_tournament(request, tournament_id):
@@ -147,7 +165,7 @@ def join_tournament(request, tournament_id):
         if tournament.players.count() == tournament.max_player:
             make_matches(tournament)
             message += " and matchmaking started"
-            # TODO : notif user 
+            make_tournament_notif(tournament)
     else:
         return JsonResponse({"success": False, "message": "Tournament is full"})
     return JsonResponse({"success": True, "message": message})
