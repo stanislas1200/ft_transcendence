@@ -311,7 +311,6 @@ def unblock_user(request, user_id):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
-
 def compress_gif(avatar):
 	with Image.open(avatar) as img:
 		# 'P' mode for palette
@@ -660,9 +659,9 @@ def verify_token(request, token=None, user_id=None):
 @require_GET
 def me(request):
 	try:
-		session_key = request.session.session_key
-		if request.user.is_authenticated:
-			return JsonResponse(user_to_dict(request.user))
+		# session_key = request.session.session_key # removed for testIflogin
+		# if request.user.is_authenticated:
+		# 	return JsonResponse(user_to_dict(request.user))
 
 		status = verify_token(request)
 		if (status == 200):
