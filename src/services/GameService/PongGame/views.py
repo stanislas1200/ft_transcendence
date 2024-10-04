@@ -210,7 +210,7 @@ def get_tournament(request, tournament_id):
     except Tournament.DoesNotExist:
         return JsonResponse({'error': 'Tournament not found'}, status=404)
 
-    matches = Match.objects.filter(tournament=tournament)
+    matches = Match.objects.filter(tournament=tournament).order_by('id')
     matches_data = [{
         'id': match.id,
         'game_id': match.game.id,
@@ -225,7 +225,7 @@ def get_tournament(request, tournament_id):
         'start_date': tournament.start_date.strftime('%Y-%m-%d %H:%M:%S'),
         'end_date': tournament.end_date.strftime('%Y-%m-%d %H:%M:%S') if tournament.end_date else None,
         'max_player_number': tournament.max_player,
-        'player_number': players.length(),
+        'player_number': tournament.players.count(),
         'matches': matches_data
     }
     
