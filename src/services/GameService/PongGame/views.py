@@ -147,6 +147,7 @@ def join_tournament(request, tournament_id):
         if tournament.players.count() == tournament.max_player:
             make_matches(tournament)
             message += " and matchmaking started"
+            # TODO : notif user 
     else:
         return JsonResponse({"success": False, "message": "Tournament is full"})
     return JsonResponse({"success": True, "message": message})
@@ -214,8 +215,14 @@ def get_tournament(request, tournament_id):
     matches_data = [{
         'id': match.id,
         'game_id': match.game.id,
-        'player_one': match.game.players.first().id if match.game.players.exists() else None,
-        'player_two': match.game.players.last().id if match.game.players.exists() and match.game.players.count() > 1 else None,
+        'player_one': {
+            'id': match.game.players.first().id if match.game.players.exists() else None,
+            'username': match.game.players.first().username if match.game.players.exists() else None
+        },
+        'player_two': {
+            'id': match.game.players.last().id if match.game.players.exists() and match.game.players.count() > 1 else None,
+            'username': match.game.players.last().username if match.game.players.exists() and match.game.players.count() > 1 else None,
+        },
         'winner': match.winner.id if match.winner else None,
     } for match in matches]
 
