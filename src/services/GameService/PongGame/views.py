@@ -202,7 +202,7 @@ def make_matches(tournament):
                 current_round.save()
 
 def make_pong_tournament_game(player1, player2):
-    pong = Pong.objects.create(playerNumber=1, mapId=0)
+    pong = Pong.objects.create(playerNumber=2, mapId=0)
     game = Game.objects.create(gameName='pong', gameProperty=pong, start_date=timezone.now())
     # if player1:
     #     print("okok", flush=True)
@@ -353,11 +353,13 @@ def join_game(request):
         
         if game_id:
             game = Game.objects.get(id=game_id)  # Get the game
+            if Match.objects.filter(game=game).exists()
+                return JsonResponse({'error': 'Unauthorized access'}, status=403)
         else:
             games = Game.objects.filter(gameName=game_name, status='waiting').order_by('?') # Get random game
             game = None
             for g in games:
-                if g.gameProperty.gameMode == game_mode:
+                if g.gameProperty.gameMode == game_mode and g.gameProperty.max_player == player_number:
                     game = g
             if not game:
                 return start_game(request, game_name, game_mode, player_number)

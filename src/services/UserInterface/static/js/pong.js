@@ -140,6 +140,7 @@ function drawNS() {
 	if (game_state.usernames) {
 		spaceB = c.width / game_state.usernames.length
 		colors = ['#7e3047', '#498d14', '#a891d5', 'white']
+		c.textAlign = 'left'
 		c.textBaseline = "middle"
 		c.fillStyle = 'white'
 		c.fillRect(0, 600, 800, 2)
@@ -192,7 +193,36 @@ async function drawEnd() {
 	return 0
 }
 
-function draw() {
+let dotCount = 0;
+let pulseScale = 1;
+let pulseDirection = 0.01;
+
+async function drawWaitingState() {
+    c.clearRect(0, 0, 800, 650);
+
+    c.font = "40px monospace";
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+
+    pulseScale += pulseDirection;
+    if (pulseScale >= 1.1 || pulseScale <= 0.9) pulseDirection = -pulseDirection;
+    c.save();
+    c.scale(pulseScale, pulseScale);
+
+    let text = 'waiting player' + '.'.repeat(dotCount);
+    c.fillText(text, 800 / 2 / pulseScale, 600 / 2 / pulseScale);
+
+    c.restore();
+
+    dotCount = (dotCount + 1) % 4;
+
+	drawNS()
+    await sleep(500)
+}
+
+async function draw() {
+	if (game_state.state == 'waiting')
+		return await drawWaitingState();
 	c.textAlign = 'left'
 	// c.clearRect(0, 0, 800, 600)
 	c.fillStyle = "rgb(0 0 0 / 20%)";
@@ -202,6 +232,8 @@ function draw() {
 	drawPlayers()
 	drawNS()
 	c.fillStyle = "#FFFFFF";
+	// if (game_state.state == 'waiting')
+	// 	c.fillText('waiting player ...', 800/2, 600/2)
 	// draw obstacles
 	if (obstaclesDrawn) {
 		c.drawImage(offScreenC, 0, 0); // TODO : optimise
@@ -218,7 +250,7 @@ function draw() {
 async function gameLoop() {
 	try {
 		if (isGameLoopRunning) {
-			draw();
+			await draw();
 			updatePlayers();
 			end = await drawEnd();
 			if (end == 1)
