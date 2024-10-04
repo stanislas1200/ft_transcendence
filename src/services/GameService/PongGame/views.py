@@ -32,7 +32,7 @@ def get_player(session_key, token, user_id):
     return user
 
 @csrf_exempt
-def send_notification(request, message=None):
+def send_notification(request, users_id, message=None):
     if request:
         internal_secret = request.headers.get('X-Internal-Secret')
 
@@ -43,7 +43,7 @@ def send_notification(request, message=None):
         data = request.body.decode()
         data = json.loads(data)
         message = data.get('message')
-        user_id = data.get('user_id')
+        users_id = data.get('user_id')
 
     channel_layer = get_channel_layer()
     for uid in users_id:
@@ -123,7 +123,7 @@ def create_tournament(request):
         if not all([name, start_date, game_name]):
             return JsonResponse({"success": False, "message": "Missing required fields."}, status=400)
         
-        tournament = Tournament.objects.create(max_player=4, name=name, gameName=game_name, start_date=start_date)
+        tournament = Tournament.objects.create(max_player=8, name=name, gameName=game_name, start_date=start_date)
         return JsonResponse({"success": True, "message": "Tournament created " + str(tournament.id)})
 
     except Exception as e:
