@@ -1,22 +1,22 @@
 <div class="tournament-container">
 	<div class="tournament-name info">
-		<span>Tournament Name</span>
+		<span id="tournament-name">Tournament Name</span>
 	</div>
 	<div class="date info">
-		<span>DD/MM/YYYY</span>
+		<span id="tournament-date">DD/MM/YYYY</span>
 	</div>
 	<div class="join-button info border-bottom">
 		<span>Join tournament</span>
 	</div>
 	<div class="players info border-bottom">
-		<span>Players: 0/8</span>
+		<span id="tournament-nb-player">Players: 0/8</span> <!-- TODO : automate the number of players who joined the tournament -->
 	</div>
 	<div class="wrapper-bracket">
 		<div class="item">
 			<div class="item-parent">
 				<div class="bracket-user">
 					<div class="bracket-user-img">IMG</div>
-					<span>Username</span>
+					<span id="tournament-winner">Username</span>
 				</div>
 			</div>
 			<div class="item-childrens">
@@ -25,7 +25,7 @@
 						<div class="item-parent">
 							<div class="bracket-user">
 								<div class="bracket-user-img">IMG</div>
-								<span>Username</span>
+								<span class="username" data-match="7" data-player="one">Username</span>
 							</div>
 						</div>
 						<div class="item-childrens">
@@ -34,20 +34,20 @@
 									<div class="item-parent">
 										<div class="bracket-user">
 											<div class="bracket-user-img">IMG</div>
-											<span>Username</span>
+											<span class="username" data-match="5" data-player="one">Username</span>
 										</div>
 									</div>
 									<div class="item-childrens">
 										<div class="item-child">
 											<div class="bracket-user">
 												<div class="bracket-user-img">IMG</div>
-												<span>Username</span>
+												<span class="username" data-match="1" data-player="one">Username</span>
 											</div>
 										</div>
 										<div class="item-child">
 											<div class="bracket-user">
 												<div class="bracket-user-img">IMG</div>
-												<span>Username</span>
+												<span class="username" data-match="1" data-player="two">Username</span>
 											</div>
 										</div>
 									</div>
@@ -58,20 +58,20 @@
 									<div class="item-parent">
 										<div class="bracket-user">
 											<div class="bracket-user-img">IMG</div>
-											<span>Username</span>
+											<span class="username" data-match="5" data-player="two">Username</span>
 										</div>
 									</div>
 									<div class="item-childrens">
 										<div class="item-child">
 											<div class="bracket-user">
 												<div class="bracket-user-img">IMG</div>
-												<span>Username</span>
+												<span class="username" data-match="2" data-player="one">Username</span>
 											</div>
 										</div>
 										<div class="item-child">
 											<div class="bracket-user">
 												<div class="bracket-user-img">IMG</div>
-												<span>Username</span>
+												<span class="username" data-match="2" data-player="two">Username</span>
 											</div>
 										</div>
 									</div>
@@ -85,7 +85,7 @@
 						<div class="item-parent">
 							<div class="bracket-user">
 								<div class="bracket-user-img">IMG</div>
-								<span>Username</span>
+								<span class="username" data-match="7" data-player="two">Username</span>
 							</div>
 						</div>
 						<div class="item-childrens">
@@ -94,20 +94,20 @@
 									<div class="item-parent">
 										<div class="bracket-user">
 											<div class="bracket-user-img">IMG</div>
-											<span>Username</span>
+											<span class="username" data-match="6" data-player="one">Username</span>
 										</div>
 									</div>
 									<div class="item-childrens">
 										<div class="item-child">
 											<div class="bracket-user">
 												<div class="bracket-user-img">IMG</div>
-												<span>Username</span>
+												<span class="username" data-match="3" data-player="one">Username</span>
 											</div>
 										</div>
 										<div class="item-child">
 											<div class="bracket-user">
 												<div class="bracket-user-img">IMG</div>
-												<span>Username</span>
+												<span class="username" data-match="3" data-player="two">Username</span>
 											</div>
 										</div>
 									</div>
@@ -118,20 +118,20 @@
 									<div class="item-parent">
 										<div class="bracket-user">
 											<div class="bracket-user-img">IMG</div>
-											<span>Username</span>
+											<span class="username" data-match="6" data-player="two">Username</span>
 										</div>
 									</div>
 									<div class="item-childrens">
 										<div class="item-child">
 											<div class="bracket-user">
 												<div class="bracket-user-img">IMG</div>
-												<span>Username</span>
+												<span class="username" data-match="4" data-player="one">Username</span>
 											</div>
 										</div>
 										<div class="item-child">
 											<div class="bracket-user">
 												<div class="bracket-user-img">IMG</div>
-												<span>Username</span>
+												<span class="username" data-match="4" data-player="two">Username</span>
 											</div>
 										</div>
 									</div>
@@ -146,7 +146,7 @@
 	<div class="current-game">
 		<div class="match-number">
 			<span class="left-right-button"><</span>
-			<span>Match X</span>
+			<span id="match-title">TBD/TBD</span>
 			<span class="left-right-button">></span>
 		</div>
 		<div class="player-versus">
@@ -154,6 +154,7 @@
 			<div class="current-score">X : X</div>
 			<div class="player">IMG</div>
 		</div>
-		<div class="spectate-button">Spectate game</div>
+		<div id="match-join-button" class="spectate-button">Spectate game</div>
 	</div>
 </div>
+<script>showTournamentInfo();</script>

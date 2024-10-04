@@ -46,6 +46,9 @@ async function loadPage(page) {
         case 'localpong':
             loadLocalPong();
             break;
+        case 'tournament':
+            showTournamentInfo();
+            break;
         default:
             break;
     }
