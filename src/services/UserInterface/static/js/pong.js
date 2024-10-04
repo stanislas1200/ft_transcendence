@@ -180,7 +180,7 @@ async function drawEnd() {
 		c.fillText("Team 2 won", 800/2, 600/2)
 
 		if (game_state.tournament)
-			message = "tournament"
+			page = "tournament"
 		else 
 			page = "game"
 

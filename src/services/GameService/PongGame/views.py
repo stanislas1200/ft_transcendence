@@ -231,7 +231,7 @@ def get_tournament(request, tournament_id):
 
     matches = Match.objects.filter(tournament=tournament).order_by('id')
     matches_data = [{
-        'id': match.id,
+        'id': i+1,
         'game_id': match.game.id,
         'player_one': {
             'id': match.game.players.first().id if match.game.players.exists() else None,
@@ -242,7 +242,7 @@ def get_tournament(request, tournament_id):
             'username': match.game.players.last().username if match.game.players.exists() and match.game.players.count() > 1 else None,
         },
         'winner': match.winner.id if match.winner else None,
-    } for match in matches]
+    } for i, match in enumerate(matches)]
 
     tournament_data = {
         'id': tournament.id,
@@ -353,7 +353,7 @@ def join_game(request):
         
         if game_id:
             game = Game.objects.get(id=game_id)  # Get the game
-            if Match.objects.filter(game=game).exists()
+            if Match.objects.filter(game=game).exists():
                 return JsonResponse({'error': 'Unauthorized access'}, status=403)
         else:
             games = Game.objects.filter(gameName=game_name, status='waiting').order_by('?') # Get random game
