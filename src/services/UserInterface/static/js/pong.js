@@ -24,7 +24,7 @@ function closeWebSocket() {
 
 function connect() {
 	let sessionId = getCookie('sessionid');
-	console.log(sessionId)
+	// console.log(sessionId)
 
 
 	window.addEventListener('popstate', closeWebSocket);
@@ -34,7 +34,7 @@ function connect() {
 	});
 
 	socket.addEventListener('message', function (event) {
-		console.log('Message from server: ', event.data);
+		// console.log('Message from server: ', event.data);
 		let serverMessage = JSON.parse(event.data);
 
 		if (serverMessage.error) {
@@ -63,10 +63,13 @@ function connect() {
 		game_state = serverMessage;
 	});
 
-	socket.addEventListener('close', function (event) {
-		isGameLoopRunning = false;
-		console.log('WebSocket is closed now.');
-	});
+	// socket.addEventListener('close', function (event) {
+	// 	window.removeEventListener('popstate', closeWebSocket);
+	// 	drawEnd();
+	// 	socket = null;
+	// 	isGameLoopRunning = false
+	// 	console.log('WebSocket is closed now.');
+	// });
 
 	socket.addEventListener('error', function (event) {
 		console.log('Error: ', event);
@@ -77,6 +80,7 @@ let c = null;
 let offScreenC = null;
 let offc = null;
 let obstaclesDrawn = false;
+let animFrame;
 
 game_state = {
 	ball: {
@@ -155,8 +159,41 @@ function drawNS() {
 	}
 }
 
-function draw() {
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
+async function drawEnd() {
+	if (game_state.scores) {
+		winner = ''
+		if (game_state.scores[0] > 9)
+			winner = 'Team 1' // TODO : winner
+		else if (game_state.scores[1] > 9)
+			winner = 'Team 2'
+		else return 0;
+		
+		c.fillStyle = 'black'
+		c.fillRect(0, 0, 800, 650);
+		drawNS()
+		c.textAlign = 'center'
+		c.fillText("Team 2 won", 800/2, 600/2)
+
+		if (game_state.tournament)
+			message = "tournament"
+		else 
+			page = "game"
+
+		c.fillText("Moving to " + page + " page", 800/2, 650/2)
+		cancelAnimationFrame(animFrame);
+		await sleep(2000);
+		loadPage(page)
+		return 1
+	}
+	return 0
+}
+
+function draw() {
+	c.textAlign = 'left'
 	// c.clearRect(0, 0, 800, 600)
 	c.fillStyle = "rgb(0 0 0 / 20%)";
 	c.fillRect(0, 0, 800, 650);
@@ -178,24 +215,20 @@ function draw() {
     c.fill()
 }
 
-function gameLoop() {
+async function gameLoop() {
 	try {
 		if (isGameLoopRunning) {
 			draw();
-			updatePlayers()
-			if (game_state.scores) {
-				if (game_state.scores[0] > 9)
-				{
-					c.fillText("Team 1 won", 800/2, 600/2)
-					return
-				}
-				else if (game_state.scores[1] > 9)
-				{
-					c.fillText("Team 2 won", 800/2, 600/2)
-					return
-				}
+			updatePlayers();
+			end = await drawEnd();
+			if (end == 1)
+			{
+				cancelAnimationFrame(animFrame);
+				game_state.scores = null;
+				game_state.usernames = null;
+				return;
 			}
-			requestAnimationFrame(gameLoop);
+			animFrame = requestAnimationFrame(gameLoop);
 		}
 	} catch (error) {
 		console.log(error)
