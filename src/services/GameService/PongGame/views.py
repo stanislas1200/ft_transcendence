@@ -31,6 +31,11 @@ def get_player(session_key, token, user_id):
     user = User.objects.get(id=user_id)
     return user
 
+def update_connection(user_id, i):
+    user = User.objects.get(id=user_id)
+    user.is_online += i
+    user.save()
+
 @csrf_exempt
 def send_notification(request, users_id, message=None):
     if request:
@@ -247,6 +252,7 @@ def get_tournament(request, tournament_id):
             'username': match.game.players.last().username if match.game.players.exists() and match.game.players.count() > 1 else None,
         },
         'winner': match.winner.id if match.winner else None,
+        'satus': match.game.status
     } for i, match in enumerate(matches)]
 
     tournament_data = {

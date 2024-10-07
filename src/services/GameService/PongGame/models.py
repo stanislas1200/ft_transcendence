@@ -90,3 +90,9 @@ class UserAchievement(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
     unlocked_at = models.DateTimeField(auto_now_add=True)
+
+
+User.add_to_class(
+    'is_online',
+    models.PositiveIntegerField(default=0)
+)
