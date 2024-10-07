@@ -490,6 +490,38 @@ def update_user(request, user_id):
 	except: # TODO : better except
 		return JsonResponse({'error': 'Failed to update user'}, status=400)
 
+
+@login_required
+def delete_user(request):
+	if request.user.is_authenticated:
+		user = request.user
+	else:
+		status = verify_token(request)
+		if (status == 200):
+			u_id = request.GET.get('UserId')
+			if not u_id:
+				u_id = request.COOKIES.get('userId')
+
+			user = User.objects.get(id=u_id)
+		else:
+			return JsonResponse({'error': 'User is not logged in'}, status=401)
+	
+	# user.delete()
+	user.username = "delete_user"
+	user.email = "delete@delete.delete"
+	user.first_name = "delete"
+	user.last_name = "delete"
+	user.is_active = False
+	user.save()
+
+	profile = UserToken.objects.get(user=user)
+	profile.token = ""
+	profile.avatar = "default.png"
+	profile.save()
+	# TODO : delete chat ?
+	return JsonResponse({'message': f'Successfully delete user'})
+
+
 # TODO : decorator : ex remove csrf_exempt
 
 @csrf_exempt
@@ -584,7 +616,7 @@ def register(request):
 		#TODO : uncoment
 		# if not username or not password or not email or not first_name or not last_name or not cpassword:
 		# 	return JsonResponse({'error': 'Missing required fields'}, status=400)
-		if User.objects.filter(username=username).exists():
+		if User.objects.filter(username=username).exists() or username == 'delete_user':
 			return JsonResponse({'error': 'Username already taken'}, status=400)
 		if User.objects.filter(email=email).exists():
 			return JsonResponse({'error': 'Email already taken'}, status=400)
@@ -606,7 +638,7 @@ def login_view(request):
 			return JsonResponse({'error': 'Missing required fields'}, status=400)
 		u = authenticate(request, username=username, password=password) # slow
 		if not u:
-			if User.objects.filter(email=username).exists():
+			if User.objects.filter(email=username).exists() or username == 'delete_user':
 				username = User.objects.get(email=username).username
 				u = authenticate(request, username=username, password=password)
 		if u is not None:

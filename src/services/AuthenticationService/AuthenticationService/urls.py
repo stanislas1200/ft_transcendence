@@ -31,6 +31,7 @@ urlpatterns = [
     path('block_user/<int:user_id>/', views.block_user, name='block_user'),
     path('list_blocked_user/', views.list_blocked_user, name='list_blocked_user'),
     path('unblock_user/<int:user_id>/', views.unblock_user, name='unblock_user'),
+    path('delete_user/', views.delete_user, name='delete_user'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
