@@ -117,11 +117,13 @@ def accept_friend_request(request, request_id):
 
 		if not FriendRequest.objects.filter(id=request_id).exists():
 			return JsonResponse({'error': 'Request not found'}, status=404)
+
 		friend_request = FriendRequest.objects.get(id=request_id)
 		if friend_request.receiver == user:
-			Friendship.objects.create(user1=friend_request.sender, user2=friend_request.receiver)
-			friend_request_accept_notif(user2, user1)
-			send_notif(message, user1.id)
+			if not Friendship.objects.filter(user1=friend_request.sender, user2=friend_request.receiver).exists():
+				Friendship.objects.create(user1=friend_request.sender, user2=friend_request.receiver)
+			message = friend_request_accept_notif(friend_request.receiver, friend_request.sender)
+			send_notif(message, friend_request.sender.id)
 			friend_request.delete()
 			return JsonResponse({'message': 'Successfully accepted request'})
 			
@@ -197,7 +199,7 @@ def list_friends(request, user_id):
 			return JsonResponse({'error': 'User not found'}, status=404)
 		user = User.objects.get(id=user_id)
 		friends = user.friends
-		return JsonResponse({'friends': [{'id': friend.id, 'username': friend.username} for friend in friends]})
+		return JsonResponse({'friends': [{'id': friend.id, 'username': friend.username, 'is_online': True if friend.is_online else False} for friend in friends]})
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 

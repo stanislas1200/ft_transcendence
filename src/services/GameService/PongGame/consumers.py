@@ -4,6 +4,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import asyncio
 # from asgiref.sync import database_sync_to_async
 from asgiref.sync import sync_to_async
+from django.contrib.auth.models import User
 # from .models import Game
 from .game_manager import setup, get_n, update_pong, get_pong_state, move_pong, setup
 from .tron_game import update_tron, get_tron_state, setup_tron, get_tron_n, move_tron
@@ -11,7 +12,7 @@ from .gun_and_monsters import setup_gam, move_gam, get_gam_state, get_gam_n, upd
 from .models import Game
 import http.cookies
 
-from .views import get_player
+from .views import get_player, update_connection
 from django.core.cache import cache
 import time
 
@@ -25,7 +26,6 @@ async def closeWithMessage(ws, str):
 
 class NotificationConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
-
 		headers = dict(self.scope['headers']) # TODO : connect when login or conenct and if login send user_id ?
 		if b'cookie' in headers:
 			cookie = headers[b'cookie'].decode()
@@ -43,7 +43,10 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 		)
 		await self.accept()
 
+		await sync_to_async(update_connection)(self.user_id, 1)
+
 	async def disconnect(self, code):
+		await sync_to_async(update_connection)(self.user_id, -1)
 		await self.channel_layer.group_discard(
 			self.group_name,
 			self.channel_name
