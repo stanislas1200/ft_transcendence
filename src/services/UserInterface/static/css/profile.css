@@ -125,3 +125,17 @@
     justify-content: space-between;
     align-items: center;
 }
+
+.valueForGraph {
+    fill: var(--text);
+    text-anchor: middle;
+    font-size: 10px;
+}
+
+.smaller {
+    font-size: 8px;
+}
+
+.reallySmall {
+    font-size: 6px;
+}

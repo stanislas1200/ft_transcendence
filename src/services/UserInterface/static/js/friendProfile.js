@@ -21,37 +21,12 @@ function searchUser(usernameSearching) {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200 || xhr.status === 201) {
                     response = JSON.parse(xhr.responseText);
-                    // console.log(response);
-                    // console.log(response.users.length);
-                    // if (response.users.length != 1) {
                     numUser = findGoodUser(usernameSearching, response);
-                    // console.log(response.users[numUser]);
-                    // console.log(userNameFriend);
                     var tmp = userNameFriend.textContent;
                     userNameFriend.innerHTML = response.users[numUser].username;
-                    // console.log("innerHTML: " + userNameFriend.innerHTML);
                     userNameFriend.textContent = tmp.replace("test", response.users[numUser].username);
-                    // console.log(userNameFriend.textContent);
-                    // console.log(tmp);
-                    // userNameFriend.textContent = tmp;
-                    // userName.textContent = response.users[numUser].username;
-                    // console.log(userName.textContent);
-                    // console.log('fin search user');
                     loadProfilePicture(response.users[numUser].id);
                     loadHistoryFromUser(response.users[numUser].id);
-                    // } else {
-                    //     userName.textContent = response.users[0].username;
-                    //     loadProfilePicture(response.users[0].id);
-                    // }
-                    // if (response.users.length == 1) {
-                    //     load
-                    //     loadHistoryFromUser(response.users[0].id);
-                    // } else if (response.users.length > 0) {
-                    //     let foundUser = response.users.find(users => users.username === searchValue.value);
-                    //     if (foundUser)
-                    //         loadHistoryFromUser(foundUser.id);
-                    // }
-                    // console.log(this.response);
                 } else {
                     alert('Error: ' + JSON.parse(xhr.responseText).error);
                 }
@@ -98,7 +73,8 @@ function loadHistoryFromGame(id, gameId) {
         if (xhr.readyState === 4) {
             if (xhr.status === 200 || xhr.status === 201) {
                 response = JSON.parse(xhr.responseText);
-                // console.log(response);
+                // console.log(id);
+                console.log(response);
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
@@ -156,14 +132,15 @@ function displayHistorique(userId, response) {
         // no historique for the moment
         historySpace.innerHTML = "<p class=\"game\">no history for the moment<\/p>";
     } else {
-
+        // console.log(response);
         let nbrWin = 0;
         let totalGauche = 0;
         let totalDroite = 0;
         for (let i = 0; i < response.length; i++) {
             let date = response[i].start_date.substr(0, 10);
             let tmp = "<p class=\"game\">";
-            tmp += "<a class=\"id\" style=\"visibility: collapse;\">" + i + "<\/a>"
+            // console.log(i);
+            tmp += "<a class=\"id\" style=\"visibility: collapse;\">" + response[i].id + "<\/a>"
             if (response[i].status != 'playing') {
                 if (response[i].win == true) {
                     tmp += "<a class=\"victory\" style=\"color: green;\">" + "Win" + "<\/a>"
@@ -176,6 +153,10 @@ function displayHistorique(userId, response) {
                 tmp += "<a class=\"date\">" + date + "<\/a>"
                 tmp += "<a class=\"status\">" + response[i].status + "<\/a>"
                 tmp += "<\/p>";
+                // if (i == 5) {
+                //     console.log('ici');
+                //     console.log(tmp);
+                // }
                 historySpace.innerHTML += tmp;
             }
         }
@@ -187,6 +168,7 @@ function displayHistorique(userId, response) {
             target = target.previousElementSibling;
         }
         let gameId = target.innerHTML;
+        // console.log(target.innerHTML);
         if (!isNaN(gameId)) {
             // console.log(gameId);
             loadHistoryFromGame(userId, gameId);
@@ -227,7 +209,7 @@ function graphique(stats) {
     const text = document.getElementById('text');
     const totalScore = document.getElementById('totalScore');
 
-    console.log(stats);
+    // console.log(stats);
     let nbrGame = stats.pong.games_played;
     let nbrWin = stats.pong.games_won;
     let nbrLoose = stats.pong.games_lost;
@@ -235,6 +217,11 @@ function graphique(stats) {
     // console.log(text);
     const winPercent = (nbrWin / nbrGame) * 100;
     let tmp = winPercent + ", 100";
+    if (nbrWin > 10 || nbrLoose > 10) {
+        text.classList.add("smaller");
+        if (nbrWin > 10 && nbrLoose > 10)
+            text.classList.add("realySmall");
+    }
     text.innerHTML = nbrWin + "w/" + nbrLoose + "l";
     percent.setAttribute('stroke-dasharray', tmp);
     totalScore.innerHTML += stats.pong.total_score;

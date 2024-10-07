@@ -145,11 +145,11 @@
     max-height: 200px;
 }
 
-#text {
+/* #text {
     text-align: center;
     color: var(--text);
     font-size: 10px;
-}
+} */
 
 .circle-svg path.percent {
     stroke: var(--primary);
