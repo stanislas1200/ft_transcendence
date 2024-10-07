@@ -1,5 +1,57 @@
 testIfLoggedIn();
 
+function getCookie(name) {
+	var value = "; " + document.cookie;
+	var parts = value.split("; " + name + "=");
+	if (parts.length == 2) return parts.pop().split(";").shift();
+}
+
+function connectToNotifications() {
+	let userId = getCookie('userId');
+    let wsUrl = `wss://localhost:8001/ws/notifications/${userId}`;
+    wsUrl = wsUrl.replace('localhost', window.location.hostname);
+
+    wss = new WebSocket(wsUrl);
+
+    wss.addEventListener('open', function (event) {
+        console.log('Connected to notifications system.')
+    });
+
+    wss.addEventListener('message', function (event) {
+        let serverMessage = JSON.parse(event.data);
+    });
+
+
+	wss.addEventListener('close', function (event) {
+        connectToNotifications()
+		console.log('Close: ', event);
+	});
+
+	wss.addEventListener('error', function (event) {
+		console.log('Error: ', event);
+	});
+}
+
+connectToNotifications()
+
+function logout() {
+    let url = "https://localhost:8000/logout";
+    url = url.replace("localhost", window.location.hostname);
+
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+    xhr.withCredentials = true;
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status == 200 ) {
+                testIfLoggedIn()
+            }
+        }
+    };
+    xhr.send();
+}
+
 function setActive(element, pageName) {
     // Retirer la classe 'active' de tous les liens
     const links = document.querySelectorAll('ul li a');

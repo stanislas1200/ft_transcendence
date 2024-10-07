@@ -21,6 +21,8 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/settings.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/profile.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/achievements.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/tournament.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/friendProfile.css' %}">
 
     <script src="{% static 'js/themeToggle.js' %}"></script>
@@ -28,11 +30,13 @@
     <script src="{% static 'js/friend.js' %}"></script>
     <script src="{% static 'js/spa.js' %}"></script>
     <script src="{% static 'js/game.js' %}"></script>
-    <!-- <script src="{% static 'js/pong.js' %}"></script> -->
+    <script src="{% static 'js/pong.js' %}"></script>
+    <script src="{% static 'js/localPong.js' %}"></script>
     <script src="{% static 'js/settings.js' %}"></script>
     <script src="{% static 'js/profile.js' %}"></script>
     <script src="{% static 'js/achievements.js' %}"></script>
     <script src="{% static 'js/friendProfile.js' %}"></script>
+    <script src="{% static 'js/tournament.js' %}"></script>
 </head>
 
 <body>
@@ -59,7 +63,7 @@
             <nav class="navbar-left">
                 <ul>
                     <li>
-                        <a href="#home" onclick="setActive(this, '')">
+                        <a href="#home" onclick="setActive(this, 'home')">
                             <i class="fa fa-home fa-2x"></i>
                             <span class="nav-text">
                                 Home
@@ -74,8 +78,16 @@
                             </span>
                         </a>
                     </li>
+                    <li>
+                        <a href="#tournament" onclick="setActive(this, 'tournament')">
+                            <i class="fa fa-trophy fa-2x"></i>
+                            <span class="nav-text">
+                                Tournament
+                            </span>
+                        </a>
+                    </li>
                 </ul>
-                <ul class="logout">
+                <ul class="logout" onclick="logout()">
                     <li>
                         <a href="#">
                             <i class="fa fa-power-off fa-2x"></i>
@@ -100,7 +112,7 @@
                     </li>
                     <li>
                         <a href="#achievements" onclick="setActive(this, 'achievements')">
-                            <i class="fa fa-trophy fa-2x"></i>
+                            <i class="fa fa-medal fa-2x"></i>
                         </a>
                     </li>
                     <li>

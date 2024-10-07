@@ -17,8 +17,47 @@ from django.core.files.images import get_image_dimensions
 from PIL import Image, ImageSequence
 from io import BytesIO
 from django.core.files.base import ContentFile
+from django.utils import timezone
 
 from django.shortcuts import get_object_or_404
+
+def friend_request_notif(sender, receiver):
+	message = {
+		"type": "friend_request",
+		"data": {
+			"title": "Friend Request",
+			"content": f"{sender.username} sent you a friend request",
+			"timestamp": timezone.now().isoformat(),
+			"user_id": receiver.id,
+			"metadata": {
+				"requester_id": sender.id,
+				"requester_name": sender.username
+			}
+		}
+	}
+	return message
+
+def friend_request_accept_notif(sender, receiver):
+	message = {
+		"type": "friend_request_accepted",
+		"data": {
+			"title": "Friend Request Accepted",
+			"content": f"{sender.username} accepted your friend request",
+			"timestamp": timezone.now().isoformat(),
+			"user_id": receiver.id,
+			"metadata": {
+				"requester_id": sender.id,
+				"requester_name": sender.username
+			}
+		}
+	}
+	return message
+
+def send_notif(message, user_id):
+	headers = {
+		'X-Internal-Secret': 'my_internal_secret_token'
+	}
+	response = requests.post(f'https://game-service:8001/game/send-notification/', headers=headers, json={"user_id": [user_id], "message": message}, verify=False)
 
 @csrf_exempt # Disable CSRF protection for this view
 @require_POST
@@ -49,12 +88,13 @@ def send_friend_request(request, user_id):
 		friend_request, created = FriendRequest.objects.get_or_create(sender=sender, receiver=receiver)
 		
 		if created:
+			message = friend_request_notif(sender, receiver)
+			send_notif(message, receiver.id)
 			return JsonResponse({'message': 'Successfully sent request'})
 		else:
 			return JsonResponse({'error': 'Friend request already exists'}, status=409) # TODO : check sender receiver and receiver sender 
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
-
 
 @csrf_exempt # Disable CSRF protection for this view
 @require_POST
@@ -78,6 +118,8 @@ def accept_friend_request(request, request_id):
 		friend_request = FriendRequest.objects.get(id=request_id)
 		if friend_request.receiver == user:
 			Friendship.objects.create(user1=friend_request.sender, user2=friend_request.receiver)
+			friend_request_accept_notif(user2, user1)
+			send_notif(message, user1.id)
 			friend_request.delete()
 			return JsonResponse({'message': 'Successfully accepted request'})
 			
@@ -268,7 +310,6 @@ def unblock_user(request, user_id):
 		return JsonResponse({'error': 'Object not found'}, status=404)
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
-
 
 def compress_gif(avatar):
 	with Image.open(avatar) as img:
@@ -530,6 +571,11 @@ def register(request):
 		password = request.POST.get('password')
 		cpassword = request.POST.get('c_password')
 		email = request.POST.get('email')
+
+		if not User.objects.filter(username='AI').exists(): # get_or_create Temp so ai have a profile image 
+			ai = User.objects.create_user(username='AI')
+			UserToken.objects.update_or_create(user=ai, defaults={'token': 'TODO : check if can connect as ai'}) # TODO : check if can connect as ai
+
 		#TODO : uncoment
 		# if not username or not password or not email or not first_name or not last_name or not cpassword:
 		# 	return JsonResponse({'error': 'Missing required fields'}, status=400)
@@ -613,9 +659,9 @@ def verify_token(request, token=None, user_id=None):
 @require_GET
 def me(request):
 	try:
-		session_key = request.session.session_key
-		if request.user.is_authenticated:
-			return JsonResponse(user_to_dict(request.user))
+		# session_key = request.session.session_key # removed for testIflogin
+		# if request.user.is_authenticated:
+		# 	return JsonResponse(user_to_dict(request.user))
 
 		status = verify_token(request)
 		if (status == 200):

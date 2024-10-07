@@ -11,7 +11,9 @@ from django.core.cache import cache
 import random
 from django.utils import timezone
 from django.db import transaction
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+import json
 
 # service comunication
 def verify_token(session_key, token, user_id):
@@ -29,6 +31,31 @@ def get_player(session_key, token, user_id):
     user = User.objects.get(id=user_id)
     return user
 
+@csrf_exempt
+def send_notification(request, users_id, message=None):
+    if request:
+        internal_secret = request.headers.get('X-Internal-Secret')
+
+        if internal_secret != 'my_internal_secret_token': # TODO : secret
+            return JsonResponse({'error': 'Unauthorized access'}, status=403)
+        
+    if not message:
+        data = request.body.decode()
+        data = json.loads(data)
+        message = data.get('message')
+        users_id = data.get('user_id')
+
+    channel_layer = get_channel_layer()
+    for uid in users_id:
+        group_name = f'notifications_{uid}'
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': 'send_notification',
+                'message': message
+            }
+        )
+    return JsonResponse({'status': 'Message sent'})
 
 @csrf_exempt
 @require_GET
@@ -75,7 +102,6 @@ def search(request):
         print(e, flush=True)
         return JsonResponse({'error': 'Server error'}, status=500)
     
-
 @csrf_exempt
 @require_POST
 def create_tournament(request):
@@ -97,11 +123,29 @@ def create_tournament(request):
         if not all([name, start_date, game_name]):
             return JsonResponse({"success": False, "message": "Missing required fields."}, status=400)
         
-        tournament = Tournament.objects.create(max_player=4, name=name, gameName=game_name, start_date=start_date)
+        tournament = Tournament.objects.create(max_player=8, name=name, gameName=game_name, start_date=start_date)
         return JsonResponse({"success": True, "message": "Tournament created " + str(tournament.id)})
 
     except Exception as e:
         return JsonResponse({"success": False, "message": "Failed to create tournament. Error: " + str(e)}, status=500)
+
+def make_tournament_notif(tournament):
+    message = {
+            "type": "tournament",
+            "data": {
+                "title": "Tournament Starting",
+                "content": f"The {tournament.name} Championship is ready!",
+                "timestamp": timezone.now().isoformat(),
+                "user_id": None,
+                "metadata": {
+                    "tournament_id": tournament.id,
+                    "start_time": tournament.start_date
+                }
+            }
+        }
+
+    users_id = [player.id for player in tournament.players.all()]
+    send_notification(None, users_id, message)
 
 @csrf_exempt
 @require_POST
@@ -121,6 +165,7 @@ def join_tournament(request, tournament_id):
         if tournament.players.count() == tournament.max_player:
             make_matches(tournament)
             message += " and matchmaking started"
+            make_tournament_notif(tournament)
     else:
         return JsonResponse({"success": False, "message": "Tournament is full"})
     return JsonResponse({"success": True, "message": message})
@@ -157,7 +202,7 @@ def make_matches(tournament):
                 current_round.save()
 
 def make_pong_tournament_game(player1, player2):
-    pong = Pong.objects.create(playerNumber=1, mapId=0)
+    pong = Pong.objects.create(playerNumber=2, mapId=0)
     game = Game.objects.create(gameName='pong', gameProperty=pong, start_date=timezone.now())
     # if player1:
     #     print("okok", flush=True)
@@ -173,7 +218,6 @@ def make_pong_tournament_game(player1, player2):
         game.gameProperty.players.add(player2)
     return game
 
-
 @csrf_exempt
 @require_GET
 def get_tournament(request, tournament_id):
@@ -185,20 +229,28 @@ def get_tournament(request, tournament_id):
     except Tournament.DoesNotExist:
         return JsonResponse({'error': 'Tournament not found'}, status=404)
 
-    matches = Match.objects.filter(tournament=tournament)
+    matches = Match.objects.filter(tournament=tournament).order_by('id')
     matches_data = [{
-        'id': match.id,
-        'player_one': match.game.players.first().id if match.game.players.exists() else None,
-        'player_two': match.game.players.last().id if match.game.players.exists() and match.game.players.count() > 1 else None,
+        'id': i+1,
+        'game_id': match.game.id,
+        'player_one': {
+            'id': match.game.players.first().id if match.game.players.exists() else None,
+            'username': match.game.players.first().username if match.game.players.exists() else None
+        },
+        'player_two': {
+            'id': match.game.players.last().id if match.game.players.exists() and match.game.players.count() > 1 else None,
+            'username': match.game.players.last().username if match.game.players.exists() and match.game.players.count() > 1 else None,
+        },
         'winner': match.winner.id if match.winner else None,
-    } for match in matches]
+    } for i, match in enumerate(matches)]
 
     tournament_data = {
         'id': tournament.id,
         'name': tournament.name,
         'start_date': tournament.start_date.strftime('%Y-%m-%d %H:%M:%S'),
         'end_date': tournament.end_date.strftime('%Y-%m-%d %H:%M:%S') if tournament.end_date else None,
-        'player_number': tournament.max_player,
+        'max_player_number': tournament.max_player,
+        'player_number': tournament.players.count(),
         'matches': matches_data
     }
     
@@ -234,7 +286,6 @@ def get_game_state(request):
         return JsonResponse(game_state)
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
-
 
 @require_GET # return a list of all game
 def list_game(request):
@@ -302,11 +353,13 @@ def join_game(request):
         
         if game_id:
             game = Game.objects.get(id=game_id)  # Get the game
+            if Match.objects.filter(game=game).exists():
+                return JsonResponse({'error': 'Unauthorized access'}, status=403)
         else:
             games = Game.objects.filter(gameName=game_name, status='waiting').order_by('?') # Get random game
             game = None
             for g in games:
-                if g.gameProperty.gameMode == game_mode:
+                if g.gameProperty.gameMode == game_mode and g.gameProperty.max_player == player_number:
                     game = g
             if not game:
                 return start_game(request, game_name, game_mode, player_number)
@@ -383,7 +436,6 @@ def startPong(request, player, token, gameType, gameMode, playerNumber):
     game.save()
     return JsonResponse({'message': 'Game started', 'game_id': game.id})
 
-
 def startTron(request, player, token, gameType, gameMode, playerNumber):
     if not playerNumber:
         playerNumber = request.POST.get('playerNumber', 1)
@@ -450,7 +502,9 @@ def start_game(request, gameName=None, gameMode=None, playerNumber=None):
     gameType = request.POST.get('gameType', 'simple')  # Get the game type from the request, default to 'simple'
 
     ach, created = Achievement.objects.get_or_create(name='first game', description='first game', points=0)
-    UserAchievement.objects.get_or_create(user=player, achievement=ach)
+    _, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
+    if created:
+        achievement_notif(user_id, ach)
     if gameName == 'pong':
         return startPong(request, player, token, gameType, gameMode, playerNumber)
     elif gameName == 'tron':
@@ -570,6 +624,22 @@ def get_history(request):
         print(e, flush=True)
         return JsonResponse({'error': 'Error'}, status=500)
 
+def achievement_notif(user_id, achievement):
+    message = {
+            "type": "achievement",
+            "data": {
+                "title": "Achievement Unlocked",
+                "content": f"You unlocked the '{achievement.name}' achievement!",
+                "timestamp": timezone.now().isoformat(),
+                "user_id": user_id,
+                "metadata": {
+                    "achievement_id": achievement.id,
+                    "achievement_name": achievement.name
+                }
+            }
+        }
+    send_notification(None, [user_id], message)
+
 @require_GET
 @csrf_exempt
 def list_achievements(request):
@@ -585,7 +655,9 @@ def list_achievements(request):
         # TODO : remove this
         # test create and add achievement
         ach, created = Achievement.objects.get_or_create(name='list achievements', description='list all achievements', points=0)
-        UserAchievement.objects.get_or_create(user=user, achievement=ach)
+        _, created = UserAchievement.objects.get_or_create(user=user, achievement=ach)
+        if created:
+            achievement_notif(user_id, ach)
         # end test
 
         user_achievements = UserAchievement.objects.filter(user=user)
