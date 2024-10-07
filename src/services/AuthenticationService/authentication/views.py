@@ -19,6 +19,8 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 from django.utils import timezone
 
+from django.utils.html import escape
+
 from django.shortcuts import get_object_or_404
 
 def friend_request_notif(sender, receiver):
@@ -568,6 +570,7 @@ def register(request):
 		first_name = request.POST.get('first_name')
 		last_name = request.POST.get('last_name')
 		username = request.POST.get('username')
+		username = escape(username)
 		password = request.POST.get('password')
 		cpassword = request.POST.get('c_password')
 		email = request.POST.get('email')
@@ -595,6 +598,7 @@ def register(request):
 def login_view(request):
 	try:
 		username = request.POST.get('username')
+		username = escape(username)
 		password = request.POST.get('password')
 		if not username or not password:
 			return JsonResponse({'error': 'Missing required fields'}, status=400)
