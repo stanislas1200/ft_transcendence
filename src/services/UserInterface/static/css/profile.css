@@ -139,3 +139,20 @@
 .reallySmall {
     font-size: 6px;
 }
+
+.oneGameInformation {
+    align-items: center;
+    justify-content: center;
+}
+
+.noPadding {
+    background-color: var(--background);
+    border: 1px solid var(--secondary);
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
+    height: 135.717px;
+    width: 135.717px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

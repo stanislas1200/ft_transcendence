@@ -33,6 +33,7 @@
     max-height: 75vh;
     display: flex;
     flex-direction: row;
+    width: 100%;
 }
 
 

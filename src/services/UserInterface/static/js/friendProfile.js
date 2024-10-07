@@ -48,7 +48,6 @@ function loadHistoryFromUser(id) {
         if (xhr.readyState === 4) {
             if (xhr.status === 200 || xhr.status === 201) {
                 response = JSON.parse(xhr.responseText);
-                // console.log(response);
                 displayHistorique(id, response);
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
@@ -58,8 +57,24 @@ function loadHistoryFromUser(id) {
     xhr.send();
 }
 
+function displayHistoryFromOneGame(response) {
+    const player1 = document.getElementById('player1');
+    const player2 = document.getElementById('player2');
+    const score = document.getElementById('score');
+
+    console.log(player1);
+    loadPicture(response[1].id, player1);
+    player1.classList.remove('player');
+    player1.classList.add('noPadding');
+    loadPicture(response[2].id, player2);
+    player2.classList.remove('player');
+    player2.classList.add('noPadding');
+
+    console.log(score.innerHTML);
+    score.innerHTML = response[1].score + " : " + response[2].score;
+}
+
 function loadHistoryFromGame(id, gameId) {
-    // console.log("userId: " + id + "gameId: " + gameId);
     let url = "https://localhost:8001/game/hist?UserId={{UserId}}&GameId={{gameId}}";
     url = url.replace("localhost", window.location.hostname);
     url = url.replace("{{UserId}}", id);
@@ -69,12 +84,11 @@ function loadHistoryFromGame(id, gameId) {
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.withCredentials = true;
     xhr.onreadystatechange = function () {
-        // console.log(xhr.readyState);
         if (xhr.readyState === 4) {
             if (xhr.status === 200 || xhr.status === 201) {
                 response = JSON.parse(xhr.responseText);
-                // console.log(id);
                 console.log(response);
+                displayHistoryFromOneGame(response);
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
@@ -117,7 +131,6 @@ function friendRequest(id) {
         if (xhr.readyState === 4) {
             if (xhr.status === 200 || xhr.status === 201) {
                 response = JSON.parse(xhr.responseText);
-                // console.log(response);
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
@@ -129,19 +142,16 @@ function friendRequest(id) {
 function displayHistorique(userId, response) {
     const historySpace = document.getElementById('history');
     if (response.length == 0) {
-        // no historique for the moment
         historySpace.innerHTML = "<p class=\"game\">no history for the moment<\/p>";
     } else {
-        // console.log(response);
         let nbrWin = 0;
         let totalGauche = 0;
         let totalDroite = 0;
         for (let i = 0; i < response.length; i++) {
             let date = response[i].start_date.substr(0, 10);
             let tmp = "<p class=\"game\">";
-            // console.log(i);
             tmp += "<a class=\"id\" style=\"visibility: collapse;\">" + response[i].id + "<\/a>"
-            if (response[i].status != 'playing') {
+            if (response[i].status == 'finished') {
                 if (response[i].win == true) {
                     tmp += "<a class=\"victory\" style=\"color: green;\">" + "Win" + "<\/a>"
                     nbrWin++;
@@ -153,29 +163,21 @@ function displayHistorique(userId, response) {
                 tmp += "<a class=\"date\">" + date + "<\/a>"
                 tmp += "<a class=\"status\">" + response[i].status + "<\/a>"
                 tmp += "<\/p>";
-                // if (i == 5) {
-                //     console.log('ici');
-                //     console.log(tmp);
-                // }
                 historySpace.innerHTML += tmp;
             }
         }
         getStats(userId);
     }
     const click = async ({ target }) => {
-        // console.log(target);
         while (target.previousElementSibling) {
             target = target.previousElementSibling;
         }
         let gameId = target.innerHTML;
-        // console.log(target.innerHTML);
         if (!isNaN(gameId)) {
-            // console.log(gameId);
             loadHistoryFromGame(userId, gameId);
         }
         else
             console.log('not a number');
-        // console.log(target);
     }
 
     const inputs = document.querySelectorAll('.history');
@@ -193,12 +195,12 @@ function displayHistorique(userId, response) {
     }
     if (message) {
         message.addEventListener('click', function () {
-            // console.log('message');
+            console.log('message');
         });
     }
     if (duel) {
         duel.addEventListener('click', function () {
-            // console.log('duel');
+            console.log('duel');
         });
     }
 }
@@ -209,12 +211,9 @@ function graphique(stats) {
     const text = document.getElementById('text');
     const totalScore = document.getElementById('totalScore');
 
-    // console.log(stats);
     let nbrGame = stats.pong.games_played;
     let nbrWin = stats.pong.games_won;
     let nbrLoose = stats.pong.games_lost;
-    // console.log(nbrWin + "/" + nbrGame);
-    // console.log(text);
     const winPercent = (nbrWin / nbrGame) * 100;
     let tmp = winPercent + ", 100";
     if (nbrWin > 10 || nbrLoose > 10) {

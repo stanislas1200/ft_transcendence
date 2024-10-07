@@ -75,15 +75,6 @@ function displayRequest(response) {
             newRequest.appendChild(button);
             requestRecieve.appendChild(newRequest);
         }
-        // const requestButton = document.getElementById('friend-request');
-        // const requestName = document.getElementById('request-name');
-        // for (let i = 0; i < response.received_requests.length; i++) {
-        //     let userId = response.received_requests[i].id;
-        //     requestName.innerHTML += response.received_requests[i].sender;
-        //     requestButton.innerHTML += "<button class=\"fa fa-check my-fa\" value=\"" + userId + "\"><\/button>";
-        //     requestButton.innerHTML += "<button class=\"fa fa-times my-fa\" value=\"" + userId + "\"><\/button>";
-        //     requestButton.innerHTML += "<button class=\"fa fa-ban my-fa\" value=\"" + userId + "\"><\/button>";
-        // }
         const click = async ({ target }) => {
             if (target.classList[1] == 'fa-times')
                 answerdRequest('decline', target.value);

@@ -45,7 +45,15 @@
                 achivement
             </div> -->
         </div>
-        <div class="directionColumn center">
+        <div class="directionColumn center oneGameInformation" id="oneGameInformation">
+            <!-- one game information -->
+            <div class="player-versus">
+                <img id="player1" class="player" src="" alt="IMG">
+                <div class="current-score" id="score">X : X</div>
+                <img id="player2" class="player" src="" alt="IMG">
+            </div>
+        </div>
+        <div class="directionColumn center graphInformation" id="graphInformation">
             <svg viewBox="0 0 36 36" class="circle-svg">
 
                 <path class="around" stroke-dasharray="100, 100"
@@ -55,6 +63,7 @@
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
 
                 <text id="text" class="valueForGraph" x="18" y="14" dy="7">3/10</text>
+
             </svg>
             <p id="totalScore">Total of points scored: </p>
         </div>
