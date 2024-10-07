@@ -5,6 +5,17 @@ class Room(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
 
+class Message(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.CharField(max_length=255)
+    hours = models.DateTimeField(auto_now_add=True)
+
+class Chat(models.Model):
+    users = models.ManyToManyField(User)
+    # user1 = models.ForeignKey(User, related_name='user1', on_delete=models.CASCADE)
+    # user2 = models.ForeignKey(User, related_name='user2', on_delete=models.CASCADE)
+    messages = models.ManyToManyField(Message)
+
 class Block(models.Model):
     blocker = models.ForeignKey(User, related_name='blocker', on_delete=models.CASCADE)
     blocked = models.ForeignKey(User, related_name='blocked', on_delete=models.CASCADE)

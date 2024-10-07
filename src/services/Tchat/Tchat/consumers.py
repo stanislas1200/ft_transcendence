@@ -4,11 +4,19 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth.models import User
 from .views import get_user
+from room.models import Chat, Message
 from asgiref.sync import sync_to_async
 import requests 
 
 # def blocked(user):
 #     return user.blocked
+
+def _get_chat_room(user, recipient_id):
+    chat, created = Chat.objects.get_or_create(users__id=user.id)
+    if created:
+        chat.users.add(user)
+        chat.users.add(recipient_id)
+    return chat
 
 class TChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -74,6 +82,9 @@ class TChatConsumer(AsyncWebsocketConsumer):
         # if (any(group_name == channel for channel in current_channels)):
         #     print("Oui", flush=True)
 
+        self.chat = await sync_to_async(_get_chat_room)(self.user, self.recipient_id)
+        print(self.chat, flush=True)
+
         self.chat_group_name = group_name
         # user = User.objects.get(id=userId)
 
@@ -82,6 +93,7 @@ class TChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
+
 
     async def _check_if_recipient_is_blocked(self, recipient_id, username):
         url = 'https://auth-service:8000/list_blocked_user/'
