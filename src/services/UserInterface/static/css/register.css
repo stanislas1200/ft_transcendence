@@ -140,3 +140,13 @@
 	width: 150%;
 	height: 150%;
 }
+
+.consent-box {
+	font-size: 15px;
+	color: var(--secondary);
+	margin-top: 10px;
+	
+	a {
+		color: var(--accent)
+	}
+  }

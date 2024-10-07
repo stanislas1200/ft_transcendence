@@ -34,3 +34,32 @@ main {
   justify-content: center;
   align-items: center;
 }
+
+.privacy-policy {
+  line-height: 1.6;
+  padding:  20px;
+  color:white;
+  font-size: 1em;
+  
+  h1, h2 {
+      color: var(--secondary);
+      margin-bottom: 10px;
+  }
+  p {
+      font-size: 0.9em;
+      padding-bottom: 15px;
+  }
+  ul {
+      margin-left: 20px;
+      font-size: 0.9em;
+  }
+  a {
+      color: var(--accent)
+  }    
+  footer {
+      margin-top: 20px;
+      font-size: 0.9em;
+      text-align: center;
+      color: #888;
+  }
+}
