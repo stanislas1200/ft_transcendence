@@ -18,7 +18,6 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
-    # path('', '../room/templates/room/index.html'),
     path('admin/', admin.site.urls),
     path('', views.homepage),
     path('about/', views.about),
