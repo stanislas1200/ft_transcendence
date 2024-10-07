@@ -469,7 +469,7 @@ def update_user(request, user_id):
 			validate_image_file_extension(avatar[0])
 			if (UserToken.objects.filter(user=user).exists()):
 				profile = UserToken.objects.get(user=user)
-				if profile.avatar:
+				if profile.avatar and profile.avatar.name != 'default.png':
 					profile.avatar.delete(save=True)
 				profile.avatar = process_avatar(avatar[0], request.FILES['avatar'].content_type)
 				profile.save()
