@@ -158,7 +158,7 @@ def join_tournament(request, tournament_id):
         return JsonResponse({'error': 'Failed to get player'}, status=400)
 
     tournament = Tournament.objects.get(id=tournament_id)
-    if tournament.players.count() < tournament.max_player:
+    if tournament.players.count() < tournament.max_player: # TODO : no double join should have use user and not ponguser
         player = PongPlayer.objects.create(player=player, score=0, n=1)
         tournament.players.add(player)
         message = "Joined tournament"
@@ -213,6 +213,10 @@ def make_pong_tournament_game(player1, player2):
     #     game.save()
 
     if player1 and player2:
+        player1.n = 1
+        player2.n = 2
+        player1.save()
+        player2.save()
         game.players.add(player1.player)
         game.players.add(player2.player)
         game.gameProperty.players.add(player1)

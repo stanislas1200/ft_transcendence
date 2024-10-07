@@ -127,7 +127,8 @@ class Party:
 		self.positions = prop.playerPositions
 		self.player_number = prop.playerNumber
 		players = prop.players.all()
-		self.players = [self.get_player_info(player, token) for player in players]
+		self.players = []
+		# self.players = [self.get_player_info(player, token) for player in players]
 		self.add_player(players, user, token)
 		self.state = 'waiting'
 		self.score = prop.maxScore
@@ -219,10 +220,10 @@ class Party:
 		}
 
 	def add_ai_player(self, players):
-		# for player in players:
-		# 	if player.player.username == 'AI':
-		# 		self.players.append(self.get_player_info(player, 'AI'))
-		# 		break
+		for player in players:
+			if player.player.username == 'AI':
+				self.players.append(self.get_player_info(player, 'AI'))
+				break
 		# self.players.append({
 		# 	'name': 'AI',
 		# 	'id': 0,
@@ -237,6 +238,7 @@ class Party:
 	def save(self):
 		try:
 			game = Game.objects.get(id=self.game_id)  # Get the game
+			winner = None
 			for player in self.players:
 				# if player['ai']:
 					# continue
@@ -251,7 +253,8 @@ class Party:
 
 				stats, created = PlayerGameTypeStats.objects.get_or_create(player=p, game_type=game_type)
 				stats.games_played = F('games_played') + 1
-				if player['score'] >= self.score: 
+				if player['score'] >= self.score:
+					winner = p
 					game.winners.add(p)
 					stats.games_won = F('games_won') + 1
 				else:
@@ -265,24 +268,25 @@ class Party:
 			# if tournament add winner to next match
 			if Match.objects.filter(game=game).exists():
 				m = Match.objects.get(game=game)
-				winner = self.players[0] if self.players[0]['score'] >= self.score else self.players[1]
+				# winner = self.players[0] if self.players[0]['score'] >= self.score else self.players[1]
 				# winner = self.players[0]
 				players = m.tournament.players.all()
+				
 				# print(winner['id'], flush=True)
-				winner = players.get(id=winner['id'])
+				# winner = players.get(id=winner.id)
 				# print(winner, flush=True)
-				m.winner = winner.player
+				m.winner = winner
 				m.save() # TODO : check if need but seem
 				if (not m.next_match): #TODO : end tournament
 					return
 
-				player = PongPlayer.objects.create(player=winner.player, score=0, n=1) # TODO : n
+				player = PongPlayer.objects.create(player=winner, score=0, n=m.next_match.game.players.count()+1)
 				m.next_match.game.players.add(player.player)
 				m.next_match.game.gameProperty.players.add(player)
 			else:
-				print("ko", flush=True)
-			# delete game
-			# game.delete()
+				print("not a match", flush=True)
+				# delete game
+				# game.delete()
 		except Exception as e:
 			print(e, flush=True)
 			game.delete()
@@ -291,6 +295,7 @@ party_list = {}
 
 def setup(game_id, player, token):
 	party = party_list.get(game_id)
+
 	# if party:
 	# 	setting = {
 	# 		'obstacles': party.map,
@@ -324,7 +329,7 @@ def setup(game_id, player, token):
 		else:
 			party.add_player(prop.players.all(), player, token)
 
-		if party.player_number <= prop.players.count() and prop.players.filter(player__id=player.id):
+		if party.player_number <= len(party.players) and prop.players.filter(player__id=player.id):
 			party.state = 'playing'
 			party.ball['dx'], party.ball['dy'] = randomize_direction(party)
 		
@@ -499,7 +504,7 @@ def reset_ball(game):
 
 def ffa_update(game):
 	if game.ball['y'] <= game.paddlePadding/4 + game.ballR or game.ball['y'] >= game.height - game.paddlePadding/4 - game.ballR:
-		if (game.ball['y'] < 100 and game.last_hit == 2) or (game.ball['y'] > 100 and game.last_hit == 3):
+		if ((game.ball['y'] < 100 and game.last_hit == 2) or (game.ball['y'] > 100 and game.last_hit == 3)) and game.player_number >= 4:
 			game.players[game.last_hit]["score"] -= 1
 		else:
 			game.players[game.last_hit]["score"] += 1
@@ -544,7 +549,7 @@ async def update_pong(game_id):
 	# check out collision x
 	if game.ball['x'] <= game.paddlePadding/4 + game.ballR:
 		if game.gameMode == 'ffa':
-			if game.last_hit == 0:
+			if game.last_hit == 0 and game.player_number >= 4:
 				game.players[game.last_hit]["score"] -= 1
 			else:
 				game.players[game.last_hit]["score"] += 1
@@ -557,7 +562,7 @@ async def update_pong(game_id):
 	
 	if game.ball['x'] >= game.width - game.paddlePadding/4 - game.ballR:
 		if game.gameMode == 'ffa':
-			if game.last_hit == 1:
+			if game.last_hit == 1 and game.player_number >= 4:
 				game.players[game.last_hit]["score"] -= 1
 			else:
 				game.players[game.last_hit]["score"] += 1
