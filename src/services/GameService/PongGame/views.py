@@ -194,12 +194,13 @@ def make_matches(tournament):
         matches_to_link = total_players // 2
         # matches_to_link = 1
         round_number = 1
-        for i in range(1, matches_to_link): #FIXME : linking match
+        for i in range(1, matches_to_link):
             next_round = Match.objects.filter(tournament=tournament, round_number=matches_to_link + i).first()
             for j in range(0, 2):
-                current_round = Match.objects.filter(tournament=tournament, round_number=round_number + j).first()
+                current_round = Match.objects.filter(tournament=tournament, round_number=round_number).first()
                 current_round.next_match = next_round
                 current_round.save()
+                round_number += 1
 
 def make_pong_tournament_game(player1, player2):
     pong = Pong.objects.create(playerNumber=2, mapId=0)
