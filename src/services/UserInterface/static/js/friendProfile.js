@@ -24,7 +24,7 @@ function searchUser(usernameSearching) {
                     numUser = findGoodUser(usernameSearching, response);
                     var tmp = userNameFriend.textContent;
                     userNameFriend.innerHTML = response.users[numUser].username;
-                    userNameFriend.textContent = tmp.replace("test", response.users[numUser].username);
+                    // userNameFriend.textContent = tmp.replace("test", response.users[numUser].username);
                     loadProfilePicture(response.users[numUser].id);
                     loadHistoryFromUser(response.users[numUser].id);
                 } else {
@@ -61,8 +61,19 @@ function displayHistoryFromOneGame(response) {
     const player1 = document.getElementById('player1');
     const player2 = document.getElementById('player2');
     const score = document.getElementById('score');
+    const gameMode = document.getElementById('gameModeHistory');
+    const namePlayer = document.getElementById('nameOfPlayer');
 
-    console.log(player1);
+    for (var i = 1; i < response.length; i++) {
+        const newElement = document.createElement('p');
+        newElement.innerHTML = response[i].name;
+        newElement.classList.add('nameOfOnePlayer');
+        namePlayer.append(newElement);
+    }
+    gameMode.innerHTML = "Game mode: " + response[0];
+
+
+    // console.log(player1);
     loadPicture(response[1].id, player1);
     player1.classList.remove('player');
     player1.classList.add('noPadding');
@@ -70,7 +81,7 @@ function displayHistoryFromOneGame(response) {
     player2.classList.remove('player');
     player2.classList.add('noPadding');
 
-    console.log(score.innerHTML);
+    // console.log(score.innerHTML);
     score.innerHTML = response[1].score + " : " + response[2].score;
 }
 
@@ -160,7 +171,7 @@ function displayHistorique(userId, response) {
                     tmp += "<a class=\"victory\" style=\"color: red;\">" + "Loose" + "<\/a>"
                 tmp += "<a class=\"mode\">" + response[i].gameName + "<\/a>"
                 tmp += "<a class=\"score\">" + response[i].scores + "<\/a>"
-                tmp += "<a class=\"date\">" + date + "<\/a>"
+                tmp += "<a class=\"dateHistory\">" + date + "<\/a>"
                 tmp += "<a class=\"status\">" + response[i].status + "<\/a>"
                 tmp += "<\/p>";
                 historySpace.innerHTML += tmp;

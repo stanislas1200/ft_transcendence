@@ -5,6 +5,7 @@
     /* background-color: rgba(233, 171, 88, 0.5); */
     padding: 1em;
     color: var(--text);
+    max-height: 600px;
 }
 
 .wrapper {
@@ -94,7 +95,7 @@
 
 .victory,
 .score,
-.date,
+.dateHistory,
 .status,
 .mode {
     display: flex;
@@ -127,7 +128,7 @@
 }
 
 .center {
-    /* justify-content: center; */
+    justify-content: center;
     align-items: center;
     width: 100%;
 }
@@ -145,12 +146,6 @@
     margin: 10px auto;
     max-height: 200px;
 }
-
-/* #text {
-    text-align: center;
-    color: var(--text);
-    font-size: 10px;
-} */
 
 .circle-svg path.percent {
     stroke: var(--primary);

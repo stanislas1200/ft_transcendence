@@ -124,6 +124,9 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    background-color: var(--tertiary);
+    border-radius: 5px;
+    padding: 10px;
 }
 
 .valueForGraph {
@@ -155,4 +158,24 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.nameOfPlayer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 449.017px;
+    margin-top: 1rem;
+}
+
+.nameOfOnePlayer {
+    width: 135.717px;
+    justify-content: center;
+    display: flex;
+}
+
+.gameModeHistory {
+    margin-bottom: 1rem;
+    font-size: larger;
+    color: var(--secondary);
 }
