@@ -19,12 +19,13 @@ class TChatConsumer(AsyncWebsocketConsumer):
         print("+=====token: " + self.token, flush=True)
         # if not (recipient):
         #     recipient = "Guigz"
-        user = await sync_to_async(get_user)(self.userId) #get user name
+        self.user = await sync_to_async(get_user)(self.userId) #get user name
         # recipient_exist = await sync_to_async(get_user)(recipient) # get destinataire
         # cookies = dict(cookies_are='token')
         # print(f'Token being sent: {cookies}')
         try:    
-            recipient_id = await sync_to_async(User.objects.get)(username=recipient)
+            self.recipient_id = await sync_to_async(User.objects.get)(username=recipient)
+            # print(self.recipient_id, " fkldjsflksjdflkj\n", flush=True)
         except User.DoesNotExist:
             await self.accept()
             messages = f'"error:" no user found called: \"{str(recipient)}\"'
@@ -39,7 +40,7 @@ class TChatConsumer(AsyncWebsocketConsumer):
         # blockedlist = await sync_to_async(user.blocked)
         # print(blockeds, flush=True)
         # print(recipient_id.blocked, flush=True)
-        if (await self._check_if_recipient_is_blocked(recipient_id, user.username)):
+        if (await self._check_if_recipient_is_blocked(self.recipient_id, self.user.username)):
             print("Ah oui oui OUI comme dirait Niska")
         else:
             print("NOOON-----------------------------------------")
@@ -59,13 +60,13 @@ class TChatConsumer(AsyncWebsocketConsumer):
         # except requests.exceptions.RequestException as e:
         #     print(f"Block list request failed: {e}")
 
-        print("=======Recipient_id: " + str(recipient_id.id), flush=True)
-        print("---------UserName: " + user.username, flush=True)
+        # print("=======Recipient_id: " + str(recipient_id.id), flush=True)
+        # print("---------UserName: " + user.username, flush=True)
         
-        if (user.username <= recipient):
-            group_name = user.username + recipient
+        if (self.user.username <= recipient):
+            group_name = self.user.username + recipient
         else:
-            group_name = recipient + user.username
+            group_name = recipient + self.user.username
         print("==--== chat_group_name: " + group_name, flush=True)
         # self.chat_group_name = f'chat_1' #to change to user + destinataire
        
@@ -88,10 +89,10 @@ class TChatConsumer(AsyncWebsocketConsumer):
             response = requests.get(url, cookies={'token': self.token, 'userId': str(recipient_id.id)}, verify=False)
             block_list = response.json()
             ##
-            print("------------------------------------", flush=True)
-            for users in block_list['blocked_user']:
-                print(users['username'], flush=True)
-            print("------------------------------------", flush=True)
+            # print("------------------------------------", flush=True)
+            # for users in block_list['blocked_user']:
+            #     print(users['username'], flush=True)
+            # print("------------------------------------", flush=True)
             ##
             for users in block_list['blocked_user']:
                 if (users['username'] == username):
@@ -110,11 +111,12 @@ class TChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         print("In receive", flush=True)
-        user = await sync_to_async(get_user)(self.userId)
+        if (await self._check_if_recipient_is_blocked(self.recipient_id, self.user.username)):
+            return
         small_msg =  json.loads(text_data)['message']
         if not (small_msg):
             return
-        message = f'{user}: {small_msg}'
+        message = f'{self.user}: {small_msg}'
         await self.channel_layer.group_send(
             self.chat_group_name,
             {
