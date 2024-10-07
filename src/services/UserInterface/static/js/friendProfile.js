@@ -120,6 +120,7 @@ function getStats(id) {
             if (xhr.status === 200 || xhr.status === 201) {
                 response = JSON.parse(xhr.responseText);
                 graphique(response);
+                listRequest();
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
@@ -154,31 +155,32 @@ function displayHistorique(userId, response) {
     if (response.length == 0) {
         // no historique for the moment
         historySpace.innerHTML = "<p class=\"game\">no history for the moment<\/p>";
-    }
-    let nbrWin = 0;
-    let totalGauche = 0;
-    let totalDroite = 0;
-    for (let i = 0; i < response.length; i++) {
-        let date = response[i].start_date.substr(0, 10);
-        let tmp = "<p class=\"game\">";
-        tmp += "<a class=\"id\" style=\"visibility: collapse;\">" + i + "<\/a>"
-        if (response[i].status != 'playing') {
-            if (response[i].win == true) {
-                tmp += "<a class=\"victory\" style=\"color: green;\">" + "Win" + "<\/a>"
-                nbrWin++;
-            }
-            else
-                tmp += "<a class=\"victory\" style=\"color: red;\">" + "Loose" + "<\/a>"
-            tmp += "<a class=\"mode\">" + response[i].gameName + "<\/a>"
-            tmp += "<a class=\"score\">" + response[i].scores + "<\/a>"
-            tmp += "<a class=\"date\">" + date + "<\/a>"
-            tmp += "<a class=\"status\">" + response[i].status + "<\/a>"
-            tmp += "<\/p>";
-            historySpace.innerHTML += tmp;
-        }
-    }
-    const inputs = document.querySelectorAll('.history');
+    } else {
 
+        let nbrWin = 0;
+        let totalGauche = 0;
+        let totalDroite = 0;
+        for (let i = 0; i < response.length; i++) {
+            let date = response[i].start_date.substr(0, 10);
+            let tmp = "<p class=\"game\">";
+            tmp += "<a class=\"id\" style=\"visibility: collapse;\">" + i + "<\/a>"
+            if (response[i].status != 'playing') {
+                if (response[i].win == true) {
+                    tmp += "<a class=\"victory\" style=\"color: green;\">" + "Win" + "<\/a>"
+                    nbrWin++;
+                }
+                else
+                    tmp += "<a class=\"victory\" style=\"color: red;\">" + "Loose" + "<\/a>"
+                tmp += "<a class=\"mode\">" + response[i].gameName + "<\/a>"
+                tmp += "<a class=\"score\">" + response[i].scores + "<\/a>"
+                tmp += "<a class=\"date\">" + date + "<\/a>"
+                tmp += "<a class=\"status\">" + response[i].status + "<\/a>"
+                tmp += "<\/p>";
+                historySpace.innerHTML += tmp;
+            }
+        }
+        getStats(userId);
+    }
     const click = async ({ target }) => {
         // console.log(target);
         while (target.previousElementSibling) {
@@ -194,10 +196,10 @@ function displayHistorique(userId, response) {
         // console.log(target);
     }
 
+    const inputs = document.querySelectorAll('.history');
     inputs.forEach((input) => {
         input.addEventListener('click', click);
     });
-    getStats(userId);
     const addFriend = document.getElementById('addFriend');
     const message = document.getElementById('message');
     const duel = document.getElementById('duel');
@@ -225,13 +227,15 @@ function graphique(stats) {
     const text = document.getElementById('text');
     const totalScore = document.getElementById('totalScore');
 
+    console.log(stats);
     let nbrGame = stats.pong.games_played;
     let nbrWin = stats.pong.games_won;
+    let nbrLoose = stats.pong.games_lost;
     // console.log(nbrWin + "/" + nbrGame);
     // console.log(text);
     const winPercent = (nbrWin / nbrGame) * 100;
     let tmp = winPercent + ", 100";
-    text.innerHTML = nbrWin + "/" + nbrGame;
+    text.innerHTML = nbrWin + "w/" + nbrLoose + "l";
     percent.setAttribute('stroke-dasharray', tmp);
     totalScore.innerHTML += stats.pong.total_score;
     // console.log(percent);

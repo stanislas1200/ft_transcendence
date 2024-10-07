@@ -35,36 +35,6 @@
     flex-direction: row;
 }
 
-#profile-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    background-color: var(--background);
-    margin: 6rem;
-    border-left: none;
-    flex-direction: column;
-}
-
-#profile-picture {
-    position: relative;
-    width: 300px;
-    height: 300px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 3px solid #ccc;
-    cursor: default;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.2s ease-in-out;
-}
-
-#profile-picture img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
 
 .addFriend {
     background-color: var(--secondary);
@@ -152,7 +122,7 @@
     width: 600px;
     max-height: 75vw;
     overflow-y: auto;
-    scrollbar-color: var(--background) var(--background);
+    scrollbar-width: none;
 }
 
 .center {

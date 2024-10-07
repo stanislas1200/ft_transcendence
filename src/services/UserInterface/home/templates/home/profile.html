@@ -4,13 +4,16 @@
     <div class="settings-grid-userCard">
         <!-- profile picture + userName + add friend + message -->
         <div class="profile-container" id="profile-container">
-            <div class="profile-picture" id="profile-picture">
-                <img id="profileImage" class="profileImage" src="{% static 'images/pp.png' %}" alt="">
+            <div class="profilePictureUserCard" id="profilePictureUserCard">
+                <img id="profileImage" class="profilePictureUserCard" src="{% static 'images/pp.png' %}" alt="">
             </div>
             <p id="userName">
                 <!-- UserName -->
             </p>
             <div class="request-recieve" id="request-recieve">
+                <!-- <div class="friend-request"> -->
+                <!-- contient nom et boutton -->
+                <!-- </div> -->
                 <!-- all pending request -->
             </div>
         </div>
@@ -54,4 +57,4 @@
     </div>
 </div>
 <script>loadProfile();</script>
-<script>listRequest();</script>
+<!-- <script>listRequest();</script> -->

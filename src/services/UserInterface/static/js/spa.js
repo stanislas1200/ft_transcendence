@@ -1,6 +1,7 @@
 /********************************* GESTION SPA *********************************/
 
 async function loadPage(page) {
+    console.log(page);
     await fetch('/' + page + '/', {
         method: 'GET',
         headers: {
