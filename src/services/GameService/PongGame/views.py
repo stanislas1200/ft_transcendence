@@ -359,13 +359,16 @@ def join_game(request):
             games = Game.objects.filter(gameName=game_name, status='waiting').order_by('?') # Get random game
             game = None
             for g in games:
-                if g.gameProperty.gameMode == game_mode and g.gameProperty.max_player == player_number:
+                if g.gameProperty.gameMode == game_mode and g.gameProperty.playerNumber == int(player_number):
                     game = g
+                    break
             if not game:
                 return start_game(request, game_name, game_mode, player_number)
                 
 
         # Check if party accept player
+        if player in game.players.all():
+            return JsonResponse({'message': 'Player joined back', 'game_id': game.id})
         if game.gameProperty.playerNumber <= game.players.count():
             return JsonResponse({'error': 'Party full'}, status=400)
         # same as above ?
