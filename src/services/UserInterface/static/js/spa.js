@@ -25,6 +25,7 @@ async function loadPage(page) {
             // Optionally load an error page or show an error message
         });
     testIfLoggedIn()
+    console.log(window.History.prototype);
     switch (page) {
         case 'friend':
             getElementFriend();

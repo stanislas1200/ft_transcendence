@@ -31,19 +31,14 @@ function answerdRequest(choice, userId) {
     else if (choice == 'block')
         url = url.replace("decline-request", "block_user");
     url = url.replace("userId", userId);
-    console.log(url);
-    return;
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
+    xhr.open('POST', url, true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.withCredentials = true;
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status === 200 || xhr.status === 201) {
                 response = JSON.parse(xhr.responseText);
-                userName.innerHTML = response.username;
-                loadProfilePicture(response.id);
-                loadHistoryFromUser(response.id);
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
@@ -69,6 +64,7 @@ function displayRequest(response) {
             const button = document.createElement('div');
             button.classList.add('friendRequestButton');
             const userId = response.received_requests[i].id;
+            console.log(response.received_requests[i].id + response.received_requests[i].send);
             button.innerHTML += "<button class=\"fa fa-check my-fa\" value=\"" + userId + "\"><\/button>";
             button.innerHTML += "<button class=\"fa fa-times my-fa\" value=\"" + userId + "\"><\/button>";
             button.innerHTML += "<button class=\"fa fa-ban my-fa\" value=\"" + userId + "\"><\/button>";

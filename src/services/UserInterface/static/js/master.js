@@ -1,13 +1,13 @@
 testIfLoggedIn();
 
 function getCookie(name) {
-	var value = "; " + document.cookie;
-	var parts = value.split("; " + name + "=");
-	if (parts.length == 2) return parts.pop().split(";").shift();
+    var value = "; " + document.cookie;
+    var parts = value.split("; " + name + "=");
+    if (parts.length == 2) return parts.pop().split(";").shift();
 }
 
 function connectToNotifications() {
-	let userId = getCookie('userId');
+    let userId = getCookie('userId');
     let wsUrl = `wss://localhost:8001/ws/notifications/${userId}`;
     wsUrl = wsUrl.replace('localhost', window.location.hostname);
 
@@ -22,14 +22,14 @@ function connectToNotifications() {
     });
 
 
-	wss.addEventListener('close', function (event) {
+    wss.addEventListener('close', function (event) {
         connectToNotifications()
-		console.log('Close: ', event);
-	});
+        console.log('Close: ', event);
+    });
 
-	wss.addEventListener('error', function (event) {
-		console.log('Error: ', event);
-	});
+    wss.addEventListener('error', function (event) {
+        console.log('Error: ', event);
+    });
 }
 
 connectToNotifications()
@@ -44,7 +44,7 @@ function logout() {
     xhr.withCredentials = true;
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-            if (xhr.status == 200 ) {
+            if (xhr.status == 200) {
                 testIfLoggedIn()
             }
         }
@@ -102,6 +102,7 @@ function searchFriend() {
             // proposition.classList.add('hide');
         }
     });
+    // backAndForward();
 }
 
 function searchAllUser(searchName, proposition) {

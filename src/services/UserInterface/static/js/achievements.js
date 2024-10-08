@@ -1,7 +1,7 @@
 function getCookie(name) {
-	var value = "; " + document.cookie;
-	var parts = value.split("; " + name + "=");
-	if (parts.length == 2) return parts.pop().split(";").shift();
+    var value = "; " + document.cookie;
+    var parts = value.split("; " + name + "=");
+    if (parts.length == 2) return parts.pop().split(";").shift();
 }
 
 function loadArchievements() { // /game/list_achievements?UserId={{UserId}}
@@ -31,6 +31,8 @@ function loadArchievements() { // /game/list_achievements?UserId={{UserId}}
 
 function listAchievements(achievements) { // this is a exemple of json {"unlocked": [{"id": 1, "name": "list achievements", "description": "list all achievements", "points": 0}], "locked": []}
     var achiveList = document.getElementById('achivements-table');
+    if (!achiveList)
+        return;
     for (var i = 0; i < achievements.unlocked.length; i++) {
         var newAchive = document.createElement('div');
         newAchive.className = 'achievement';

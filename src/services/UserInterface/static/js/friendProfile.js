@@ -10,6 +10,8 @@ function searchUser(usernameSearching) {
     console.log('debut search user');
     if (usernameSearching != "") {
         const userNameFriend = document.getElementById('userNameFriend');
+        if (!usernameSearching)
+            return;
         let url = "https://localhost:8001/game/search?page=1&query=sgodin&filter=user/game";
         url = url.replace("localhost", window.location.hostname);
         url = url.replace("sgodin", usernameSearching);
@@ -63,6 +65,11 @@ function displayHistoryFromOneGame(response) {
     const score = document.getElementById('score');
     const gameMode = document.getElementById('gameModeHistory');
     const namePlayer = document.getElementById('nameOfPlayer');
+
+    if (!player1 || !player2 || !score || !gameMode || !namePlayer)
+        return;
+
+    namePlayer.innerHTML = "";
 
     for (var i = 1; i < response.length; i++) {
         const newElement = document.createElement('p');
@@ -152,6 +159,8 @@ function friendRequest(id) {
 
 function displayHistorique(userId, response) {
     const historySpace = document.getElementById('history');
+    if (!historySpace)
+        return;
     if (response.length == 0) {
         historySpace.innerHTML = "<p class=\"game\">no history for the moment<\/p>";
     } else {
@@ -199,6 +208,9 @@ function displayHistorique(userId, response) {
     const message = document.getElementById('message');
     const duel = document.getElementById('duel');
 
+    if (!addFriend || !message || !duel)
+        return;
+
     if (addFriend) {
         addFriend.addEventListener('click', function () {
             friendRequest(userId);
@@ -221,6 +233,9 @@ function graphique(stats) {
     const percent = document.getElementById('percent');
     const text = document.getElementById('text');
     const totalScore = document.getElementById('totalScore');
+
+    if (!percent || !text || !totalScore)
+        return;
 
     let nbrGame = stats.pong.games_played;
     let nbrWin = stats.pong.games_won;
