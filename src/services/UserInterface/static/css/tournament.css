@@ -211,14 +211,18 @@
 .player {
   cursor: pointer;
   background-color: var(--background);
-  border: 1px solid var(--secondary);
+  border: 3px solid var(--secondary);
   border-radius: 50%;
   aspect-ratio: 1 / 1;
 
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 50px;
+}
+
+.player>img {
+  /* width: 90%; */
+  border-radius: 50%;
 }
 
 .current-score {
