@@ -7,6 +7,36 @@ from django.contrib.auth.models import User
 class GameType(models.Model):
     name = models.CharField(max_length=100)
 
+class PlayerStats(models.Model):
+    player = models.ForeignKey(User, on_delete=models.CASCADE)
+    pong = models.ForeignKey(PongStats)
+    tron = models.ForeignKey(TronStats)
+    total_win = models.IntegerField(default=0)
+    total_lost = models.IntegerField (default=0)
+    total_game = models.IntegerField(default=0)
+    win_streak = models.IntegerField(default=0)
+    
+class PongStats(models.Model):
+    game_won = models.IntegerField(default=0)
+    game_lost = models.IntegerField(default=0)
+    total_game = models.IntegerField(default=0)
+    total_score = models.IntegerField(default=0)
+    total_hit = models.IntegerField(default=0)
+    fastest_win = models.DateTimeField()
+    longest_game = models.DateTimeField()
+    play_time = models.DateTimeField()
+    
+class TronStats(models.Model):
+    game_won = models.IntegerField(default=0)
+    game_lost = models.IntegerField(default=0)
+    total_game = models.IntegerField(default=0)
+    total_score = models.IntegerField(default=0)
+    fastest_win = models.DateTimeField()
+    longest_game = models.DateTimeField()
+    play_time = models.DateTimeField()
+    
+# TODO : Win ration, average score, Time of Day, average play time
+# TODO : Game stats: Play Time, score, ball hit, Time of day, ball bounce,
 class PlayerGameTypeStats(models.Model):
     player = models.ForeignKey(User, on_delete=models.CASCADE)
     game_type = models.ForeignKey(GameType, on_delete=models.CASCADE)
