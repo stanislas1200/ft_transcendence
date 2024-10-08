@@ -71,7 +71,7 @@ function displayHistoryFromOneGame(response) {
 
     namePlayer.innerHTML = "";
 
-    for (var i = 1; i < response.length; i++) {
+    for (var i = 3; i < response.length; i++) {
         const newElement = document.createElement('p');
         newElement.innerHTML = response[i].name;
         newElement.classList.add('nameOfOnePlayer');
@@ -81,15 +81,15 @@ function displayHistoryFromOneGame(response) {
 
 
     // console.log(player1);
-    loadPicture(response[1].id, player1);
+    loadPicture(response[3].id, player1);
     player1.classList.remove('player');
     player1.classList.add('noPadding');
-    loadPicture(response[2].id, player2);
+    loadPicture(response[4].id, player2);
     player2.classList.remove('player');
     player2.classList.add('noPadding');
 
     // console.log(score.innerHTML);
-    score.innerHTML = response[1].score + " : " + response[2].score;
+    score.innerHTML = response[3].score + " : " + response[4].score;
 }
 
 function loadHistoryFromGame(id, gameId) {
@@ -237,10 +237,12 @@ function graphique(stats) {
     if (!percent || !text || !totalScore)
         return;
 
-    let nbrGame = stats.pong.games_played;
-    let nbrWin = stats.pong.games_won;
-    let nbrLoose = stats.pong.games_lost;
+    console.log(stats.pong);
+    let nbrGame = stats.pong.total_game;
+    let nbrWin = stats.pong.game_won;
+    let nbrLoose = stats.pong.game_lost;
     const winPercent = (nbrWin / nbrGame) * 100;
+    console.log(nbrGame);
     let tmp = winPercent + ", 100";
     if (nbrWin > 10 || nbrLoose > 10) {
         text.classList.add("smaller");

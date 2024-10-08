@@ -569,8 +569,8 @@ def get_stats(request):
         if not User.objects.filter(id=user_id).exists():
             return JsonResponse({'error': 'Player not found'}, status=404)
         
-        stats = PlayerGameTypeStats.objects.filter(player_id=user_id)
-        # player_stats = PlayerStats.objects.filter(player_id=user_id).first()
+        # stats = PlayerGameTypeStats.objects.filter(player_id=user_id)
+        player_stats = PlayerStats.objects.filter(player_id=user_id).first()
 
         all_stats_dict = {}
         stats_dict = model_to_dict(player_stats)
@@ -629,6 +629,7 @@ def get_history(request):
             game_dict.pop('winners')
 
             game_dict['win'] = game.winners.filter(id=user_id).exists()
+            game_dict['start_date'] = game.start_date
 
             party = game.gameProperty
             score = ''
