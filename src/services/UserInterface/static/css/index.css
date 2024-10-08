@@ -92,6 +92,10 @@
 	text-transform: capitalize;
 }
 
+.index-achievement {
+	justify-content: center;
+}
+
 .index-button {
 	cursor: pointer;
 	min-width: 20%;
