@@ -193,39 +193,20 @@ nav.navbar-top li.active>a {
     padding-left: 0px;
 }
 
-/* notif css */
-.notif {
-    position: fixed;
+.alert {
+    z-index: 999;
+    position: absolute;
     top: 65px;
     right: 5px;
-    width: 300px;
-    overflow: hidden;
-    z-index: 1;
-    float: right;
+
+    background-color: var(--primary);
+    border: 1px solid var(--tertiary);
+    color: var(--text);
 }
 
-.notif-list {
-    display: flex;
-    flex-direction: column;
-}
-
-.notif-item {
-    margin: 5px;
-    padding: 10px;
-
-}
-
-.notif-text {
-    /* width: 80%; */
-}
-
-.notif-close {
-    float: right;
-    cursor: pointer;
-    height: 100%;
-}
-
-.succes-notif {
-    background-color: #edfbd8;
-    border: solid 1px #84d65a;
+.alert>.close {
+    width: auto;
+    color: var(--accent);
+    opacity: 1;
+    text-shadow: none;
 }
