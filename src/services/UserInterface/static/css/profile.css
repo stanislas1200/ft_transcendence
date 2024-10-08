@@ -32,35 +32,29 @@
     grid-row: 1 / 4;
 }
 
-#profile-container {
+.profile-container {
     width: 100%;
+    height: 100%;
     display: flex;
-    justify-content: center;
-    background-color: var(--background);
-    margin: 6rem;
     border-left: none;
     flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 550px;
 }
 
-#profile-picture {
+.profilePictureUserCard {
     position: relative;
-    width: 300px;
     height: 300px;
     border-radius: 50%;
     overflow: hidden;
-    border: 3px solid #ccc;
-    cursor: default;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.2s ease-in-out;
 }
 
-#profile-picture img {
+.profilePictureUserCard img {
     width: 100%;
-    height: 100%;
     object-fit: cover;
     border-radius: 50%;
+    border: 2px solid #ccc;
 }
 
 .addFriend {
@@ -91,4 +85,97 @@
     height: 25%;
     display: flex;
     flex-direction: row;
+}
+
+.request-recieve {
+    display: flex;
+    flex-direction: column;
+    /* align-items: center; */
+    border: 2px solid var(--secondary);
+    border-radius: 5px;
+    width: 50%;
+    gap: 5px;
+    height: 90px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+}
+
+.my-fa {
+    /* position: relative; */
+    /* display: table-cell; */
+    width: 30px;
+    /* height: 20px; */
+    /* text-align: center; */
+    /* vertical-align: middle; */
+    font-size: 20px;
+    opacity: 65%;
+    background-color: var(--background) 0%;
+}
+
+.my-fa:hover {
+    transform: scale(1.2);
+    opacity: 100%;
+    background-color: var(--background) 0%;
+}
+
+.friend-request {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--tertiary);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.valueForGraph {
+    fill: var(--text);
+    text-anchor: middle;
+    font-size: 10px;
+}
+
+.smaller {
+    font-size: 8px;
+}
+
+.reallySmall {
+    font-size: 6px;
+}
+
+.oneGameInformation {
+    align-items: center;
+    justify-content: center;
+}
+
+.noPadding {
+    background-color: var(--background);
+    border: 1px solid var(--secondary);
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
+    height: 135.717px;
+    width: 135.717px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.nameOfPlayer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 449.017px;
+    margin-top: 1rem;
+}
+
+.nameOfOnePlayer {
+    width: 135.717px;
+    justify-content: center;
+    display: flex;
+}
+
+.gameModeHistory {
+    margin-bottom: 1rem;
+    font-size: larger;
+    color: var(--secondary);
 }

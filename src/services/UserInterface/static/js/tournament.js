@@ -46,7 +46,7 @@ function ifCurrentOrNot(tournament) {
                 if (xhr.readyState === 4) {
                     let response = JSON.parse(xhr.responseText);
                     if (xhr.status === 200 || xhr.status === 201) {
-                        loadPage("tournament");
+                        loadPage("tournament", 1);
                     } else {
                         if (response.success == false)
                             alert('Error: ' + response.message);
@@ -113,7 +113,7 @@ function selfCurrentGame(match) { // Si l'utilisateur est dans un match current 
     joinButton.innerHTML = "Join My Game";
     joinButton.onclick = function () {
         localStorage.setItem("gameId", match.game_id);
-        loadPage("pong");
+        loadPage("pong", 1);
     }
 }
 
@@ -172,7 +172,7 @@ function updateMatchDisplay(matches) {
     function displayMatch(index) {
         const match = matches[index];
         if (!match) return;
-        
+
         const matchTitle = `${match.player_one?.username || 'TBD'} / ${match.player_two?.username || 'TBD'}`;
         document.getElementById('match-title').textContent = matchTitle;
 
@@ -221,18 +221,25 @@ function updateMatchDisplay(matches) {
         if (currentIndex > 0) {
             currentIndex--;
             displayMatch(currentIndex);
+            document.querySelector('.left-right-button:last-child').classList.remove('disabled');
         }
+        else
+            document.querySelector('.left-right-button:first-child').classList.add('disabled');
+
     };
-    
+
     document.querySelector('.left-right-button:last-child').onclick = () => {
         if (currentIndex < matches.length - 1) {
             currentIndex++;
             displayMatch(currentIndex);
+            document.querySelector('.left-right-button:first-child').classList.remove('disabled');
         }
+        else
+            document.querySelector('.left-right-button:last-child').classList.add('disabled');
     };
 }
 
 function joinGame(gameId) {
     localStorage.setItem('gameId', gameId);
-    loadPage('pong');
+    loadPage('pong', 1);
 }

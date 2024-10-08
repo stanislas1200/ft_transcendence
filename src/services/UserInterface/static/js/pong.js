@@ -193,7 +193,7 @@ async function drawEnd() {
 		c.fillText("Moving to " + page + " page", 800/2, 650/2)
 		cancelAnimationFrame(animFrame);
 		await sleep(2000);
-		loadPage(page)
+		loadPage(page, 1)
 		return 1
 	}
 	return 0

@@ -4,24 +4,23 @@
     <div class="settings-grid-userCard">
         <!-- profile picture + userName + add friend + message -->
         <div class="profile-container" id="profile-container">
-            <div class="profile-picture" id="profile-picture">
-                <img id="profileImage" class="profileImage" src="{% static 'images/pp.png' %}" alt="">
+            <div class="profilePictureUserCard" id="profilePictureUserCard">
+                <img id="profileImage" class="profilePictureUserCard" src="{% static 'images/pp.png' %}" alt="">
             </div>
             <p id="userNameFriend">
-                test
                 <!-- UserName -->
             </p>
             <div class="buttonFriendMessage">
-                <div class="addFriend">
+                <div class="addFriend" id="addFriend">
                     <span class="plus">+</span>
                     <span class="text">Add Friend</span>
                 </div>
-                <div class="addFriend">
+                <div class="addFriend" id="message">
                     <span class="text">Message me</span>
                 </div>
-            </div>
-            <div class="addFriend">
-                <span class="text">Challenge me</span>
+                <div class="addFriend" id="duel">
+                    <span class="text">Challenge me</span>
+                </div>
             </div>
         </div>
     </div>
@@ -42,10 +41,31 @@
                 <div class="history" id="history">
                 </div>
             </div>
-            <div class="achivement">
+            <!-- <div class="achivement">
                 achivement
+            </div> -->
+        </div>
+        <div class="directionColumn center oneGameInformation" id="oneGameInformation">
+            <!-- one game information -->
+            <div class="player-versus">
+                <img id="player1" class="player" src="" alt="IMG">
+                <div class="current-score" id="score">X : X</div>
+                <img id="player2" class="player" src="" alt="IMG">
             </div>
+        </div>
+        <div class="directionColumn center graphInformation" id="graphInformation">
+            <svg viewBox="0 0 36 36" class="circle-svg">
+
+                <path class="around" stroke-dasharray="100, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <path id="percent" class="percent" stroke-dasharray="80, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <text id="text" class="valueForGraph" x="18" y="14" dy="7">3/10</text>
+
+            </svg>
+            <p id="totalScore">Total of points scored: </p>
         </div>
     </div>
 </div>
-<!-- <script>searchUser("");</script> -->

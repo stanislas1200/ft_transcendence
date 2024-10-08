@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 import requests, secrets, os
 from .models import UserToken, Friendship, FriendRequest, Block
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import redirect
 
 from django.core.files.images import get_image_dimensions
 
@@ -239,8 +240,17 @@ def list_blocked_user(request):
 		# 		u_id = request.GET.get('UserId')
 		# 		if not u_id:
 		# 			u_id = request.COOKIES.get('userId')
+		u_id = request.COOKIES.get('userId')
+		# if request.user.is_authenticated:
+		# 	user = request.user
+		# else:
+		# 	status = verify_token(request)
+		# 	if (status == 200):
+		# 		u_id = request.GET.get('UserId')
+		# 		if not u_id:
+		# 			u_id = request.COOKIES.get('userId')
 
-		# 		user = User.objects.get(id=u_id)
+		user = User.objects.get(id=u_id)
 		# 	else:
 		# 		return JsonResponse({'error': 'User is not logged in'}, status=401)
 		
@@ -538,7 +548,7 @@ def oauth42(request):
 			'client_id': os.environ['CLIENT_UID_42'],
 			'client_secret': os.environ['CLIENT_SECRET_42'],
 			'code': code,
-			'redirect_uri': os.environ['OAUTH_REDIRECT_URI'],  # Replace with your redirect URI
+			'redirect_uri': os.environ['OAUTH_REDIRECT_URI'],
 		})
 		
 		if response.status_code != 200:
@@ -589,11 +599,10 @@ def oauth42(request):
 				profile.avatar = process_avatar(avatar, content_type)
 				profile.save()
 
-		response = JsonResponse({'message': f'Logged in successfully as {username}'}, status=201)
-		response.set_cookie(key='token', value=token, secure=True, samesite='Strict') # max_age=??
-		response.set_cookie(key='userId', value=user.id, samesite='None') 
+		response = HttpResponseRedirect('https://localhost:8003/')
+		response.set_cookie(key='token', value=token, secure=True, httponly=True, samesite='Strict')
+		response.set_cookie(key='userId', value=user.id, samesite='None')
 		return response
-	
 	except Exception as e:
 		return JsonResponse({'error': 'An error occurred while processing your request'}, status=500)
 
@@ -685,6 +694,9 @@ def verify_token(request, token=None, user_id=None):
 	if not user_id:
 		user_id = request.COOKIES.get('userId')
 	try:
+		print(user_id)
+		print(user_id)
+		print(user_id, flush=True)
 		user_token = UserToken.objects.get(user_id=user_id)
 		if check_password(token, user_token.token):
 			return 200

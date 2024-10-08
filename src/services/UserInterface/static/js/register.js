@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	button.addEventListener("click", () => {
-		console.log("Bouton cliqué !");
+		// console.log("Bouton cliqué !");
 		var firstNameInput = document.getElementById('firstName').value;
 		var lastNameInput = document.getElementById('lastName').value;
 		var usernameInput = document.getElementById('username').value;
@@ -122,7 +122,7 @@ function login(username, password) {
 			if (xhr.status === 200 || xhr.status === 201) {
 				console.log('Login Success:', xhr.responseText);
 				var response = JSON.parse(xhr.responseText);
-				console.log(response);
+				// console.log(response);
 				// localStorage.setItem('token', response.token);
 				// Here you can store the session ID or token if needed
 				window.location.replace("/");

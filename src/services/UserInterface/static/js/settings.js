@@ -75,7 +75,7 @@ function checkPassword(pwd) {
 
 // function validateForm() {
 function validateForm() {
-    console.log('button press');
+    // console.log('button press');
     let valid = 1;
 
     const newFirstName = document.getElementById('firstName');
@@ -209,6 +209,8 @@ function inputsChangement() {
 
 function loadProfilePicture(id) {
     const profilePicture = document.getElementById('profileImage');
+    if (!profilePicture)
+        return;
     var response;
     let url = "https://localhost:8000/users/<int:user_id>/avatar";
     url = url.replace("localhost", window.location.hostname); var xhr = new XMLHttpRequest();
@@ -237,6 +239,8 @@ function sleep(ms) {
 
 function saveChangement(id) {
     const saveButton = document.getElementById('saveButton');
+    if (!saveButton)
+        return;
     saveButton.addEventListener('click', function () {
         let verif = 1
         verif = validateForm();
@@ -246,6 +250,10 @@ function saveChangement(id) {
             const userName = document.getElementById('username');
             const email = document.getElementById('email');
             const profilePicture = document.getElementById('profilePic');
+
+            if (!firstName || !lastName || !userName || !email)
+                return;
+
             let url = "https://localhost:8000/users/<int:user_id>/edit";
             url = url.replace("localhost", window.location.hostname); var xhr = new XMLHttpRequest();
             url = url.replace("<int:user_id>", id);

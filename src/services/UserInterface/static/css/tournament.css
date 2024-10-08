@@ -52,7 +52,7 @@
   font-size: 2rem;
 }
 
-.border-bottom {
+.t_border-bottom {
   border-bottom: 1px solid var(--accent);
 }
 
@@ -190,9 +190,13 @@
   font-size: 2.5rem;
 }
 
-.match-number>.left-right-button {
+.left-right-button {
   cursor: pointer;
   font-size: 4rem;
+}
+
+.left-right-button.disabled {
+  opacity: 0;
 }
 
 .spectate-button {
@@ -211,14 +215,18 @@
 .player {
   cursor: pointer;
   background-color: var(--background);
-  border: 1px solid var(--secondary);
+  border: 3px solid var(--secondary);
   border-radius: 50%;
   aspect-ratio: 1 / 1;
 
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 50px;
+}
+
+.player>img {
+  /* width: 90%; */
+  border-radius: 50%;
 }
 
 .current-score {
