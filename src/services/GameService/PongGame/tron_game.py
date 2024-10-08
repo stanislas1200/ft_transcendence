@@ -57,16 +57,47 @@ class Party:
 			p.save()
 
 			p = User.objects.get(username=player['name'])
-			game_type = GameType.objects.get(name='tron')
+			# game_type = GameType.objects.get(name='tron')
 
-			stats, created = PlayerGameTypeStats.objects.get_or_create(player=p, game_type=game_type)
-			stats.game_played = F('games_played') + 1
+			# stats, created = PlayerGameTypeStats.objects.get_or_create(player=p, game_type=game_type)
+
+			if not PlayerStats.objects.filter(player=p).exists():
+				PlayerStats.objects.get_or_create(player=p, pong=PongStats.objects.create(), tron=TronStats.objects.create())
+			player_stats = PlayerStats.objects.get(player=p)
+
+			game.end_time = timezone.now()
+			game_duration = game.end_time - game.start_date
+			player_stats.tron.play_time = F('play_time') + game_duration
+			player_stats.tron.save()
+			player_stats.tron.refresh_from_db()
+			player_stats.total_game = F('total_game') + 1
+			player_stats.tron.total_game = F('total_game') + 1
+			# stats.game_played = F('games_played') + 1
 			if player['alive']:
-				stats.games_won = F('games_won') + 1
+				# stats.games_won = F('games_won') + 1
+				player_stats.tron.game_won = F('game_won') + 1
+				player_stats.total_win = F('total_win') + 1
+				player_stats.win_streak = F('win_streak') + 1
+				if not player_stats.tron.fastest_win:
+					player_stats.tron.fastest_win = game_duration
+				elif game_duration < player_stats.tron.fastest_win:
+					player_stats.tron.fastest_win = game_duration
 			else:
-				stats.games_lost = F('games_lost') + 1
-			stats.total_score = F('total_score') + score
-			stats.save()
+				# stats.games_lost = F('games_lost') + 1
+				player_stats.tron.game_lost = F('game_lost') + 1
+				player_stats.total_lost = F('total_lost') + 1
+				player_stats.win_streak = 0
+
+			# stats.total_score = F('total_score') + score
+			player_stats.tron.total_score = F('total_score') + player['score']
+			player_stats.tron.total_hit = F('total_hit') + player['hit']
+			# stats.save()
+			if not player_stats.tron.longest_game:
+				player_stats.tron.longest_game = game_duration
+			elif game_duration > player_stats.tron.longest_game:
+				player_stats.tron.longest_game = game_duration
+			player_stats.tron.save()
+			player_stats.save()
 
 			game.status = 'finished'
 			game.save()
@@ -106,6 +137,7 @@ def setup_tron(game_id, player, token):
 			party.add_player(prop.players.all(), player, token)
 
 		if party.player_number <= prop.players.count() and prop.players.filter(player__id=player.id):
+			game.start_date = timezone.now()
 			party.state = 'playing'
 
 		return "{'obstacles': party.map}"

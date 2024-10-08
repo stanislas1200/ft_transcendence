@@ -1,4 +1,4 @@
-from .models import Game, PongPlayer, GameType, PlayerGameTypeStats, Match
+from .models import Game, PongPlayer, GameType, PlayerGameTypeStats, Match, PlayerStats, PongStats, TronStats
 from django.contrib.auth.models import User
 from django.db.models import F
 from asgiref.sync import sync_to_async
@@ -249,18 +249,50 @@ class Party:
 
 				# save player stats
 				p = User.objects.get(username=player['name'])
-				game_type = GameType.objects.get(name="pong")
+				# game_type = GameType.objects.get(name="pong")
 
-				stats, created = PlayerGameTypeStats.objects.get_or_create(player=p, game_type=game_type)
-				stats.games_played = F('games_played') + 1
+				# stats, created = PlayerGameTypeStats.objects.get_or_create(player=p, game_type=game_type)
+
+				if not PlayerStats.objects.filter(player=p).exists():
+					PlayerStats.objects.get_or_create(player=p, pong=PongStats.objects.create(), tron=TronStats.objects.create())
+				player_stats = PlayerStats.objects.get(player=p)
+
+
+				game.end_time = timezone.now()
+				game_duration = game.end_time - game.start_date
+				player_stats.pong.play_time = F('play_time') + game_duration
+				player_stats.pong.save()
+				player_stats.pong.refresh_from_db()
+				player_stats.total_game = F('total_game') + 1
+				player_stats.pong.total_game = F('total_game') + 1
+				# stats.games_played = F('games_played') + 1
 				if player['score'] >= self.score:
 					winner = p
 					game.winners.add(p)
-					stats.games_won = F('games_won') + 1
+					# stats.games_won = F('games_won') + 1
+					player_stats.pong.game_won = F('game_won') + 1
+					player_stats.total_win = F('total_win') + 1
+					player_stats.win_streak = F('win_streak') + 1
+					if not player_stats.pong.fastest_win:
+						player_stats.pong.fastest_win = game_duration
+					elif game_duration < player_stats.pong.fastest_win:
+						player_stats.pong.fastest_win = game_duration
 				else:
-					stats.games_lost = F('games_lost') + 1
-				stats.total_score = F('total_score') + player['score']
-				stats.save()
+					# stats.games_lost = F('games_lost') + 1
+					player_stats.pong.game_lost = F('game_lost') + 1
+					player_stats.total_lost = F('total_lost') + 1
+					player_stats.win_streak = 0
+
+				# stats.total_score = F('total_score') + player['score']
+				player_stats.pong.total_score = F('total_score') + player['score']
+				player_stats.pong.total_hit = F('total_hit') + player['hit']
+				# stats.save()
+				if not player_stats.pong.longest_game:
+					player_stats.pong.longest_game = game_duration
+				elif game_duration > player_stats.pong.longest_game:
+					player_stats.pong.longest_game = game_duration
+				player_stats.pong.save()
+				player_stats.save()
 
 				# save history
 				game.status = 'finished'
@@ -330,6 +362,7 @@ def setup(game_id, player, token):
 			party.add_player(prop.players.all(), player, token)
 
 		if party.player_number <= len(party.players) and prop.players.filter(player__id=player.id):
+			game.start_date = timezone.now()
 			party.state = 'playing'
 			party.ball['dx'], party.ball['dy'] = randomize_direction(party)
 		
