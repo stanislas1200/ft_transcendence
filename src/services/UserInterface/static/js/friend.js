@@ -13,6 +13,7 @@ function getElementFriend() {
 
 function chat() {
     // Données d'exemple pour les amis
+    console.log(1);
     const friends = [
         { id: 'chat1', name: 'Alice', lastMessage: 'How are you?' },
         { id: 'chat2', name: 'Bob', lastMessage: 'What’s up?' },
@@ -106,3 +107,4 @@ function chat() {
         }
     });
 }
+
