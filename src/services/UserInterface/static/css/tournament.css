@@ -52,7 +52,7 @@
   font-size: 2rem;
 }
 
-.border-bottom {
+.t_border-bottom {
   border-bottom: 1px solid var(--accent);
 }
 
