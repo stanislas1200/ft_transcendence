@@ -15,7 +15,9 @@ class PlayerStats(models.Model):
     total_lost = models.IntegerField (default=0)
     total_game = models.IntegerField(default=0)
     win_streak = models.IntegerField(default=0)
-    
+    tournament_win = models.IntegerField(default=0)
+    tournament_played = models.IntegerField(default=0)
+
 class PongStats(models.Model):
     game_won = models.IntegerField(default=0)
     game_lost = models.IntegerField(default=0)
