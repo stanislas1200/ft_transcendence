@@ -152,15 +152,15 @@ class GameConsumer(AsyncWebsocketConsumer):
 					ret, game_id = await update_gam(self.game_id) or (None, None)
 					game_state = get_gam_state(self.game_id)
 				
-
-				await self.channel_layer.group_send(
-					self.game_group_name,
-					{
-						'type': 'update_game_state',
-						'game_state': game_state
-					}
-				)
-				last_time = current_time
+				if game_state:
+					await self.channel_layer.group_send(
+						self.game_group_name,
+						{
+							'type': 'update_game_state',
+							'game_state': game_state
+						}
+					)
+					last_time = current_time
 
 			if ret:
 				await self.channel_layer.group_send(

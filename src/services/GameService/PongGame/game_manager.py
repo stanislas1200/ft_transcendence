@@ -137,6 +137,8 @@ class Party:
 		self.paddleWidth = 10
 		self.paddleHeight = 100
 		self.ballR = 5
+		self.timer = 3
+		self.timer_start = time.time()
 		if prop.mapId == 3:
 			make_map3()
 		self.map = maps[prop.mapId].copy()
@@ -380,6 +382,7 @@ def get_pong_state(game_id):
 	if game is None:
 		return {'error': f'Game ID {game_id} not found in party list.'}
 	# if game.state == 'waiting':
+	# 	return None
 	# 	return {'error': 'Game not started yet.'}
 	scores = [player['score'] for player in game.players]
 	username = [player['name'] for player in game.players]
@@ -534,6 +537,8 @@ def reset_ball(game):
 	game.ball['x'] = game.width/2
 	game.ball['dx'], game.ball['dy'] = randomize_direction(game)
 	# time.sleep(1)
+	game.timer = 1
+	game.timer_start = time.time()
 
 def ffa_update(game):
 	if game.ball['y'] <= game.paddlePadding/4 + game.ballR or game.ball['y'] >= game.height - game.paddlePadding/4 - game.ballR:
@@ -570,6 +575,10 @@ async def update_pong(game_id):
 	if game.state != 'playing':
 		# print(f"Game ID {game_id} not playing.", flush=True)
 		return
+
+	if game.timer and game.timer_start + game.timer > time.time():
+		return
+	game.timer = 0
 	
 	# move ball
 	game.ball['x'] += game.ball['dx']
