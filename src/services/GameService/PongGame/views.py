@@ -253,7 +253,7 @@ def get_tournament(request, tournament_id):
             'username': match.game.players.last().username if match.game.players.exists() and match.game.players.count() > 1 else None,
         },
         'winner': match.winner.id if match.winner else None,
-        'satus': match.game.status
+        'status': match.game.status
     } for i, match in enumerate(matches)]
 
     tournament_data = {
