@@ -221,14 +221,21 @@ function updateMatchDisplay(matches) {
         if (currentIndex > 0) {
             currentIndex--;
             displayMatch(currentIndex);
+            document.querySelector('.left-right-button:last-child').classList.remove('disabled');
         }
+        else
+            document.querySelector('.left-right-button:first-child').classList.add('disabled');
+
     };
 
     document.querySelector('.left-right-button:last-child').onclick = () => {
         if (currentIndex < matches.length - 1) {
             currentIndex++;
             displayMatch(currentIndex);
+            document.querySelector('.left-right-button:first-child').classList.remove('disabled');
         }
+        else
+            document.querySelector('.left-right-button:last-child').classList.add('disabled');
     };
 }
 
