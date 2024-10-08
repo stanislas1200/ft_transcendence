@@ -69,6 +69,8 @@ services:
       - ssl_cert_volume:/etc/ssl/certs
     ports:
       - "8003:8003"
+    environment:
+      OAUTH_LINK: ${OAUTH_LINK}
     depends_on:
       - db
       - game-service
