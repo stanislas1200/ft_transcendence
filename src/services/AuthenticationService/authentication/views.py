@@ -701,7 +701,7 @@ def verify_token(request, token=None, user_id=None):
 		if check_password(token, user_token.token):
 			return 200
 		else:
-			return 200
+			return 401
 	except UserToken.DoesNotExist:
 		return 404
 
