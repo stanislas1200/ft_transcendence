@@ -37,7 +37,7 @@ def update_connection(user_id, i):
     user.save()
 
 @csrf_exempt
-def send_notification(request, users_id, message=None):
+def send_notification(request, users_id=None, message=None):
     if request:
         internal_secret = request.headers.get('X-Internal-Secret')
 
@@ -50,16 +50,17 @@ def send_notification(request, users_id, message=None):
         message = data.get('message')
         users_id = data.get('user_id')
 
-    channel_layer = get_channel_layer()
-    for uid in users_id:
-        group_name = f'notifications_{uid}'
-        async_to_sync(channel_layer.group_send)(
-            group_name,
-            {
-                'type': 'send_notification',
-                'message': message
-            }
-        )
+    if message and users_id:
+        channel_layer = get_channel_layer()
+        for uid in users_id:
+            group_name = f'notifications_{uid}'
+            async_to_sync(channel_layer.group_send)(
+                group_name,
+                {
+                    'type': 'send_notification',
+                    'message': message
+                }
+            )
     return JsonResponse({'status': 'Message sent'})
 
 @csrf_exempt

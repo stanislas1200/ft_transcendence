@@ -38,7 +38,7 @@ function connect() {
 		let serverMessage = JSON.parse(event.data);
 
 		if (serverMessage.error) {
-			console.error('Error:', serverMessage.error);
+			// console.error('Error:', serverMessage.error);
 			return;
 		}
 
@@ -72,8 +72,14 @@ function connect() {
 	// });
 
 	socket.addEventListener('error', function (event) {
-		console.log('Error: ', event);
+		// console.log('Error: ', event);
 	});
+
+
+	document.removeEventListener('keydown', keyDown)
+	document.removeEventListener('keyup', keyUp)
+	document.addEventListener('keydown', keyDown);
+	document.addEventListener('keyup', keyUp);
 }
 
 let c = null;
@@ -107,7 +113,7 @@ function updatePlayers() {
 		direction = "down";
 	}
 
-	if (direction && socket) {
+	if (direction && socket && socket.readyState === WebSocket.OPEN) {
 		var sessionId = getCookie('sessionid');
 		socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', player: 'p1', direction: direction }));
 	}
@@ -161,7 +167,7 @@ function drawNS() {
 }
 
 function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function drawEnd() {
@@ -198,26 +204,26 @@ let pulseScale = 1;
 let pulseDirection = 0.01;
 
 async function drawWaitingState() {
-    c.clearRect(0, 0, 800, 650);
+	c.clearRect(0, 0, 800, 650);
 
-    c.font = "40px monospace";
-    c.textAlign = 'center';
-    c.textBaseline = 'middle';
+	c.font = "40px monospace";
+	c.textAlign = 'center';
+	c.textBaseline = 'middle';
 
-    pulseScale += pulseDirection;
-    if (pulseScale >= 1.1 || pulseScale <= 0.9) pulseDirection = -pulseDirection;
-    c.save();
-    c.scale(pulseScale, pulseScale);
+	pulseScale += pulseDirection;
+	if (pulseScale >= 1.1 || pulseScale <= 0.9) pulseDirection = -pulseDirection;
+	c.save();
+	c.scale(pulseScale, pulseScale);
 
-    let text = 'waiting player' + '.'.repeat(dotCount);
-    c.fillText(text, 800 / 2 / pulseScale, 600 / 2 / pulseScale);
+	let text = 'waiting player' + '.'.repeat(dotCount);
+	c.fillText(text, 800 / 2 / pulseScale, 600 / 2 / pulseScale);
 
-    c.restore();
+	c.restore();
 
-    dotCount = (dotCount + 1) % 4;
+	dotCount = (dotCount + 1) % 4;
 
 	drawNS()
-    await sleep(500)
+	await sleep(500)
 }
 
 async function draw() {
@@ -240,11 +246,11 @@ async function draw() {
 		// obstaclesDrawn = false;
 	}
 	
-    c.beginPath();
-    c.moveTo(game_state.x, game_state.y);
-    c.arc(game_state.x, game_state.y, 5, 0, Math.PI * 2, true);
-    c.stroke();
-    c.fill()
+	c.beginPath();
+	c.moveTo(game_state.x, game_state.y);
+	c.arc(game_state.x, game_state.y, 5, 0, Math.PI * 2, true);
+	c.stroke();
+	c.fill()
 }
 
 async function gameLoop() {
@@ -273,10 +279,6 @@ function loadPong() {
 	let userId = getCookie('userId');
 	let wsUrl = `wss://localhost:8001/ws/pong/${partyId}/${userId}`;
 	wsUrl = wsUrl.replace('localhost', window.location.hostname);
-	document.removeEventListener('keydown', keyDown)
-	document.removeEventListener('keyup', keyUp)
-	document.addEventListener('keydown', keyDown);
-	document.addEventListener('keyup', keyUp);
 	if (socket)
 		closeWebSocket()
 	socket = new WebSocket(wsUrl);
@@ -290,7 +292,7 @@ function loadPong() {
 	c.font = "60px monospace"
 	connect();
 	if (!isGameLoopRunning) {
-        isGameLoopRunning = true;
-        gameLoop();
-    }
+		isGameLoopRunning = true;
+		gameLoop();
+	}
 }
