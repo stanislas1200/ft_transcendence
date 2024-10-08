@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, Tournament, Match, Tron, GameType, UserAchievement, Achievement, GAM
+from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, Tournament, Match, Tron, GameType, UserAchievement, Achievement, GAM, PlayerStats
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST, require_GET
 from django.forms.models import model_to_dict
@@ -570,15 +570,20 @@ def get_stats(request):
             return JsonResponse({'error': 'Player not found'}, status=404)
         
         stats = PlayerGameTypeStats.objects.filter(player_id=user_id)
+        # player_stats = PlayerStats.objects.filter(player_id=user_id).first()
 
         all_stats_dict = {}
-        for stat in stats:
-            stat_dict = model_to_dict(stat)
-            stat_dict.pop('player')
-            stat_dict.pop('game_type')
-            stat_dict.pop('id')
-            if stat.game_type.name == 'pong':
-                all_stats_dict['pong'] = stat_dict
+        stats_dict = model_to_dict(player_stats)
+        all_stats_dict = stats_dict
+        all_stats_dict['pong'] = model_to_dict(player_stats.pong)
+        all_stats_dict['tron'] = model_to_dict(player_stats.tron)
+        # for stat in stats:
+        #     stat_dict = model_to_dict(stat)
+        #     stat_dict.pop('player')
+        #     stat_dict.pop('game_type')
+        #     stat_dict.pop('id')
+        #     if stat.game_type.name == 'pong':
+        #         all_stats_dict['pong'] = stat_dict
         return JsonResponse(all_stats_dict, safe=False)
     
     except:
@@ -601,6 +606,8 @@ def get_history(request):
             game = Game.objects.filter(id=game_id).first()
             ret = []
             ret.append(game.gameName)
+            ret.append(game.start_date)
+            ret.append(game.end_time)
             game = game.gameProperty
             for p in game.players.all():
                 info = {}

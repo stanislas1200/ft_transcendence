@@ -7,35 +7,35 @@ from django.contrib.auth.models import User
 class GameType(models.Model):
     name = models.CharField(max_length=100)
 
-class PlayerStats(models.Model):
-    player = models.ForeignKey(User, on_delete=models.CASCADE)
-    pong = models.ForeignKey(PongStats)
-    tron = models.ForeignKey(TronStats)
-    total_win = models.IntegerField(default=0)
-    total_lost = models.IntegerField (default=0)
-    total_game = models.IntegerField(default=0)
-    win_streak = models.IntegerField(default=0)
-    tournament_win = models.IntegerField(default=0)
-    tournament_played = models.IntegerField(default=0)
-
 class PongStats(models.Model):
     game_won = models.IntegerField(default=0)
     game_lost = models.IntegerField(default=0)
     total_game = models.IntegerField(default=0)
     total_score = models.IntegerField(default=0)
     total_hit = models.IntegerField(default=0)
-    fastest_win = models.DateTimeField()
-    longest_game = models.DateTimeField()
-    play_time = models.DateTimeField()
+    fastest_win = models.DurationField(null=True, blank=True)
+    longest_game = models.DurationField(null=True, blank=True)
+    play_time = models.DurationField(default="0:00:00")
     
 class TronStats(models.Model):
     game_won = models.IntegerField(default=0)
     game_lost = models.IntegerField(default=0)
     total_game = models.IntegerField(default=0)
     total_score = models.IntegerField(default=0)
-    fastest_win = models.DateTimeField()
-    longest_game = models.DateTimeField()
-    play_time = models.DateTimeField()
+    fastest_win = models.DurationField(null=True, blank=True)
+    longest_game = models.DurationField(null=True, blank=True)
+    play_time = models.DurationField(default="0:00:00")
+
+class PlayerStats(models.Model):
+    player = models.ForeignKey(User, on_delete=models.CASCADE)
+    pong = models.ForeignKey(PongStats, on_delete=models.CASCADE)
+    tron = models.ForeignKey(TronStats, on_delete=models.CASCADE)
+    total_win = models.IntegerField(default=0)
+    total_lost = models.IntegerField (default=0)
+    total_game = models.IntegerField(default=0)
+    win_streak = models.IntegerField(default=0)
+    tournament_win = models.IntegerField(default=0)
+    tournament_played = models.IntegerField(default=0)
     
 # TODO : Win ration, average score, Time of Day, average play time
 # TODO : Game stats: Play Time, score, ball hit, Time of day, ball bounce,
@@ -81,7 +81,8 @@ class Game(models.Model):
     status = models.CharField(max_length=20, default='waiting')  # pending, ongoing, finished
     gameName = models.CharField(max_length=255)
     party_name = models.CharField(max_length=50, default='game')
-    start_date = models.DateTimeField()
+    start_date = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(auto_now_add=True)
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()

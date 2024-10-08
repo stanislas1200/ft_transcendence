@@ -661,7 +661,7 @@ def login_view(request):
 def logout_view(request):
 	try:
 		if request.user.is_authenticated:
-			UserToken.objects.filter(user=request.user).delete()
+			UserToken.objects.filter(user=request.user).update(token=secrets.token_hex(16))
 		logout(request)
 		return JsonResponse({'message': 'Logged out successfully'})
 	except:
