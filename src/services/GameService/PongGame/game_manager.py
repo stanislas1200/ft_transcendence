@@ -1,9 +1,40 @@
-from .models import Game, PongPlayer, GameType, PlayerGameTypeStats, Match, PlayerStats, PongStats, TronStats
+from .models import Game, PongPlayer, GameType, PlayerGameTypeStats, Match, PlayerStats, PongStats, TronStats, UserAchievement, Achievement,
 from django.contrib.auth.models import User
 from django.db.models import F
 from asgiref.sync import sync_to_async
 import asyncio
 from django.utils import timezone
+
+def check_achievement(user, stats,  win):
+	if win_streak == 5:
+		ach, created = Achievement.objects.get_or_create(name='Unstoppable Streak', description='Win 5 consecutive matches.', points=10)
+		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
+		if created:
+			achievement_notif(user.id, ach)
+	if stats.stats.total_game == 50:
+		ach, created = Achievement.objects.get_or_create(name='Gladiator', description='Play 50 matches across all games.', points=10)
+		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
+		if created:
+			achievement_notif(user.id, ach)
+	if stats.total_win == 1:
+		ach, created = Achievement.objects.get_or_create(name='first win', description='Win your first game.', points=10)
+		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
+		if created:
+			achievement_notif(user.id, ach)
+	if stats.pong.game_won == 10:
+		ach, created = Achievement.objects.get_or_create(name='Pong Master', description='Win 10 games of Pong.', points=10)
+		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
+		if created:
+			achievement_notif(user.id, ach)
+        if stats.pong.total_game == 100:
+		ach, created = Achievement.objects.get_or_create(name='Pong Veteran', description='Play 100 games of Pong..', points=10)
+		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
+		if created:
+			achievement_notif(user.id, ach)
+	
+
+
+	
 
 party_list = {}
 
@@ -251,6 +282,7 @@ class Party:
 
 				# save player stats
 				p = User.objects.get(username=player['name'])
+				check_achievements(p)
 				# game_type = GameType.objects.get(name="pong")
 
 				# stats, created = PlayerGameTypeStats.objects.get_or_create(player=p, game_type=game_type)
