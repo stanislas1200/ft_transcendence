@@ -52,6 +52,8 @@ async function loadPage(page, prevent) {
         case 'tournament':
             showTournamentInfo();
             break;
+        case 'tron':
+            loadTron();
         default:
             break;
     }

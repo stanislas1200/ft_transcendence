@@ -142,14 +142,21 @@ function createGameButton() {
                     console.log("game id :" + gameId);
                     localStorage.setItem("gameId", gameId);
                     console.log(xhr.responseText);
-                    loadPage("pong", 1);
+                    if (partyName === 'tron')
+                        loadPage("tron", 1);
+                    else
+                        loadPage("pong", 1);
                 }
                 else {
                     console.log('Error creating game'); // TODO put a message
                     console.log(xhr.responseText);
                 }
         }
-        xhr.send("partyName=" + partyName + "&game=pong&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
+
+        if (partyName === 'tron')
+            xhr.send("partyName=" + partyName + "&game=tron&gameType=custom&playerNumber=" + playerNumber);
+        else
+            xhr.send("partyName=" + partyName + "&game=pong&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
     });
 }
 
