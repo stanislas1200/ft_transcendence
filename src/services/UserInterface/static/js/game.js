@@ -103,7 +103,7 @@ function randomJoinGameButton() {
                     console.log("game id :" + gameId);
                     localStorage.setItem("gameId", gameId);
                     console.log(xhr.responseText);
-                    loadPage('pong')
+                    loadPage('pong', 1)
                 }
                 else {
                     console.log('Error joining game'); // TODO put a message
@@ -126,7 +126,7 @@ function createGameButton() {
         const paddleSpeed = document.getElementById('paddle-speed').value;
 
         if (gameMode == 'local')
-            return loadPage("localpong")
+            return loadPage("localpong", 1)
 
         var xhr = new XMLHttpRequest();
         let url = "https://" + window.location.hostname + ":8001" + "/game/create";
@@ -142,7 +142,7 @@ function createGameButton() {
                     console.log("game id :" + gameId);
                     localStorage.setItem("gameId", gameId);
                     console.log(xhr.responseText);
-                    loadPage("pong");
+                    loadPage("pong", 1);
                 }
                 else {
                     console.log('Error creating game'); // TODO put a message

@@ -53,6 +53,7 @@ function logout() {
 }
 
 function setActive(element, pageName) {
+    event.preventDefault();
     // Retirer la classe 'active' de tous les liens
     const links = document.querySelectorAll('ul li a');
     links.forEach(link => {
@@ -63,7 +64,7 @@ function setActive(element, pageName) {
     element.classList.add('active');
 
     // Charger la page correspondante
-    loadPage(pageName);
+    loadPage(pageName, 1);
 }
 
 
@@ -147,7 +148,7 @@ function findFriend() {
     const inputs = document.querySelectorAll('.proposition-item');
 
     const click = async ({ target }) => {
-        await loadPage('friendProfile');
+        await loadPage('friendProfile', 1);
         searchUser(target.innerHTML);
         const searchFriend = document.getElementById('searchValue');
         const proposition = document.getElementById('proposition');
