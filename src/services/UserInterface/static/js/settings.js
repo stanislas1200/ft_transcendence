@@ -75,7 +75,7 @@ function checkPassword(pwd) {
 
 // function validateForm() {
 function validateForm() {
-    console.log('button press');
+    // console.log('button press');
     let valid = 1;
 
     const newFirstName = document.getElementById('firstName');

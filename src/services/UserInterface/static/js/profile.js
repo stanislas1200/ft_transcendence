@@ -1,5 +1,5 @@
 function loadProfile() {
-    console.log('loadprofile');
+    // console.log('loadprofile');
     const userName = document.getElementById('userName');
     var response;
     let url = "https://localhost:8000/me";
@@ -48,7 +48,7 @@ function answerdRequest(choice, userId) {
 }
 
 function displayRequest(response) {
-    console.log(response);
+    // console.log(response);
     if (response.received_requests.length == 0)
         console.log('no request pending');
     else {
@@ -64,7 +64,7 @@ function displayRequest(response) {
             const button = document.createElement('div');
             button.classList.add('friendRequestButton');
             const userId = response.received_requests[i].id;
-            console.log(response.received_requests[i].id + response.received_requests[i].send);
+            // console.log(response.received_requests[i].id + response.received_requests[i].send);
             button.innerHTML += "<button class=\"fa fa-check my-fa\" value=\"" + userId + "\"><\/button>";
             button.innerHTML += "<button class=\"fa fa-times my-fa\" value=\"" + userId + "\"><\/button>";
             button.innerHTML += "<button class=\"fa fa-ban my-fa\" value=\"" + userId + "\"><\/button>";
@@ -88,7 +88,7 @@ function displayRequest(response) {
 }
 
 function listRequest() {
-    console.log('list request');
+    // console.log('list request');
     let url = "https://localhost:8000/list_request/";
     url = url.replace("localhost", window.location.hostname);
     var xhr = new XMLHttpRequest();

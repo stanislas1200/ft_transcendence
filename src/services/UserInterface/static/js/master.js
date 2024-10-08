@@ -80,7 +80,7 @@ function testIfLoggedIn() {
             if (xhr.status !== 200 && xhr.status !== 201) {
                 window.location.replace("/login");
             }
-            console.log(xhr.responseText);
+            // console.log(xhr.responseText);
         }
     };
     xhr.send();
