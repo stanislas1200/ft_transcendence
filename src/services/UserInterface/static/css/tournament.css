@@ -190,9 +190,13 @@
   font-size: 2.5rem;
 }
 
-.match-number>.left-right-button {
+.left-right-button {
   cursor: pointer;
   font-size: 4rem;
+}
+
+.left-right-button.disabled {
+  opacity: 0;
 }
 
 .spectate-button {
