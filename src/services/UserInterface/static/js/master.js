@@ -19,6 +19,10 @@ function connectToNotifications() {
 
     wss.addEventListener('message', function (event) {
         let serverMessage = JSON.parse(event.data);
+        notif = document.getElementById('notif_id')
+        // notif.style.opacity = 100;
+        notif.innerHTML = serverMessage.data.content
+        // notif.style.opacity = 100;
     });
 
 
@@ -54,6 +58,7 @@ function logout() {
 
 function setActive(element, pageName) {
     // Retirer la classe 'active' de tous les liens
+    event.preventDefault(); // Prevent the form from submitting the traditional way
     const links = document.querySelectorAll('ul li a');
     links.forEach(link => {
         link.classList.remove('active');

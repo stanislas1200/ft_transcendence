@@ -130,7 +130,7 @@ def create_tournament(request):
             return JsonResponse({"success": False, "message": "Missing required fields."}, status=400)
         
         tournament = Tournament.objects.create(max_player=8, name=name, gameName=game_name, start_date=start_date)
-        return JsonResponse({"success": True, "message": "Tournament created " + str(tournament.id)})
+        return JsonResponse({"success": True, "message": "Tournament created ", "tournament_id":  str(tournament.id)})
 
     except Exception as e:
         return JsonResponse({"success": False, "message": "Failed to create tournament. Error: " + str(e)}, status=500)
@@ -555,7 +555,7 @@ def record_move(request):
         return JsonResponse({'error': 'Game not found'}, status=404)
     except:
         return JsonResponse({'error': 'Server error'}, status=500)
-
+# TODO : remove date tournament
 @require_GET
 @csrf_exempt # Disable CSRF protection for this view
 def get_stats(request):
