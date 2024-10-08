@@ -1,6 +1,7 @@
 /********************************* GESTION SPA *********************************/
 
 async function loadPage(page) {
+    // console.log(page);
     await fetch('/' + page + '/', {
         method: 'GET',
         headers: {
@@ -14,6 +15,7 @@ async function loadPage(page) {
             return response.text();
         })
         .then(html => {
+            console.log(page);
             document.getElementById('spa-content').innerHTML = html;
             window.history.pushState({}, '', '/' + page + '/');
             // If there are any specific scripts or functions to run for the page, you can call them here.
@@ -24,6 +26,7 @@ async function loadPage(page) {
             // Optionally load an error page or show an error message
         });
     testIfLoggedIn()
+    // console.log(window.History.prototype);
     switch (page) {
         case 'friend':
             getElementFriend();

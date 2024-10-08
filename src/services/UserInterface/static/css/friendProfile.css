@@ -5,6 +5,7 @@
     /* background-color: rgba(233, 171, 88, 0.5); */
     padding: 1em;
     color: var(--text);
+    max-height: 600px;
 }
 
 .wrapper {
@@ -31,38 +32,11 @@
     grid-column: 3 / 10;
     grid-row: 1 / 4;
     max-height: 75vh;
-}
-
-#profile-container {
-    width: 100%;
     display: flex;
-    justify-content: center;
-    background-color: var(--background);
-    margin: 6rem;
-    border-left: none;
-    flex-direction: column;
-}
-
-#profile-picture {
-    position: relative;
-    width: 300px;
-    height: 300px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 3px solid #ccc;
-    cursor: default;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.2s ease-in-out;
-}
-
-#profile-picture img {
+    flex-direction: row;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
 }
+
 
 .addFriend {
     background-color: var(--secondary);
@@ -88,7 +62,7 @@
 }
 
 .info-area {
-    width: 100%;
+    width: 50%;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -101,6 +75,10 @@
     height: 70px;
     display: flex;
     flex-direction: row;
+}
+
+.game:hover {
+    background-color: var(--primary);
 }
 
 .legend {
@@ -117,7 +95,7 @@
 
 .victory,
 .score,
-.date,
+.dateHistory,
 .status,
 .mode {
     display: flex;
@@ -146,5 +124,39 @@
     width: 600px;
     max-height: 75vw;
     overflow-y: auto;
-    scrollbar-color: var(--background) var(--background);
+    scrollbar-width: none;
+}
+
+.center {
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+/* *************************************************************************************************** */
+
+@keyframes progress {
+    0% {
+        stroke-dasharray: 0 100;
+    }
+}
+
+.circle-svg {
+    display: block;
+    margin: 10px auto;
+    max-height: 200px;
+}
+
+.circle-svg path.percent {
+    stroke: var(--primary);
+    fill: none;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    animation: progress 1s ease-out forwards;
+}
+
+.circle-svg path.around {
+    stroke: #c4c4c4;
+    fill: none;
+    stroke-width: 2.8;
 }

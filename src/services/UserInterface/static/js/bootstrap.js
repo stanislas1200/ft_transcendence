@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 	const alertPlaceholder = document.getElementById('liveAlertPlaceholder')
+	if (!alertPlaceholder)
+		return;
 	const appendAlert = (message, type) => {
 		const wrapper = document.createElement('div')
 		wrapper.innerHTML = [
@@ -13,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	const alertTrigger = document.getElementById('liveAlertBtn')
+	if (!alertTrigger)
+		return;
 	if (alertTrigger) {
 		alertTrigger.addEventListener('click', () => {
 			appendAlert('Nice, you found me!', 'success')

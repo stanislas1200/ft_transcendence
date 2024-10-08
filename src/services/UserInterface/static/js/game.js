@@ -130,7 +130,7 @@ function createGameButton() {
 
         var xhr = new XMLHttpRequest();
         let url = "https://" + window.location.hostname + ":8001" + "/game/create";
-        console.log(url);
+        // console.log(url);
         xhr.withCredentials = true;
         xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
