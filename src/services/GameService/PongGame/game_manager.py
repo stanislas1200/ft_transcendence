@@ -31,6 +31,11 @@ def check_achievement(user, stats,  win):
 		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
 		if created:
 			achievement_notif(user.id, ach)
+	if stats.tron.game_won == 10:
+		ach, created = Achievement.objects.get_or_create(name='Tron Champion', description='Win 10 games of Tron.', points=10)
+		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
+		if created:
+			achievement_notif(user.id, ach)
 	
 
 
@@ -282,7 +287,7 @@ class Party:
 
 				# save player stats
 				p = User.objects.get(username=player['name'])
-				check_achievements(p)
+				check_achievements(p, player_stats, None)
 				# game_type = GameType.objects.get(name="pong")
 
 				# stats, created = PlayerGameTypeStats.objects.get_or_create(player=p, game_type=game_type)
