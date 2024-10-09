@@ -380,7 +380,7 @@ def join_game(request):
             games = Game.objects.filter(gameName=game_name, status='waiting').order_by('?') # Get random game
             game = None
             for g in games:
-                if ((game_name == 'pong' and g.gameProperty.gameMode == game_mode) or (game_name == 'tron')) and g.gameProperty.playerNumber == int(player_number):
+                if ((game_name == 'pong' and g.gameProperty.gameMode == game_mode) or (game_name == 'tron')) and g.gameProperty.playerNumber == int(player_number) and g.gameProperty.players.count() < int(player_number):
                     game = g
                     break
             if not game:
