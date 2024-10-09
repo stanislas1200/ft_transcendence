@@ -694,9 +694,6 @@ def verify_token(request, token=None, user_id=None):
 	if not user_id:
 		user_id = request.COOKIES.get('userId')
 	try:
-		print(user_id)
-		print(user_id)
-		print(user_id, flush=True)
 		user_token = UserToken.objects.get(user_id=user_id)
 		if check_password(token, user_token.token):
 			return 200
