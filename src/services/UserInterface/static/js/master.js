@@ -79,6 +79,7 @@ function logout() {
 function setActive(element, pageName) {
     event.preventDefault();
     // Retirer la classe 'active' de tous les liens
+    event.preventDefault(); // Prevent the form from submitting the traditional way
     const links = document.querySelectorAll('ul li a');
     links.forEach(link => {
         link.classList.remove('active');

@@ -14,6 +14,13 @@
     <!-- Partie gauche inférieure: Trouver une partie aléatoire -->
     <div id="random-game">
         <h2>Find a random game</h2>
+        <label for="gameRandom">
+            <span>game</span>
+            <select id="gameRandom">
+                <option value="pong">pong</option>
+                <option value="tron">tron</option>
+            </select>
+        </label>
         <label for="max-players-random">
             <span>Numbers of players</span>
             <select id="max-players-random">
@@ -34,9 +41,12 @@
     <!-- Partie droite: Créer une partie -->
     <div id="create-game">
         <h2>Create a game</h2>
-        <label class="login__label">
-            <span>Game name (optional)</span>
-            <input id="partyName" type="text" name="username" class="input">
+        <label for="gameCreate">
+            <span>game</span>
+            <select id="gameCreate">
+                <option value="pong">pong</option>
+                <option value="tron">tron</option>
+            </select>
         </label>
 
         <label for="max-players-create">

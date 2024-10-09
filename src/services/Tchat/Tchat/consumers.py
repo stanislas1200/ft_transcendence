@@ -7,15 +7,21 @@ from .views import get_user
 from room.models import Chat, Message
 from asgiref.sync import sync_to_async
 import requests 
+from django.db.models import Q
 
-# def blocked(user):
-#     return user.blocked
 
 def _get_chat_room(user, recipient):
-    chat, created = Chat.objects.get_or_create(users__id=user.id)
-    if created:
-        chat.users.add(user)
-        chat.users.add(recipient)
+    try:
+        chats = Chat.objects.filter(users=user)
+        for chat in chats:
+            if chat.users.filter(id=recipient.id).exists():
+                return chat
+    except Chat.DoesNotExist:
+        pass
+
+    chat = Chat.objects.create()
+    chat.users.add(user)
+    chat.users.add(recipient)
     return chat
 
 class TChatConsumer(AsyncWebsocketConsumer):
