@@ -1,70 +1,71 @@
 <div class="homepage-container">
 	<div class="info-grid">
-		<div class="index-info index-title">last game played:</div>
-		<div class="index-info index-date">DD/MM/YYYY</div>
-		<div class="index-info index-wl">
-			<span data-status="win"></span>
+		<div id="index-title" class="index-info index-title">last game played:</div>
+		<div id="index-date" class="index-info index-date">DD/MM/YYYY</div>
+		<div id="status" class="index-info index-wl">
+			<!-- <span data-status="win"></span> -->
 		</div>
 		<div class="index-info index-score">
 			<span>final score:</span>
 			&nbsp;
-			<span class="index-final-score">10 | 10</span>
+			<span id="index-final-score" class="index-final-score">10 | 10</span>
 		</div>
 	</div>
 	<div class="index-quicklinks">
 		<div class="index-quicklink">
 			<span>active games</span>
-			<div class="home-list">
-				<div class="list-element">
+			<div id="game-list" class="home-list">
+				<!-- <div class="list-element">
 					<span class="list-span">
 						Game name
 					</span>
 					<div class="list-join-button">
 						Join ➞
 					</div>
-				</div>
+				</div> -->
 			</div>
 			<div class="index-button">list</div>
 		</div>
 		<div class="index-quicklink">
 			<span>active tournaments</span>
-			<div class="home-list">
-				<div class="list-element">
+			<div id="tournament-list" class="home-list">
+				<!-- <div class="list-element">
 					<span class="list-span">
 						Tournament name
 					</span>
 					<div class="list-join-button">
 						Join ➞
 					</div>
-				</div>
+				</div> -->
 			</div>
 
 			<div class="index-button">list</div>
 		</div>
 		<div class="index-quicklink">
 			<span>achievements</span>
-			<div class="home-list">
-				<div class="list-element index-achievement">
+			<div id="achivement-list" class="home-list">
+				<!-- <div class="list-element index-achievement">
 					<span class="list-span">
 						Achievement name
 					</span>
-				</div>
+				</div> -->
 			</div>
 			<div class="index-button">list</div>
 		</div>
 		<div class="index-quicklink">
-			<span>online friends</span>
-			<div class="home-list">
-				<div class="list-element">
+			<span>Friends list</span>
+			<div id="friend-list-home-page" class="home-list">
+				<!-- <div class="list-element">
 					<span class="list-span">
 						Friend name
 					</span>
 					<div class="list-join-button">
 						Send message ➞
 					</div>
-				</div>
+				</div> -->
 			</div>
 			<div class="index-button">list</div>
 		</div>
 	</div>
 </div>
+<script>loadHome();</script>

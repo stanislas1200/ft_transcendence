@@ -105,7 +105,7 @@ function loadHistoryFromGame(id, gameId) {
         if (xhr.readyState === 4) {
             if (xhr.status === 200 || xhr.status === 201) {
                 response = JSON.parse(xhr.responseText);
-                console.log(response);
+                // console.log(response);
                 displayHistoryFromOneGame(response);
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
@@ -211,21 +211,15 @@ function displayHistorique(userId, response) {
     if (!addFriend || !message || !duel)
         return;
 
-    if (addFriend) {
-        addFriend.addEventListener('click', function () {
-            friendRequest(userId);
-        });
-    }
-    if (message) {
-        message.addEventListener('click', function () {
-            console.log('message');
-        });
-    }
-    if (duel) {
-        duel.addEventListener('click', function () {
-            console.log('duel');
-        });
-    }
+    addFriend.addEventListener('click', function () {
+        friendRequest(userId);
+    });
+    message.addEventListener('click', function () {
+        console.log('message');
+    });
+    duel.addEventListener('click', function () {
+        console.log('duel');
+    });
 }
 // retirer sur pas finish
 
@@ -237,12 +231,12 @@ function graphique(stats) {
     if (!percent || !text || !totalScore)
         return;
 
-    console.log(stats.pong);
+    // console.log(stats.pong);
     let nbrGame = stats.pong.total_game;
     let nbrWin = stats.pong.game_won;
     let nbrLoose = stats.pong.game_lost;
     const winPercent = (nbrWin / nbrGame) * 100;
-    console.log(nbrGame);
+    // console.log(nbrGame);
     let tmp = winPercent + ", 100";
     if (nbrWin > 10 || nbrLoose > 10) {
         text.classList.add("smaller");
