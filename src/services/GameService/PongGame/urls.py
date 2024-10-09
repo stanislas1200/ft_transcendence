@@ -21,6 +21,7 @@ urlpatterns = [
 	path('get_tournament/<int:tournament_id>', views.get_tournament),
 	path('list_achievements', views.list_achievements),
 	path('send-notification/', views.send_notification),
+	path('list_tournament', views.list_tournament),
 
 	path('search', views.search)
 	

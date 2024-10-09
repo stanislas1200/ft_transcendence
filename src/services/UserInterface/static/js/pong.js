@@ -22,11 +22,7 @@ function closeWebSocket() {
 	isGameLoopRunning = false
 }
 
-function connect() {
-	let sessionId = getCookie('sessionid');
-	// console.log(sessionId)
-
-
+function connect(game) {
 	window.addEventListener('popstate', closeWebSocket);
 
 	socket.addEventListener('open', function (event) {
@@ -34,33 +30,36 @@ function connect() {
 	});
 
 	socket.addEventListener('message', function (event) {
-		// console.log('Message from server: ', event.data);
 		let serverMessage = JSON.parse(event.data);
 
-		if (serverMessage.error) {
-			// console.error('Error:', serverMessage.error);
+		if (serverMessage.error)
 			return;
-		}
 
-		if (serverMessage.message === 'Setup') {
-			obstacles = serverMessage.setting.obstacles
-			offc.fillStyle = "white";
-			if (obstacles) {
-				obstacles.forEach((obstacle) => {
-					let vertices = obstacle.vertices;
-					offc.beginPath();
-					offc.moveTo(vertices[0].x, vertices[0].y);
-					for (i = 1; i < vertices.length; i++) {
-						offc.lineTo(vertices[i].x, vertices[i].y);
-					}
-					offc.closePath();
-					offc.fill();
-					offc.stroke();
-				})
-				obstaclesDrawn = true;
+		if (game === 'pong') {
+			if (serverMessage.message === 'Setup') {
+				obstacles = serverMessage.setting.obstacles
+				offc.fillStyle = "white";
+				if (obstacles) {
+					obstacles.forEach((obstacle) => {
+						let vertices = obstacle.vertices;
+						offc.beginPath();
+						offc.moveTo(vertices[0].x, vertices[0].y);
+						for (i = 1; i < vertices.length; i++) {
+							offc.lineTo(vertices[i].x, vertices[i].y);
+						}
+						offc.closePath();
+						offc.fill();
+						offc.stroke();
+					})
+					obstaclesDrawn = true;
+				}
 			}
 		}
 		game_state = serverMessage;
+		// else if (game === 'tron') {
+		// 	game_state = serverMessage.state
+		// 	players = serverMessage.players;
+		// }
 	});
 
 	// socket.addEventListener('close', function (event) {
@@ -214,7 +213,8 @@ async function drawWaitingState() {
 	if (pulseScale >= 1.1 || pulseScale <= 0.9) pulseDirection = -pulseDirection;
 	c.save();
 	c.scale(pulseScale, pulseScale);
-
+	
+	c.fillStyle = 'white'
 	let text = 'waiting player' + '.'.repeat(dotCount);
 	c.fillText(text, 800 / 2 / pulseScale, 600 / 2 / pulseScale);
 
@@ -253,20 +253,29 @@ async function draw() {
 	c.fill()
 }
 
-async function gameLoop() {
+async function gameLoop(game) {
 	try {
 		if (isGameLoopRunning) {
-			await draw();
-			updatePlayers();
-			end = await drawEnd();
+			if ( game == 'pong') {
+				await draw();
+				updatePlayers();
+				end = await drawEnd();
+			}
+			else {
+				await drawTron();
+				updatePlayersTron();
+				end = await drawEndTron();
+			}
 			if (end == 1)
 			{
 				cancelAnimationFrame(animFrame);
 				game_state.scores = null;
 				game_state.usernames = null;
+				game_state.players = [];
+				game_state.state = 'nope';
 				return;
 			}
-			animFrame = requestAnimationFrame(gameLoop);
+			animFrame = requestAnimationFrame(() => gameLoop(game));
 		}
 	} catch (error) {
 		console.log(error)
@@ -290,9 +299,9 @@ function loadPong() {
 	offc = offScreenC.getContext('2d');
 	obstaclesDrawn = false;
 	c.font = "60px monospace"
-	connect();
+	connect('pong');
 	if (!isGameLoopRunning) {
 		isGameLoopRunning = true;
-		gameLoop();
+		gameLoop('pong');
 	}
 }
