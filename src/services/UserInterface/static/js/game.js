@@ -36,19 +36,87 @@ function getElementGame() {
     // ballSpeed = parseInt(document.getElementById('ball-speed').value);
     // paddleSpeed = parseInt(document.getElementById('paddle-speed').value);
 
-    gameModeDisabler();
+    gameModeDisablerForRandom();
+    gameModeDisablerForCreate();
     inputAnimation();
     randomJoinGameButton();
     createGameButton();
     // waitingRoom();
 }
 
-function gameModeDisabler() {
-    // Désactive le choix du mode de jeu si 2 joueurs sont sélectionnés
-    const maxPlayersSelectRandom = document.getElementById('max-players-random');
-    const gameModeSelect = document.getElementById('game-mode');
+function gameModeDisablerForCreate() {
+    const maxPlayersSelect = document.getElementById('max-players-create');
+    const gameModeCreateTeam = document.getElementById('game-mode-create-team');
+    const gameModeCreateFfa = document.getElementById('game-mode-create-ffa');
+    const gameModeCreateSolo = document.getElementById('game-mode-create-solo');
+    const gameModeCreateLocal = document.getElementById('game-mode-create-local');
+    const gameStyle = document.getElementById('gameCreate');
+    const gameModeSelect = document.getElementById('game-mode-create');
+    const map = document.getElementById('map-choice');
+
+    gameModeSelect.value = "solo-ia";
     gameModeSelect.disabled = true;
-    maxPlayersSelectRandom.addEventListener('change', function () {
+
+    gameStyle.addEventListener('change', function () {
+        if (this.value === 'tron') {
+            gameModeSelect.value = 'ffa';
+            gameModeSelect.disabled = true;
+            maxPlayersSelect.value = '2';
+            maxPlayersSelect.disabled = true;
+            map.value = '0';
+            map.disabled = true;
+        } else {
+            maxPlayersSelect.disabled = false;
+            map.disabled = false;
+        }
+    });
+
+    maxPlayersSelect.addEventListener('change', function () {
+        if (this.value === '1') {
+            gameModeSelect.value = "solo-ia";
+            gameModeSelect.disabled = true;
+            map.disabled = false;
+        } else if (this.value == '2') {
+            gameModeSelect.value = 'ffa';
+            gameModeSelect.disabled = false;
+            gameModeCreateFfa.disabled = false;
+            gameModeCreateSolo.disabled = true;
+            gameModeCreateTeam.disabled = true;
+            gameModeCreateLocal.disabled = false;
+        } else {
+            gameModeSelect.value = 'ffa';
+            gameModeSelect.disabled = false;
+            gameModeCreateFfa.disabled = false;
+            gameModeCreateSolo.disabled = true;
+            gameModeCreateTeam.disabled = false;
+            gameModeCreateLocal.disabled = true;
+        }
+    });
+
+}
+
+function gameModeDisablerForRandom() {
+    // Désactive le choix du mode de jeu si 2 joueurs sont sélectionnés
+    const maxPlayersSelect = document.getElementById('max-players-random');
+    const gameModeSelect = document.getElementById('game-mode');
+    const gameStyle = document.getElementById('gameRandom');
+    gameModeSelect.disabled = false;
+
+    // console.log(gameStyle.value);
+
+    gameStyle.addEventListener('change', function () {
+        if (this.value === 'tron') {
+            gameModeSelect.value = 'ffa';
+            maxPlayersSelect.value = '2';
+            gameModeSelect.disabled = true;
+            maxPlayersSelect.disabled = true;
+        } else {
+            // gameModeSelect.disabled = false;
+            maxPlayersSelect.disabled = false;
+        }
+    });
+
+    maxPlayersSelect.addEventListener('change', function () {
         if (this.value === '2') {
             gameModeSelect.value = 'ffa';
             gameModeSelect.disabled = true;
@@ -56,32 +124,6 @@ function gameModeDisabler() {
             gameModeSelect.disabled = false;
         }
     });
-
-    const maxPlayersSelectCreate = document.getElementById('max-players-create');
-    const gameModeCreateTeam = document.getElementById('game-mode-create-team');
-    const gameModeCreateFfa = document.getElementById('game-mode-create-ffa');
-    const gameModeCreateSolo = document.getElementById('game-mode-create-solo');
-    gameModeCreateFfa.disabled = true;
-    gameModeCreateTeam.disabled = true;
-
-    maxPlayersSelectCreate.addEventListener('change', function () {
-        if (this.value === '1') {
-            gameModeCreateSolo.value = 'solo-ia';
-            gameModeCreateFfa.disabled = true;
-            gameModeCreateTeam.disabled = true;
-            gameModeCreateSolo.disabled = false;
-        } else if (this.value === '2') {
-            gameModeCreateSolo.value = 'ffa';
-            gameModeCreateSolo.disabled = true;
-            gameModeCreateTeam.disabled = true;
-            gameModeCreateFfa.disabled = false;
-        } else {
-            gameModeCreateSolo.disabled = true;
-            gameModeCreateFfa.disabled = false;
-            gameModeCreateTeam.disabled = false;
-        }
-    });
-
 }
 
 function randomJoinGameButton() {

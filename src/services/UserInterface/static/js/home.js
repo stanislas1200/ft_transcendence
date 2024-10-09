@@ -6,7 +6,7 @@ function loadHome() {
     loadFriend(userId);
     loadAchivement(userId);
     loadGame();
-    // loadTounament(userId);
+    loadTounament();
 }
 
 function clickOnFriend() {
@@ -25,53 +25,58 @@ function clickOnFriend() {
     });
 }
 
-// function displayTournament(response) {
-//     let tournamentList = document.getElementById('tournament-list');
+function displayTournament(response) {
+    console.log(response);
+    let tournamentList = document.getElementById('tournament-list');
 
-//     if (!tournamentList)
-//         return;
+    if (!tournamentList)
+        return;
 
-//     for (let i = 0; i < response.length; i++) {
-//         if (response[i].status != 'finished') {
-//             let newDiv = document.createElement('div');
-//             newDiv.classList.add('list-element');
-//             let newSpan = document.createElement('span');
-//             newSpan.classList.add('list-span');
-//             newSpan.innerHTML = response[i].name;
-//             newDiv.append(newSpan);
-//             let newButton = document.createElement('div');
-//             newButton.classList.add('list-join-button');
-//             if (response[i].status == 'waiting')
-//                 newButton.innerHTML = 'Join ➞';
-//             else
-//                 newButton.innerHTML = 'Watch ➞';
-//             newDiv.classList.add(response[i].id);
-//             newDiv.append(newButton);
-//             gameList.append(newDiv);
-//         }
-//     }
-// }
+    if (response.length == 0) {
+        tournamentList.innerHTML = 'no tournament for the moment';
+        return;
+    }
 
-// function loadTounament(userId) {
-//     let url = "https://localhost:8001/game/get_tournament/{{UserId}}";
-//     url = url.replace("localhost", window.location.hostname);
-//     url = url.replace("{{UserId}}", userId);
-//     var xhr = new XMLHttpRequest();
-//     xhr.open('GET', url, true);
-//     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-//     xhr.withCredentials = true;
-//     xhr.onreadystatechange = function () {
-//         if (xhr.readyState === 4) {
-//             if (xhr.status === 200 || xhr.status === 201) {
-//                 response = JSON.parse(xhr.responseText);
-//                 displayTournament(response);
-//             } else {
-//                 alert('Error: ' + JSON.parse(xhr.responseText).error);
-//             }
-//         }
-//     };
-//     xhr.send();
-// }
+    for (let i = 0; i < response.length; i++) {
+        if (response[i].status != 'finished') {
+            let newDiv = document.createElement('div');
+            newDiv.classList.add('list-element');
+            let newSpan = document.createElement('span');
+            newSpan.classList.add('list-span');
+            newSpan.innerHTML = response[i].name;
+            newDiv.append(newSpan);
+            let newButton = document.createElement('div');
+            newButton.classList.add('list-join-button');
+            if (response[i].status == 'waiting')
+                newButton.innerHTML = 'Join ➞';
+            else
+                newButton.innerHTML = 'Watch ➞';
+            newDiv.classList.add(response[i].id);
+            newDiv.append(newButton);
+            gameList.append(newDiv);
+        }
+    }
+}
+
+function loadTounament() {
+    let url = "https://localhost:8001/game/list_tournament";
+    url = url.replace("localhost", window.location.hostname);
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.withCredentials = true;
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200 || xhr.status === 201) {
+                response = JSON.parse(xhr.responseText);
+                displayTournament(response);
+            } else {
+                alert('Error: ' + JSON.parse(xhr.responseText).error);
+            }
+        }
+    };
+    xhr.send();
+}
 
 function joinGameFromHome(gameId, gameStyle) {
     var xhr = new XMLHttpRequest();
@@ -89,7 +94,7 @@ function joinGameFromHome(gameId, gameStyle) {
                 var gameId = JSON.parse(xhr.responseText).game_id;
                 console.log("game id :" + gameId);
                 localStorage.setItem("gameId", gameId);
-                loadPage('pong', 1)
+                loadPage(gameStyle, 1)
             }
             else {
                 console.log('Error joining game'); // TODO put a message
