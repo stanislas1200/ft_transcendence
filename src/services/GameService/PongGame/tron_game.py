@@ -39,7 +39,7 @@ class Party:
 			'x': player.n * 100,
 			'y': 0 if player.n // 2 else 600,
 			'trail': [],
-			'direction': "doDwn" if player.n // 2 else "uDp",
+			'direction': "down" if player.n // 2 else "up",
 			'alive': True,
 			'color': ['red', 'green', 'yellow'][player.n-1],
 			'ai': False
@@ -159,18 +159,17 @@ async def update_tron(game_id):
 		players_alive +=1
 			
 		if player['direction'] == 'up':
-			player['y'] -= 3
+			player['y'] -= 2
 		elif player['direction'] == 'down':
-			player['y'] += 3
+			player['y'] += 2
 		elif player['direction'] == 'left':
-			player['x'] -= 3
+			player['x'] -= 2
 		elif player['direction'] == 'right':
-			player['x'] += 3
+			player['x'] += 2
 	
 		player['trail'].append((player['x'], player['y']))
 
 		if player['x'] < 0 or player['x'] > grid_size or player['y'] < 0 or player['y'] > grid_size:
-			print(f"Player {player['id']} crashed!", flush=True)
 			player['alive'] = False
 
 		# Check if the player hits a trail

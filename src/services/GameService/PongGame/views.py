@@ -273,8 +273,9 @@ def list_tournament(request):
     ret = []
     for t in tournaments:
         d = model_to_dict(t)
+        d.pop('players')
         ret.append(d)
-    return JsonResponse(ret)
+    return JsonResponse(ret, safe=False)
     
 @csrf_exempt # Disable CSRF protection for this view
 @require_POST
@@ -379,7 +380,7 @@ def join_game(request):
             games = Game.objects.filter(gameName=game_name, status='waiting').order_by('?') # Get random game
             game = None
             for g in games:
-                if g.gameProperty.gameMode == game_mode and g.gameProperty.playerNumber == int(player_number):
+                if ((game_name == 'pong' and g.gameProperty.gameMode == game_mode) or (game_name == 'tron')) and g.gameProperty.playerNumber == int(player_number):
                     game = g
                     break
             if not game:

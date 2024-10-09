@@ -4,75 +4,30 @@ function getCookie(name) {
 	if (parts.length == 2) return parts.pop().split(";").shift();
 }
 
-function keyDown(event) {
-	keyState[event.key] = true;
-}
-function keyUp(event) {
-	keyState[event.key] = false;
-}
+function updatePlayersTron() {
+	var direction
+	if (keyState["ArrowUp"]) {
+		direction = "up";
+	} else if (keyState["ArrowDown"]) {
+		direction = "down";
+	} else if (keyState["ArrowLeft"]) {
+		direction = "left";
+	} else if (keyState["ArrowRight"]) {
+		direction = "right";
+	}
 
-function closeWebSocket() {
-	socket.close();
-	window.removeEventListener('popstate', closeWebSocket);
-	socket = null;
-	isGameLoopRunning = false
-}
-
-function connect() {
-	window.addEventListener('popstate', closeWebSocket);
-
-	socket.addEventListener('open', function (event) {
-		console.log('WebSocket is open now.');
-	});
-
-	socket.addEventListener('message', function (event) {
-		let serverMessage = JSON.parse(event.data);
-
-		if (serverMessage.error)
-			return;
-
-		players = serverMessage.players;
-	});
-
-	socket.addEventListener('error', function (event) {
-		// console.log('Error: ', event);
-	});
-
-
-	document.removeEventListener('keydown', keyDown)
-	document.removeEventListener('keyup', keyUp)
-	document.addEventListener('keydown', keyDown);
-	document.addEventListener('keyup', keyUp);
+	if (direction && socket && socket.readyState === WebSocket.OPEN) {
+		var sessionId = getCookie('sessionid');
+		socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', player: 'p1', direction: direction }));
+	}
 }
 
-async function drawWaitingState() {
-	c.clearRect(0, 0, 800, 650);
-
-	c.font = "40px monospace";
-	c.textAlign = 'center';
-	c.textBaseline = 'middle';
-
-	pulseScale += pulseDirection;
-	if (pulseScale >= 1.1 || pulseScale <= 0.9) pulseDirection = -pulseDirection;
-	c.save();
-	c.scale(pulseScale, pulseScale);
-
-	let text = 'waiting player' + '.'.repeat(dotCount);
-	c.fillText(text, 800 / 2 / pulseScale, 600 / 2 / pulseScale);
-
-	c.restore();
-
-	dotCount = (dotCount + 1) % 4;
-
-	drawNS()
-	await sleep(500)
-}
-
-async function draw() {
+async function drawTron() {
 	if (game_state.state == 'waiting')
 		return await drawWaitingState();
-    if (players) {
-        players.forEach((player, index) => {
+    if (game_state.players) {
+        game_state.players.forEach((player, index) => {
+			console.log('draw')
             // Calculate x and y positions for each player
             const x = player['x']
             const y = player['y']
@@ -92,23 +47,28 @@ async function draw() {
     }
 }
 
-async function gameLoop() {
-	try {
-		if (isGameLoopRunning) {
-			await draw();
-			end = await drawEnd();
-			if (end == 1)
-			{
-				cancelAnimationFrame(animFrame);
-				game_state.scores = null;
-				game_state.usernames = null;
-				return;
-			}
-			animFrame = requestAnimationFrame(gameLoop);
-		}
-	} catch (error) {
-		console.log(error)
+async function drawEndTron() {
+	if (game_state.state === "finished") {
+		winner = '';
+		game_state.players.forEach((player, index) => {
+			if (player.alive)
+				winner = player.username;
+		});
+		
+		c.fillStyle = 'black'
+		c.fillRect(0, 0, 800, 650);
+		page = "game"
+		c.fillStyle = 'white'
+		c.textAlign = 'center'
+		c.fillText(winner + " won", 800/2, 600/2)
+
+		c.fillText("Moving to " + page + " page", 800/2, 650/2)
+		cancelAnimationFrame(animFrame);
+		await sleep(2000);
+		loadPage(page, 1)
+		return 1
 	}
+	return 0
 }
 
 function loadTron() {
@@ -122,15 +82,10 @@ function loadTron() {
 	socket = new WebSocket(wsUrl);
 	
 	c = document.getElementById('pongCanvas').getContext('2d')
-	offScreenC = document.createElement('canvas');
-	offScreenC.width = c.width = 800;
-	offScreenC.height = c.height = 600;
-	offc = offScreenC.getContext('2d');
-	obstaclesDrawn = false;
 	c.font = "60px monospace"
-	connect();
+	connect('tron');
 	if (!isGameLoopRunning) {
 		isGameLoopRunning = true;
-		gameLoop();
+		gameLoop('tron');
 	}
 }

@@ -1,4 +1,4 @@
-from .models import Game, PongPlayer, GameType, PlayerGameTypeStats, Match, PlayerStats, PongStats, TronStats, UserAchievement, Achievement,
+from .models import Game, PongPlayer, GameType, PlayerGameTypeStats, Match, PlayerStats, PongStats, TronStats, UserAchievement, Achievement
 from django.contrib.auth.models import User
 from django.db.models import F
 from asgiref.sync import sync_to_async
@@ -26,7 +26,7 @@ def check_achievement(user, stats,  win):
 		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
 		if created:
 			achievement_notif(user.id, ach)
-        if stats.pong.total_game == 100:
+	if stats.pong.total_game == 100:
 		ach, created = Achievement.objects.get_or_create(name='Pong Veteran', description='Play 100 games of Pong..', points=10)
 		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
 		if created:
@@ -35,11 +35,7 @@ def check_achievement(user, stats,  win):
 		ach, created = Achievement.objects.get_or_create(name='Tron Champion', description='Win 10 games of Tron.', points=10)
 		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
 		if created:
-			achievement_notif(user.id, ach)
-	
-
-
-	
+			achievement_notif(user.id, ach)	
 
 party_list = {}
 
