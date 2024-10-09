@@ -268,6 +268,14 @@ def get_tournament(request, tournament_id):
     
     return JsonResponse(tournament_data)
 
+def list_tournament(request):
+    tournaments = Tournament.objects.all()
+    ret = []
+    for t in tournaments:
+        d = model_to_dict(t)
+        ret.append(d)
+    return JsonResponse(ret)
+    
 @csrf_exempt # Disable CSRF protection for this view
 @require_POST
 # end a game party
