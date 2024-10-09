@@ -130,7 +130,7 @@ def create_tournament(request):
             return JsonResponse({"success": False, "message": "Missing required fields."}, status=400)
         
         tournament = Tournament.objects.create(max_player=8, name=name, gameName=game_name, start_date=start_date)
-        return JsonResponse({"success": True, "message": "Tournament created " + str(tournament.id)})
+        return JsonResponse({"success": True, "message": "Tournament created ", "tournament_id":  str(tournament.id)})
 
     except Exception as e:
         return JsonResponse({"success": False, "message": "Failed to create tournament. Error: " + str(e)}, status=500)
@@ -268,6 +268,15 @@ def get_tournament(request, tournament_id):
     
     return JsonResponse(tournament_data)
 
+def list_tournament(request):
+    tournaments = Tournament.objects.all()
+    ret = []
+    for t in tournaments:
+        d = model_to_dict(t)
+        d.pop('players')
+        ret.append(d)
+    return JsonResponse(ret, safe=False)
+    
 @csrf_exempt # Disable CSRF protection for this view
 @require_POST
 # end a game party
@@ -371,7 +380,7 @@ def join_game(request):
             games = Game.objects.filter(gameName=game_name, status='waiting').order_by('?') # Get random game
             game = None
             for g in games:
-                if g.gameProperty.gameMode == game_mode and g.gameProperty.playerNumber == int(player_number):
+                if ((game_name == 'pong' and g.gameProperty.gameMode == game_mode) or (game_name == 'tron')) and g.gameProperty.playerNumber == int(player_number):
                     game = g
                     break
             if not game:
@@ -555,7 +564,7 @@ def record_move(request):
         return JsonResponse({'error': 'Game not found'}, status=404)
     except:
         return JsonResponse({'error': 'Server error'}, status=500)
-
+# TODO : remove date tournament
 @require_GET
 @csrf_exempt # Disable CSRF protection for this view
 def get_stats(request):

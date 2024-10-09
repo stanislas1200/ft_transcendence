@@ -1,4 +1,5 @@
 from django.shortcuts import render
+import os
 
 def master(request):
     return render(request, 'home/master.html')
@@ -7,7 +8,10 @@ def register(request):
     return render(request, 'home/register.html')
 
 def login(request):
-    return render(request, 'home/login.html')
+    context = {
+        '42_link': os.environ['OAUTH_LINK'],
+    }
+    return render(request, 'home/login.html', context)
 
 def bootstrap(request):
     return render(request, 'home/bootstrap.html')

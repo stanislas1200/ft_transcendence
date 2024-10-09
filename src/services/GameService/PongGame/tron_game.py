@@ -1,4 +1,4 @@
-from .models import Game, PongPlayer, User, GameType, PlayerGameTypeStats, Match
+from .models import Game, PongPlayer, User, GameType, PlayerGameTypeStats, Match, PlayerStats, PongStats, TronStats
 from django.db.models import F
 from django.utils import timezone
 from asgiref.sync import sync_to_async
@@ -30,7 +30,7 @@ class Party:
 				self.players.append(self.get_player_info(player, token))
 				break
 
-	def get_player_info(self, player, token):
+	def get_player_info(self, player, token=None):
 		return {
 			'name': player.player.username,
 			'id': player.id,
@@ -39,7 +39,7 @@ class Party:
 			'x': player.n * 100,
 			'y': 0 if player.n // 2 else 600,
 			'trail': [],
-			'direction': "doDwn" if player.n // 2 else "uDp",
+			'direction': "down" if player.n // 2 else "up",
 			'alive': True,
 			'color': ['red', 'green', 'yellow'][player.n-1],
 			'ai': False
@@ -89,8 +89,7 @@ class Party:
 				player_stats.win_streak = 0
 
 			# stats.total_score = F('total_score') + score
-			player_stats.tron.total_score = F('total_score') + player['score']
-			player_stats.tron.total_hit = F('total_hit') + player['hit']
+			player_stats.tron.total_score = F('total_score') + score
 			# stats.save()
 			if not player_stats.tron.longest_game:
 				player_stats.tron.longest_game = game_duration
@@ -136,7 +135,7 @@ def setup_tron(game_id, player, token):
 		else:
 			party.add_player(prop.players.all(), player, token)
 
-		if party.player_number <= prop.players.count() and prop.players.filter(player__id=player.id):
+		if party.player_number <= len(party.players) and prop.players.filter(player__id=player.id):
 			game.start_date = timezone.now()
 			party.state = 'playing'
 
@@ -160,18 +159,17 @@ async def update_tron(game_id):
 		players_alive +=1
 			
 		if player['direction'] == 'up':
-			player['y'] -= 3
+			player['y'] -= 2
 		elif player['direction'] == 'down':
-			player['y'] += 3
+			player['y'] += 2
 		elif player['direction'] == 'left':
-			player['x'] -= 3
+			player['x'] -= 2
 		elif player['direction'] == 'right':
-			player['x'] += 3
+			player['x'] += 2
 	
 		player['trail'].append((player['x'], player['y']))
 
 		if player['x'] < 0 or player['x'] > grid_size or player['y'] < 0 or player['y'] > grid_size:
-			print(f"Player {player['id']} crashed!", flush=True)
 			player['alive'] = False
 
 		# Check if the player hits a trail

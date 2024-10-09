@@ -55,6 +55,9 @@ async function loadPage(page, prevent) {
         case 'index':
             loadHome();
             break;
+        case 'tron':
+            loadTron();
+            break;
         default:
             break;
     }

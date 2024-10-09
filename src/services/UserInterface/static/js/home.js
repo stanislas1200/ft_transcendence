@@ -73,11 +73,12 @@ function clickOnFriend() {
 //     xhr.send();
 // }
 
-function joinGameFromHome(gameId) {
+function joinGameFromHome(gameId, gameStyle) {
     var xhr = new XMLHttpRequest();
-    var url = "https://localhost:8001/game/join?gameId={{GameId}}&gameName=pong";
+    var url = "https://localhost:8001/game/join?gameId={{GameId}}&gameName={{gameStyle}}";
     url = url.replace("localhost", window.location.hostname);
     url = url.replace("{{GameId}}", gameId);
+    url = url.replace("{{gameStyle}}", gameStyle);
     xhr.withCredentials = true;
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -100,15 +101,24 @@ function joinGameFromHome(gameId) {
 
 function clickOnGame() {
     const click = async ({ target }) => {
-        console.log(target);
         if (target.classList[0] != 'list-element')
             target = target.parentElement;
-        if (target.classList[2] == 'watch') {
-            localStorage.setItem("gameId", target.classList[1]);
-            loadPage('pong', 1);
+        // console.log(target.childNodes[0].innerHTML);
+        if (target.childNodes[0].innerHTML == 'pong') {
+            if (target.classList[2] == 'watch') {
+                localStorage.setItem("gameId", target.classList[1]);
+                loadPage('pong', 1);
+            }
+            else
+                joinGameFromHome(target.classList[1], 'pong');
+        } else {
+            if (target.classList[2] == 'watch') {
+                localStorage.setItem("gameId", target.classList[1]);
+                loadPage('tron', 1);
+            }
+            else
+                joinGameFromHome(target.classList[1], 'tron');
         }
-        else
-            joinGameFromHome(target.classList[1]);
     }
 
     const inputs = document.querySelectorAll('#gameList');

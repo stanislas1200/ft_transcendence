@@ -66,12 +66,12 @@ function gameModeDisabler() {
 
     maxPlayersSelectCreate.addEventListener('change', function () {
         if (this.value === '1') {
-            gameModeSelectCreate.value = 'solo-ia';
+            gameModeCreateSolo.value = 'solo-ia';
             gameModeCreateFfa.disabled = true;
             gameModeCreateTeam.disabled = true;
             gameModeCreateSolo.disabled = false;
         } else if (this.value === '2') {
-            gameModeSelectCreate.value = 'ffa';
+            gameModeCreateSolo.value = 'ffa';
             gameModeCreateSolo.disabled = true;
             gameModeCreateTeam.disabled = true;
             gameModeCreateFfa.disabled = false;
@@ -105,7 +105,10 @@ function randomJoinGameButton() {
                     console.log("game id :" + gameId);
                     localStorage.setItem("gameId", gameId);
                     console.log(xhr.responseText);
-                    loadPage(gameStyle, 1)
+                    if (gameStyle === 'tron')
+                        loadPage("tron", 1);
+                    else
+                        loadPage("pong", 1);
                 }
                 else {
                     console.log('Error joining game'); // TODO put a message
@@ -148,7 +151,10 @@ function createGameButton() {
                     console.log("game id :" + gameId);
                     localStorage.setItem("gameId", gameId);
                     console.log(xhr.responseText);
-                    loadPage(gameStyle, 1);
+                    if (gameStyle === 'tron')
+                        loadPage("tron", 1);
+                    else
+                        loadPage("pong", 1);
                 }
                 else {
                     console.log('Error creating game'); // TODO put a message

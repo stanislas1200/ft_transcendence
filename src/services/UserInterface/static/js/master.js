@@ -19,7 +19,31 @@ function connectToNotifications() {
 
     wss.addEventListener('message', function (event) {
         let serverMessage = JSON.parse(event.data);
+        let content = serverMessage.data.content;
+
+        let alertHtml = `
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>${content}</strong> 
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        `;
+
+        document.getElementById('main').insertAdjacentHTML('beforeend', alertHtml);
+        let alertElement = document.querySelector('#main .alert:last-child');
+        removeAlertAfterTimeout(alertElement)
     });
+
+    function removeAlertAfterTimeout(alertElement, timeout = 5000) {
+        setTimeout(() => {
+            alertElement.classList.remove('show');
+            alertElement.classList.add('fade');
+            setTimeout(() => {
+                alertElement.remove();
+            }, 1000);
+        }, timeout);
+    }
 
 
     wss.addEventListener('close', function (event) {
@@ -55,6 +79,7 @@ function logout() {
 function setActive(element, pageName) {
     event.preventDefault();
     // Retirer la classe 'active' de tous les liens
+    event.preventDefault(); // Prevent the form from submitting the traditional way
     const links = document.querySelectorAll('ul li a');
     links.forEach(link => {
         link.classList.remove('active');

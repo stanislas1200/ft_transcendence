@@ -45,6 +45,23 @@ services:
     environment:
       POSTGRES_PASSWORD: ${PGPASSWORD}
 
+  tchat:
+    build: ./services/Tchat
+    ports:
+      - "8002:8002"
+    environment:
+      PGPASSWORD: ${PGPASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+    restart: unless-stopped
+    volumes:
+      - ./services/Tchat:/usr/src/app
+      - ssl_cert_volume:/etc/ssl/certs
+    depends_on:
+      - db
+  
   ui-service:
     build: ./services/UserInterface
     volumes:
@@ -52,6 +69,8 @@ services:
       - ssl_cert_volume:/etc/ssl/certs
     ports:
       - "8003:8003"
+    environment:
+      OAUTH_LINK: ${OAUTH_LINK}
     depends_on:
       - db
       - game-service
