@@ -26,7 +26,7 @@ async def closeWithMessage(ws, str):
 
 class NotificationConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
-		headers = dict(self.scope['headers']) # TODO : connect when login or conenct and if login send user_id ?
+		headers = dict(self.scope['headers']) # TODO : security
 		if b'cookie' in headers:
 			cookie = headers[b'cookie'].decode()
 			cookie = http.cookies.SimpleCookie(cookie)
@@ -66,7 +66,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 	connected_users = 0
 	async def connect(self):
 
-		# TODO : better to store n instead of token but lazy
+		# better to store n instead of token but lazy
 		headers = dict(self.scope['headers'])
 		if b'cookie' in headers:
 			cookie = headers[b'cookie'].decode()
@@ -141,7 +141,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		while True:
 			current_time = time.time()
 			elapsed_time = current_time - last_time
-			if elapsed_time >= (1/60): # TODO : best ?
+			if elapsed_time >= (1/60):
 				if self.game == 'pong':
 					ret, game_id = await update_pong(self.game_id) or (None, None)
 					game_state = get_pong_state(self.game_id)
@@ -178,7 +178,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 	async def update_game_state(self, event):
 		await self.send(text_data=json.dumps(event['game_state']))
 
-# TODO : + timezone.timedelta(seconds=60)
 	async def receive(self, text_data):
 		try:
 			data = json.loads(text_data)

@@ -41,7 +41,7 @@ def send_notification(request, users_id=None, message=None):
     if request:
         internal_secret = request.headers.get('X-Internal-Secret')
 
-        if internal_secret != 'my_internal_secret_token': # TODO : secret
+        if internal_secret != os.environ['INTERNAL_SECRET']:
             return JsonResponse({'error': 'Unauthorized access'}, status=403)
         
     if not message:
@@ -282,18 +282,18 @@ def list_tournament(request):
 # end a game party
 def leave_game(request):
     try:
-        session_key = request.session.session_key
-        game_id = request.GET.get('gameId')
-        token = request.COOKIES.get('token')
-        user_id = request.COOKIES.get('userId')
+        # session_key = request.session.session_key
+        # game_id = request.GET.get('gameId')
+        # token = request.COOKIES.get('token')
+        # user_id = request.COOKIES.get('userId')
 
-        player = get_player(session_key, token, user_id)
-        if player == None:
-            return JsonResponse({'error': 'Failed to get player'}, status=400)
+        # player = get_player(session_key, token, user_id)
+        # if player == None:
+        #     return JsonResponse({'error': 'Failed to get player'}, status=400)
 
-        game = Game.objects.get(id=game_id)  # Get the game
-        game.delete()  # End the game # TODO : change this ( delete for now) remove and just disconect ws
-        return JsonResponse({'message': 'Game ended', 'game_id': game.id})
+        # game = Game.objects.get(id=game_id)  # Get the game
+        # game.delete()  # End the game # TODO : change this ( delete for now) remove and just disconect ws
+        return JsonResponse({'message': 'nope'})
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
 
@@ -630,7 +630,7 @@ def get_history(request):
 
         history_list = []
         games = Game.objects.filter(players__id=user_id).order_by('start_date')
-        for game in games: # TODO : add if win and score ?
+        for game in games:
             game_dict = model_to_dict(game)
             game_dict.pop('players')
             game_dict.pop('content_type')

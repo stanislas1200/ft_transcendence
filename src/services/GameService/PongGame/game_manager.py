@@ -11,7 +11,7 @@ def send_notification(request, users_id=None, message=None):
 	if request:
 		internal_secret = request.headers.get('X-Internal-Secret')
 
-		if internal_secret != 'my_internal_secret_token': # TODO : secret
+		if internal_secret != os.environ['INTERNAL_SECRET']:
 			return JsonResponse({'error': 'Unauthorized access'}, status=403)
 		
 	if not message:
@@ -401,7 +401,7 @@ class Party:
 				# winner = players.get(id=winner.id)
 				# print(winner, flush=True)
 				m.winner = winner
-				m.save() # TODO : check if need but seem
+				m.save()
 				if (not m.next_match): #TODO : end tournament
 					return
 
@@ -438,7 +438,7 @@ def setup(game_id, player, token):
 		tournament = True
 	
 	if timezone.now() < game.start_date:
-		return None # TODO : error message
+		return None # error message
 	
 	if game:
 		prop = game.gameProperty
@@ -465,7 +465,7 @@ def setup(game_id, player, token):
 def dict_player(player):
 	return {
 		"username": player['name'],
-		"id": player['id'] # TODO : check id
+		"id": player['id']
 	}
 
 def get_pong_state(game_id):

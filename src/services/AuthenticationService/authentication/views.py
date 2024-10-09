@@ -58,7 +58,7 @@ def friend_request_accept_notif(sender, receiver):
 
 def send_notif(message, user_id):
 	headers = {
-		'X-Internal-Secret': 'my_internal_secret_token'
+		'X-Internal-Secret': os.environ['INTERNAL_SECRET']
 	}
 	response = requests.post(f'https://game-service:8001/game/send-notification/', headers=headers, json={"user_id": [user_id], "message": message}, verify=False)
 
