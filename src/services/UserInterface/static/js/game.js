@@ -86,12 +86,14 @@ function gameModeDisabler() {
 
 function randomJoinGameButton() {
     const randomGameButton = document.getElementById('random-game-button');
-    const gameModeSelect = document.getElementById('game-mode');
-    const maxPlayersSelectRandom = document.getElementById('max-players-random');
 
     randomGameButton.addEventListener('click', function () {
+        const gameModeSelect = document.getElementById('game-mode');
+        const maxPlayersSelectRandom = document.getElementById('max-players-random');
+        const gameStyle = document.getElementById('gameRandom').value;
         var xhr = new XMLHttpRequest();
-        var url = "https://" + window.location.hostname + ":8001/game/join?gameName=pong&gameMode=" + gameModeSelect.value + "&nbPlayers=" + maxPlayersSelectRandom.value;
+        var url = "https://" + window.location.hostname + ":8001/game/join?gameName={{gameStyle}}&gameMode=" + gameModeSelect.value + "&nbPlayers=" + maxPlayersSelectRandom.value;
+        url = url.replace("{{gameStyle}}", gameStyle);
         xhr.withCredentials = true;
         xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -103,7 +105,7 @@ function randomJoinGameButton() {
                     console.log("game id :" + gameId);
                     localStorage.setItem("gameId", gameId);
                     console.log(xhr.responseText);
-                    loadPage('pong', 1)
+                    loadPage(gameStyle, 1)
                 }
                 else {
                     console.log('Error joining game'); // TODO put a message
@@ -118,19 +120,23 @@ function createGameButton() {
     const createGameButton = document.getElementById('create-game-button');
 
     createGameButton.addEventListener('click', function () {
-        const partyName = document.getElementById('partyName').value;
+        // const partyName = document.getElementById('partyName').value;
         const playerNumber = document.getElementById('max-players-create').value;
         const gameMode = document.getElementById('game-mode-create').value;
         const mapChoice = document.getElementById('map-choice').value;
         const ballSpeed = document.getElementById('ball-speed').value;
         const paddleSpeed = document.getElementById('paddle-speed').value;
+        const gameStyle = document.getElementById('gameCreate').value;
 
         if (gameMode == 'local')
             return loadPage("localpong", 1)
 
         var xhr = new XMLHttpRequest();
-        let url = "https://" + window.location.hostname + ":8001" + "/game/create";
-        // console.log(url);
+        let url = "https://localhost:8001/game/join?gameName={{gameStyle}}&gameMode={{gameMode}}&nbPlayers={{nbPlayer}}";
+        url = url.replace("localhost", window.location.hostname);
+        url = url.replace("{{gameStyle}}", gameStyle);
+        url = url.replace("{{gameMode}}", gameMode);
+        url = url.replace("{{nbPlayer}}", playerNumber);
         xhr.withCredentials = true;
         xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -142,14 +148,14 @@ function createGameButton() {
                     console.log("game id :" + gameId);
                     localStorage.setItem("gameId", gameId);
                     console.log(xhr.responseText);
-                    loadPage("pong", 1);
+                    loadPage(gameStyle, 1);
                 }
                 else {
                     console.log('Error creating game'); // TODO put a message
                     console.log(xhr.responseText);
                 }
         }
-        xhr.send("partyName=" + partyName + "&game=pong&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
+        xhr.send("partyName=tmp&game=pong&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
     });
 }
 

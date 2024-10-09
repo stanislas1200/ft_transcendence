@@ -137,6 +137,8 @@ label:has(> select) span {
 #game-mode,
 #max-players-create,
 #game-mode-create,
+#gameCreate,
+#gameRandom,
 #map-choice {
     font-size: 0.9em;
     font-weight: 700;
