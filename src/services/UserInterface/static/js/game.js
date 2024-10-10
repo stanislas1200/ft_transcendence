@@ -50,6 +50,7 @@ function gameModeDisablerForCreate() {
     const gameModeCreateFfa = document.getElementById('game-mode-create-ffa');
     const gameModeCreateSolo = document.getElementById('game-mode-create-solo');
     const gameModeCreateLocal = document.getElementById('game-mode-create-local');
+    const gameModeCreateTournament = document.getElementById('game-mode-create-tournament');
     const gameStyle = document.getElementById('gameCreate');
     const gameModeSelect = document.getElementById('game-mode-create');
     const map = document.getElementById('map-choice');
@@ -83,6 +84,10 @@ function gameModeDisablerForCreate() {
             gameModeCreateSolo.disabled = true;
             gameModeCreateTeam.disabled = true;
             gameModeCreateLocal.disabled = false;
+            gameModeCreateTournament.disabled = true;
+        } else if (this.value == '8') {
+            gameModeSelect.value = 'tournament';
+            gameModeSelect.disabled = true;
         } else {
             gameModeSelect.value = 'ffa';
             gameModeSelect.disabled = false;
