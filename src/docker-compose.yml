@@ -17,6 +17,7 @@ services:
       CLIENT_UID_42: ${CLIENT_UID_42}
       CLIENT_SECRET_42: ${CLIENT_SECRET_42}
       OAUTH_REDIRECT_URI: ${OAUTH_REDIRECT_URI}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
     depends_on:
       - db
       - game-service
@@ -35,6 +36,7 @@ services:
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
     depends_on:
       - db
     restart: on-failure:3

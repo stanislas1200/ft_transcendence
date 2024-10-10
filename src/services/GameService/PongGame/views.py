@@ -32,16 +32,17 @@ def get_player(session_key, token, user_id):
     return user
 
 def update_connection(user_id, i):
-    user = User.objects.get(id=user_id)
-    user.is_online += i
-    user.save()
+    if User.objects.filter(id=user_id).exists():
+        user = User.objects.get(id=user_id)
+        user.is_online += i
+        user.save()
 
 @csrf_exempt
 def send_notification(request, users_id=None, message=None):
     if request:
         internal_secret = request.headers.get('X-Internal-Secret')
 
-        if internal_secret != 'my_internal_secret_token': # TODO : secret
+        if internal_secret != os.environ['INTERNAL_SECRET']:
             return JsonResponse({'error': 'Unauthorized access'}, status=403)
         
     if not message:
@@ -274,6 +275,7 @@ def list_tournament(request):
     for t in tournaments:
         d = model_to_dict(t)
         d.pop('players')
+        d['player_number'] = t.players.count()
         ret.append(d)
     return JsonResponse(ret, safe=False)
     
@@ -282,18 +284,18 @@ def list_tournament(request):
 # end a game party
 def leave_game(request):
     try:
-        session_key = request.session.session_key
-        game_id = request.GET.get('gameId')
-        token = request.COOKIES.get('token')
-        user_id = request.COOKIES.get('userId')
+        # session_key = request.session.session_key
+        # game_id = request.GET.get('gameId')
+        # token = request.COOKIES.get('token')
+        # user_id = request.COOKIES.get('userId')
 
-        player = get_player(session_key, token, user_id)
-        if player == None:
-            return JsonResponse({'error': 'Failed to get player'}, status=400)
+        # player = get_player(session_key, token, user_id)
+        # if player == None:
+        #     return JsonResponse({'error': 'Failed to get player'}, status=400)
 
-        game = Game.objects.get(id=game_id)  # Get the game
-        game.delete()  # End the game # TODO : change this ( delete for now) remove and just disconect ws
-        return JsonResponse({'message': 'Game ended', 'game_id': game.id})
+        # game = Game.objects.get(id=game_id)  # Get the game
+        # game.delete()  # End the game # TODO NM : change this ( delete for now) remove and just disconect ws
+        return JsonResponse({'message': 'nope'})
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
 
@@ -365,7 +367,7 @@ def join_game(request):
             return JsonResponse({'error': 'Failed to get player'}, status=400)
         
 
-        # Check if a player is already in a game # TODO : check waiting and playing and for start_game() 
+        # Check if a player is already in a game # TODO NM : check waiting and playing and for start_game() 
         # if Game.objects.filter(status='waiting', players__in=[player]).exists():
         #     return JsonResponse({'error': 'Player already in a game'}, status=400)
 
@@ -380,7 +382,7 @@ def join_game(request):
             games = Game.objects.filter(gameName=game_name, status='waiting').order_by('?') # Get random game
             game = None
             for g in games:
-                if ((game_name == 'pong' and g.gameProperty.gameMode == game_mode) or (game_name == 'tron')) and g.gameProperty.playerNumber == int(player_number):
+                if ((game_name == 'pong' and g.gameProperty.gameMode == game_mode) or (game_name == 'tron')) and g.gameProperty.playerNumber == int(player_number) and g.gameProperty.players.count() < int(player_number):
                     game = g
                     break
             if not game:
@@ -552,7 +554,7 @@ def record_move(request):
         player = get_player(session_key, token, user_id)
         if player == None:
             return JsonResponse({'error': 'Failed to get player'}, status=400)
-        # TODO : multiple game
+        # TODO NM : multiple game
         game = Game.objects.get(id=game_id)  # Get the game
         if not game.gameProperty.players.get(player=player):
             return JsonResponse({'error': 'Player not in game'}, status=400)
@@ -564,7 +566,7 @@ def record_move(request):
         return JsonResponse({'error': 'Game not found'}, status=404)
     except:
         return JsonResponse({'error': 'Server error'}, status=500)
-# TODO : remove date tournament
+
 @require_GET
 @csrf_exempt # Disable CSRF protection for this view
 def get_stats(request):
@@ -630,7 +632,7 @@ def get_history(request):
 
         history_list = []
         games = Game.objects.filter(players__id=user_id).order_by('start_date')
-        for game in games: # TODO : add if win and score ?
+        for game in games:
             game_dict = model_to_dict(game)
             game_dict.pop('players')
             game_dict.pop('content_type')
@@ -684,7 +686,7 @@ def list_achievements(request):
             return JsonResponse({'error': 'Player not found'}, status=404)
         
         user = User.objects.get(id=user_id)
-        # TODO : remove this
+        # TODO NM : remove this
         # test create and add achievement
         ach, created = Achievement.objects.get_or_create(name='list achievements', description='list all achievements', points=0)
         _, created = UserAchievement.objects.get_or_create(user=user, achievement=ach)

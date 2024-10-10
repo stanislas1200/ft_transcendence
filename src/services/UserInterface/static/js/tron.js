@@ -27,7 +27,6 @@ async function drawTron() {
 		return await drawWaitingState();
     if (game_state.players) {
         game_state.players.forEach((player, index) => {
-			console.log('draw')
             // Calculate x and y positions for each player
             const x = player['x']
             const y = player['y']

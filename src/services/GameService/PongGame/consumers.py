@@ -18,23 +18,29 @@ import time
 
 
 async def closeWithMessage(ws, str):
-	await self.accept()
+	await ws.accept()
 	await asyncio.sleep(0.5)
-	await self.send(text_data=str)
-	await self.close(code=4001)
+	await ws.send(text_data=str)
+	await ws.close(code=4001)
 
 
 class NotificationConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
-		headers = dict(self.scope['headers']) # TODO : connect when login or conenct and if login send user_id ?
+		headers = dict(self.scope['headers'])
 		if b'cookie' in headers:
 			cookie = headers[b'cookie'].decode()
 			cookie = http.cookies.SimpleCookie(cookie)
 			self.token = cookie['token'].value if 'token' in cookie else None
+			self.user_id = cookie['userId'].value if 'userId' in cookie else None
 		else:
-			self.token = None
+			self.token = self.user_id = self.group_name= None
 
-		self.user_id = self.scope['url_route']['kwargs']['UserId']
+		if not self.token or not self.user_id:
+			return await closeWithMessage(self, 'User not connected')
+
+		user = await sync_to_async(get_player)(None, self.token, self.user_id)
+
+		self.user_id = user.id
 		self.group_name = f'notifications_{self.user_id}'
 
 		await self.channel_layer.group_add(
@@ -46,11 +52,12 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 		await sync_to_async(update_connection)(self.user_id, 1)
 
 	async def disconnect(self, code):
-		await sync_to_async(update_connection)(self.user_id, -1)
-		await self.channel_layer.group_discard(
-			self.group_name,
-			self.channel_name
-		)
+		if self.group_name:
+			await sync_to_async(update_connection)(self.user_id, -1)
+			await self.channel_layer.group_discard(
+				self.group_name,
+				self.channel_name
+			)
 
 	async def receive(self, text_data):
 		return
@@ -66,7 +73,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 	connected_users = 0
 	async def connect(self):
 
-		# TODO : better to store n instead of token but lazy
+		# better to store n instead of token but lazy
 		headers = dict(self.scope['headers'])
 		if b'cookie' in headers:
 			cookie = headers[b'cookie'].decode()
@@ -82,12 +89,12 @@ class GameConsumer(AsyncWebsocketConsumer):
 		# Check game id
 		game_exist = await sync_to_async(Game.objects.filter(id=self.game_id).exists)()
 		if not game_exist:
-			closeWithMessage(self, "Game not found. Closing connection.")
+			await closeWithMessage(self, "Game not found. Closing connection.")
 			return
 
 		game = await sync_to_async(Game.objects.get)(id=self.game_id)
 		if game.status == 'finished':
-			closeWithMessage(self, "Game is finished. Closing connection.")
+			await closeWithMessage(self, "Game is finished. Closing connection.")
 			return
 
 		self.game = game.gameName
@@ -99,7 +106,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		)
 		await self.accept()
 		if player:
-			# TODO : check game time or tournament 
+			# TODO NM : check game time or tournament 
 			if game.gameName == 'pong':
 				setting = await sync_to_async(setup)(self.game_id, player, self.token)
 			elif game.gameName == 'tron':
@@ -141,7 +148,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		while True:
 			current_time = time.time()
 			elapsed_time = current_time - last_time
-			if elapsed_time >= (1/60): # TODO : best ?
+			if elapsed_time >= (1/60):
 				if self.game == 'pong':
 					ret, game_id = await update_pong(self.game_id) or (None, None)
 					game_state = get_pong_state(self.game_id)
@@ -171,14 +178,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 					}
 				)
 				await self.close()
-				break # TODO : circle game solo
+				break # TODO NM : circle game solo
 			# await asyncio.sleep(1/60)
 			await asyncio.sleep(0)
 
 	async def update_game_state(self, event):
 		await self.send(text_data=json.dumps(event['game_state']))
 
-# TODO : + timezone.timedelta(seconds=60)
 	async def receive(self, text_data):
 		try:
 			data = json.loads(text_data)
