@@ -5,7 +5,8 @@ function showTournamentInfo() {
 }
 
 function getAllInfoTournament() {
-    let tournament_id = getCookie("tournament_id");
+    console.log(localStorage);
+    let tournament_id = localStorage.tournament_id;
     if (tournament_id == "" || tournament_id == null || tournament_id == undefined) {
         alert("No tournament selected");
         return;

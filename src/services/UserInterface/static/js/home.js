@@ -36,12 +36,12 @@ function goToButton() {
                 if (xhr.status === 200) {
                     var gameId = JSON.parse(xhr.responseText).game_id;
                     localStorage.setItem("gameId", gameId);
-                    console.log(xhr.responseText);
+                    // console.log(xhr.responseText);
                     loadPage("pong", 1);
                 }
                 else {
                     console.log('Error creating game'); // TODO put a message
-                    console.log(xhr.responseText);
+                    // console.log(xhr.responseText);
                 }
         }
         xhr.send("partyName=tmp&game=pong&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
@@ -78,7 +78,7 @@ function clickOnFriend() {
 }
 
 function displayTournament(response) {
-    console.log(response);
+    // console.log(response);
     let tournamentList = document.getElementById('tournament-list');
 
     if (!tournamentList)
@@ -99,11 +99,10 @@ function displayTournament(response) {
             newDiv.append(newSpan);
             let newButton = document.createElement('div');
             newButton.classList.add('list-join-button');
-            console.log(response[i]);
-            if (response[i].status == 'waiting')
-                newButton.innerHTML = 'Join ➞';
-            else
+            if (response[i].player_number == '8')
                 newButton.innerHTML = 'Watch ➞';
+            else
+                newButton.innerHTML = response[i].player_number + '/8 Join ➞ ';
             newDiv.classList.add(response[i].id);
             newDiv.append(newButton);
             tournamentList.append(newDiv);

@@ -18,12 +18,12 @@ function loadArchievements() { // /game/list_achievements?UserId={{UserId}}
         if (xhr.readyState === 4)
             if (xhr.status === 200) {
                 var archievements = JSON.parse(xhr.responseText);
-                console.log(xhr.responseText);
+                // console.log(xhr.responseText);
                 listAchievements(archievements);
             }
             else {
                 console.log('Error loading archievements');
-                console.log(xhr.responseText);
+                // console.log(xhr.responseText);
             }
     };
     xhr.send();

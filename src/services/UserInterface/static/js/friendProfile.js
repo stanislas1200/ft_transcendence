@@ -39,9 +39,11 @@ function searchUser(usernameSearching) {
 }
 
 function loadHistoryFromUser(id) {
+    let response;
     let url = "https://localhost:8001/game/hist?UserId={{UserId}}";
     url = url.replace("localhost", window.location.hostname);
     url = url.replace("{{UserId}}", id);
+    console.log(url);
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -50,6 +52,7 @@ function loadHistoryFromUser(id) {
         if (xhr.readyState === 4) {
             if (xhr.status === 200 || xhr.status === 201) {
                 response = JSON.parse(xhr.responseText);
+                console.log(response);
                 displayHistorique(id, response);
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
@@ -228,15 +231,13 @@ function graphique(stats) {
     const text = document.getElementById('text');
     const totalScore = document.getElementById('totalScore');
 
-    if (!percent || !text || !totalScore)
+    if (!percent || !text || !totalScore || !stats)
         return;
 
-    // console.log(stats.pong);
     let nbrGame = stats.pong.total_game;
     let nbrWin = stats.pong.game_won;
     let nbrLoose = stats.pong.game_lost;
     const winPercent = (nbrWin / nbrGame) * 100;
-    // console.log(nbrGame);
     let tmp = winPercent + ", 100";
     if (nbrWin > 10 || nbrLoose > 10) {
         text.classList.add("smaller");
@@ -246,5 +247,4 @@ function graphique(stats) {
     text.innerHTML = nbrWin + "w/" + nbrLoose + "l";
     percent.setAttribute('stroke-dasharray', tmp);
     totalScore.innerHTML += stats.pong.total_score;
-    // console.log(percent);
 }
