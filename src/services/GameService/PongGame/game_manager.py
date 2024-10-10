@@ -1,41 +1,99 @@
 from .models import Game, PongPlayer, GameType, PlayerGameTypeStats, Match, PlayerStats, PongStats, TronStats, UserAchievement, Achievement
 from django.contrib.auth.models import User
 from django.db.models import F
-from asgiref.sync import sync_to_async
+from asgiref.sync import sync_to_async, async_to_sync
 import asyncio
 from django.utils import timezone
+from django.forms.models import model_to_dict
+from channels.layers import get_channel_layer
 
-def check_achievement(user, stats,  win):
-	if win_streak == 5:
+def send_notification(request, users_id=None, message=None):
+	if request:
+		internal_secret = request.headers.get('X-Internal-Secret')
+
+		if internal_secret != os.environ['INTERNAL_SECRET']:
+			return JsonResponse({'error': 'Unauthorized access'}, status=403)
+		
+	if not message:
+		data = request.body.decode()
+		data = json.loads(data)
+		message = data.get('message')
+		users_id = data.get('user_id')
+
+	if message and users_id:
+		channel_layer = get_channel_layer()
+		for uid in users_id:
+			group_name = f'notifications_{uid}'
+			async_to_sync(channel_layer.group_send)(
+				group_name,
+				{
+					'type': 'send_notification',
+					'message': message
+				}
+			)
+	return JsonResponse({'status': 'Message sent'})
+
+
+def achievement_notif(user_id, achievement):
+	message = {
+			"type": "achievement",
+			"data": {
+				"title": "Achievement Unlocked",
+				"content": f"You unlocked the '{achievement.name}' achievement!",
+				"timestamp": timezone.now().isoformat(),
+				"user_id": user_id,
+				"metadata": {
+					"achievement_id": achievement.id,
+					"achievement_name": achievement.name
+				}
+			}
+		}
+	send_notification(None, [user_id], message)
+
+def check_achievements(user, stats,  win):
+	stats.refresh_from_db()
+	pong = stats.pong
+	tron = stats.tron
+	stats = model_to_dict(stats)
+	stats['pong'] = model_to_dict(pong)
+	stats['tron'] = model_to_dict(tron)
+	
+	if stats['win_streak'] >= 5:
 		ach, created = Achievement.objects.get_or_create(name='Unstoppable Streak', description='Win 5 consecutive matches.', points=10)
-		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
+		_, created = UserAchievement.objects.get_or_create(user=user, achievement=ach)
 		if created:
 			achievement_notif(user.id, ach)
-	if stats.stats.total_game == 50:
+
+	if stats['total_game'] >= 50:
 		ach, created = Achievement.objects.get_or_create(name='Gladiator', description='Play 50 matches across all games.', points=10)
-		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
+		_, created = UserAchievement.objects.get_or_create(user=user, achievement=ach)
 		if created:
 			achievement_notif(user.id, ach)
-	if stats.total_win == 1:
+
+	if stats['total_win'] >= 1:
 		ach, created = Achievement.objects.get_or_create(name='first win', description='Win your first game.', points=10)
-		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
+		_, created = UserAchievement.objects.get_or_create(user=user, achievement=ach)
 		if created:
 			achievement_notif(user.id, ach)
-	if stats.pong.game_won == 10:
+
+	if stats['pong']['game_won'] >= 10:
 		ach, created = Achievement.objects.get_or_create(name='Pong Master', description='Win 10 games of Pong.', points=10)
-		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
+		_, created = UserAchievement.objects.get_or_create(user=user, achievement=ach)
 		if created:
 			achievement_notif(user.id, ach)
-	if stats.pong.total_game == 100:
+
+	if stats['pong']['total_game'] >= 100:
 		ach, created = Achievement.objects.get_or_create(name='Pong Veteran', description='Play 100 games of Pong..', points=10)
-		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
+		_, created = UserAchievement.objects.get_or_create(user=user, achievement=ach)
 		if created:
 			achievement_notif(user.id, ach)
-	if stats.tron.game_won == 10:
+
+	if stats['tron']['game_won'] >= 10:
 		ach, created = Achievement.objects.get_or_create(name='Tron Champion', description='Win 10 games of Tron.', points=10)
-		_, created = UserAchievement.objects.get_or_create(user=player, achievement=ach)
+		_, created = UserAchievement.objects.get_or_create(user=user, achievement=ach)
 		if created:
 			achievement_notif(user.id, ach)	
+
 
 party_list = {}
 
@@ -283,7 +341,6 @@ class Party:
 
 				# save player stats
 				p = User.objects.get(username=player['name'])
-				check_achievements(p, player_stats, None)
 				# game_type = GameType.objects.get(name="pong")
 
 				# stats, created = PlayerGameTypeStats.objects.get_or_create(player=p, game_type=game_type)
@@ -328,6 +385,7 @@ class Party:
 					player_stats.pong.longest_game = game_duration
 				player_stats.pong.save()
 				player_stats.save()
+				check_achievements(p, player_stats, None)
 
 				# save history
 				game.status = 'finished'
@@ -343,8 +401,10 @@ class Party:
 				# winner = players.get(id=winner.id)
 				# print(winner, flush=True)
 				m.winner = winner
-				m.save() # TODO : check if need but seem
-				if (not m.next_match): #TODO : end tournament
+				m.save()
+				if (not m.next_match): #TODO NM : end tournament
+					m.tournament.end_date = timezone.now()
+					m.tournament.save()
 					return
 
 				player = PongPlayer.objects.create(player=winner, score=0, n=m.next_match.game.players.count()+1)
@@ -380,7 +440,7 @@ def setup(game_id, player, token):
 		tournament = True
 	
 	if timezone.now() < game.start_date:
-		return None # TODO : error message
+		return None # error message
 	
 	if game:
 		prop = game.gameProperty
@@ -407,7 +467,7 @@ def setup(game_id, player, token):
 def dict_player(player):
 	return {
 		"username": player['name'],
-		"id": player['id'] # TODO : check id
+		"id": player['id']
 	}
 
 def get_pong_state(game_id):

@@ -41,8 +41,7 @@ function listAchievements(achievements) { // this is a exemple of json {"unlocke
     }
     for (var i = 0; i < achievements.locked.length; i++) {
         var newAchive = document.createElement('div');
-        newAchive.className = 'achievement';
-        newAchive.className = 'disabled';
+        newAchive.className = 'achievement disabled';
         newAchive.innerHTML = '<div class="icon-box"><i class="fa fa-trophy fa-2x achievement-trophy"></i></div><div class="achievement-info"><div class="achievement-name"><span>' + achievements.locked[i].name + '</span></div><div class="achievement-desc"><span>' + achievements.locked[i].description + '</span></div></div>';
         achiveList.appendChild(newAchive);
     }

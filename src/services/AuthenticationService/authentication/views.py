@@ -58,7 +58,7 @@ def friend_request_accept_notif(sender, receiver):
 
 def send_notif(message, user_id):
 	headers = {
-		'X-Internal-Secret': 'my_internal_secret_token'
+		'X-Internal-Secret': os.environ['INTERNAL_SECRET']
 	}
 	response = requests.post(f'https://game-service:8001/game/send-notification/', headers=headers, json={"user_id": [user_id], "message": message}, verify=False)
 
@@ -617,6 +617,10 @@ def register(request):
 		password = request.POST.get('password')
 		cpassword = request.POST.get('c_password')
 		email = request.POST.get('email')
+		agree = request.POST.get('agree')
+
+		if not agree:
+			return JsonResponse({'error': 'You need to agree to the Privacy Policy and Terms of Service. '}, status=400)
 
 		if not User.objects.filter(username='AI').exists(): # get_or_create Temp so ai have a profile image 
 			ai = User.objects.create_user(username='AI')
@@ -694,9 +698,6 @@ def verify_token(request, token=None, user_id=None):
 	if not user_id:
 		user_id = request.COOKIES.get('userId')
 	try:
-		print(user_id)
-		print(user_id)
-		print(user_id, flush=True)
 		user_token = UserToken.objects.get(user_id=user_id)
 		if check_password(token, user_token.token):
 			return 200

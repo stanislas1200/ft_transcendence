@@ -16,8 +16,9 @@ function keyUp(event) {
 }
 
 function closeWebSocket() {
-	socket.close();
 	window.removeEventListener('popstate', closeWebSocket);
+	cancelAnimationFrame(animFrame);
+	socket.close();
 	socket = null;
 	isGameLoopRunning = false
 }
@@ -63,10 +64,10 @@ function connect(game) {
 	});
 
 	// socket.addEventListener('close', function (event) {
-	// 	window.removeEventListener('popstate', closeWebSocket);
-	// 	drawEnd();
-	// 	socket = null;
-	// 	isGameLoopRunning = false
+	// 	// window.removeEventListener('popstate', closeWebSocket);
+	// 	cancelAnimationFrame(animFrame);
+	// 	// socket = null;
+	// 	// isGameLoopRunning = false
 	// 	console.log('WebSocket is closed now.');
 	// });
 

@@ -12,7 +12,7 @@ class Party:
 		players = prop.players.all()
 		self.players = []
 		self.add_player(players, user, token)
-		self.state = 'waiting' # TODO : check
+		self.state = 'waiting'
 		self.players = sorted(self.players, key=lambda x: x['n'])
 		self.date = prop.start_date
 
@@ -107,10 +107,10 @@ class Party:
 				winner = players.get(id=winner['id'])
 				m.winner = winner.player
 				m.save()
-				if (not m.next_match): #TODO : end tournament
+				if (not m.next_match): #end tournament
 					return
 
-				player = PongPlayer.objects.create(player=winner.player, score=0, n=1, token=winner.token) # TODO : n
+				player = PongPlayer.objects.create(player=winner.player, score=0, n=1, token=winner.token) # take n from manager
 				m.next_match.game.players.add(player.player)
 				m.next_match.game.gameProperty.players.add(player)
 
@@ -122,14 +122,14 @@ def setup_tron(game_id, player, token):
 
 	game = Game.objects.filter(id=game_id).first()
 	if timezone.now() < game.start_date:
-		return None # TODO : error message
+		return None # error message
 	
 	if game:
 		prop = game.gameProperty
 		if not party:
 			prop.start_date = game.start_date
 			party = Party(prop, game_id, player, token)
-			# if party.player_number == 1: # TODO : ai
+			# if party.player_number == 1: # ai
 			# 	party.add_ai_player()
 			party_list[game_id] = party
 		else:

@@ -16,6 +16,12 @@ def login(request):
     }
     return render(request, 'home/login.html', context)
 
+def privacy_policy(request):
+    return render(request, 'home/privacy-policy.html')
+
+def terms_of_service(request):
+    return render(request, 'home/terms-of-service.html')
+
 def bootstrap(request):
     return render(request, 'home/bootstrap.html')
 
