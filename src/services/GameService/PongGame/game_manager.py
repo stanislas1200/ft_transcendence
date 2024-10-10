@@ -683,8 +683,8 @@ async def update_pong(game_id):
 
 	# check out collision x
 	if game.ball['x'] <= game.paddlePadding/4 + game.ballR:
-		if game.gameMode == 'ffa':
-			if game.last_hit == 0 and game.player_number >= 4:
+		if game.gameMode == 'ffa' and game.player_number >= 4:
+			if game.last_hit == 0:
 				game.players[game.last_hit]["score"] -= 1
 			else:
 				game.players[game.last_hit]["score"] += 1
@@ -696,8 +696,8 @@ async def update_pong(game_id):
 		reset_ball(game)
 	
 	if game.ball['x'] >= game.width - game.paddlePadding/4 - game.ballR:
-		if game.gameMode == 'ffa':
-			if game.last_hit == 1 and game.player_number >= 4:
+		if game.gameMode == 'ffa' and game.player_number >= 4:
+			if game.last_hit == 1:
 				game.players[game.last_hit]["score"] -= 1
 			else:
 				game.players[game.last_hit]["score"] += 1
