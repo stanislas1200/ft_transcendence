@@ -27,18 +27,20 @@ async def closeWithMessage(ws, str):
 class NotificationConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		headers = dict(self.scope['headers'])
+		self.token = self.user_id = self.group_name= None
 		if b'cookie' in headers:
 			cookie = headers[b'cookie'].decode()
 			cookie = http.cookies.SimpleCookie(cookie)
 			self.token = cookie['token'].value if 'token' in cookie else None
 			self.user_id = cookie['userId'].value if 'userId' in cookie else None
-		else:
-			self.token = self.user_id = self.group_name= None
 
 		if not self.token or not self.user_id:
 			return await closeWithMessage(self, 'User not connected')
 
 		user = await sync_to_async(get_player)(None, self.token, self.user_id)
+
+		if not user:
+			return await closeWithMessage(self, 'User not connected')
 
 		self.user_id = user.id
 		self.group_name = f'notifications_{self.user_id}'
@@ -48,7 +50,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 			self.channel_name
 		)
 		await self.accept()
-
 		await sync_to_async(update_connection)(self.user_id, 1)
 
 	async def disconnect(self, code):
@@ -104,6 +105,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.game_group_name,
 			self.channel_name
 		)
+		self.is_connected = True
 		await self.accept()
 		if player:
 			# TODO NM : check game time or tournament 
@@ -132,6 +134,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 	async def disconnect(self, close_code):
 		try:
+			self.is_connected = False
 			if close_code == 4001:
 				print("Game not found, connection refused", flush=True)
 			else:
@@ -177,7 +180,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 						'game_state': game_state
 					}
 				)
-				await self.close()
+				if self.is_connected:
+					await self.close()
 				break # TODO NM : circle game solo
 			# await asyncio.sleep(1/60)
 			await asyncio.sleep(0)
@@ -209,7 +213,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 				move_gam(self.game_id, n, data['k'], direction, data['angle'])
 
 		except Exception as e:
-			print(e)
 			await self.send(text_data=json.dumps({
 				'error': 'Invalid message'
 			}))

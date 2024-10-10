@@ -259,7 +259,6 @@ def list_blocked_user(request):
 	except ObjectDoesNotExist:
 		return JsonResponse({'error': 'Object not found'}, status=404)
 	except Exception as e:
-		print(e, flush=True)
 		return JsonResponse({'error': 'Server error'}, status=500)
 
 @csrf_exempt # Disable CSRF protection for this view
@@ -666,7 +665,6 @@ def login_view(request):
 		else:
 			return JsonResponse({'error': 'Invalid login credentials'}, status=400)
 	except Exception as e:
-		print(e, flush=True)
 		return JsonResponse({'error': 'Failed to login'}, status=500)
 	
 @csrf_exempt # Disable CSRF protection for this view

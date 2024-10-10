@@ -393,13 +393,8 @@ class Party:
 			# if tournament add winner to next match
 			if Match.objects.filter(game=game).exists():
 				m = Match.objects.get(game=game)
-				# winner = self.players[0] if self.players[0]['score'] >= self.score else self.players[1]
-				# winner = self.players[0]
 				players = m.tournament.players.all()
 				
-				# print(winner['id'], flush=True)
-				# winner = players.get(id=winner.id)
-				# print(winner, flush=True)
 				m.winner = winner
 				m.save()
 				if (not m.next_match): #TODO NM : end tournament
@@ -411,11 +406,10 @@ class Party:
 				m.next_match.game.players.add(player.player)
 				m.next_match.game.gameProperty.players.add(player)
 			else:
-				print("not a match", flush=True)
+				pass
 				# delete game
 				# game.delete()
 		except Exception as e:
-			print(e, flush=True)
 			game.delete()
 
 party_list = {}
@@ -503,7 +497,6 @@ def get_pong_state(game_id):
 def get_n(id, token):
 	game = party_list.get(id)
 	if game is None:
-		# print(f"Game ID {id} not found in party list.")
 		return
 	for player in game.players:
 		if player['token'] == token:
@@ -662,11 +655,9 @@ def ffa_update(game):
 
 async def update_pong(game_id):
 	if game_id not in party_list:
-		# print(f"Game ID {game_id} not found in party list.")
 		return
 	game = party_list[game_id]
 	if game.state != 'playing':
-		# print(f"Game ID {game_id} not playing.", flush=True)
 		return
 
 	if game.timer and game.timer_start + game.timer > time.time():
@@ -683,8 +674,8 @@ async def update_pong(game_id):
 
 	# check out collision x
 	if game.ball['x'] <= game.paddlePadding/4 + game.ballR:
-		if game.gameMode == 'ffa':
-			if game.last_hit == 0 and game.player_number >= 4:
+		if game.gameMode == 'ffa' and game.player_number >= 4:
+			if game.last_hit == 0:
 				game.players[game.last_hit]["score"] -= 1
 			else:
 				game.players[game.last_hit]["score"] += 1
@@ -696,8 +687,8 @@ async def update_pong(game_id):
 		reset_ball(game)
 	
 	if game.ball['x'] >= game.width - game.paddlePadding/4 - game.ballR:
-		if game.gameMode == 'ffa':
-			if game.last_hit == 1 and game.player_number >= 4:
+		if game.gameMode == 'ffa' and game.player_number >= 4:
+			if game.last_hit == 1:
 				game.players[game.last_hit]["score"] -= 1
 			else:
 				game.players[game.last_hit]["score"] += 1

@@ -50,6 +50,7 @@ function gameModeDisablerForCreate() {
     const gameModeCreateFfa = document.getElementById('game-mode-create-ffa');
     const gameModeCreateSolo = document.getElementById('game-mode-create-solo');
     const gameModeCreateLocal = document.getElementById('game-mode-create-local');
+    const gameModeCreateTournament = document.getElementById('game-mode-create-tournament');
     const gameStyle = document.getElementById('gameCreate');
     const gameModeSelect = document.getElementById('game-mode-create');
     const map = document.getElementById('map-choice');
@@ -83,6 +84,10 @@ function gameModeDisablerForCreate() {
             gameModeCreateSolo.disabled = true;
             gameModeCreateTeam.disabled = true;
             gameModeCreateLocal.disabled = false;
+            gameModeCreateTournament.disabled = true;
+        } else if (this.value == '8') {
+            gameModeSelect.value = 'tournament';
+            gameModeSelect.disabled = true;
         } else {
             gameModeSelect.value = 'ffa';
             gameModeSelect.disabled = false;
@@ -175,32 +180,56 @@ function createGameButton() {
 
         if (gameMode == 'local')
             return loadPage("localpong", 1)
-
-        var xhr = new XMLHttpRequest();
-        let url = "https://localhost:8001/game/create";
-        url = url.replace("localhost", window.location.hostname);
-        xhr.withCredentials = true;
-        xhr.open("POST", url, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4)
-                if (xhr.status === 200) {
-                    console.log('Game created');
-                    var gameId = JSON.parse(xhr.responseText).game_id;
-                    console.log("game id :" + gameId);
-                    localStorage.setItem("gameId", gameId);
-                    console.log(xhr.responseText);
-                    if (gameStyle === 'tron')
-                        loadPage("tron", 1);
-                    else
-                        loadPage("pong", 1);
-                }
-                else {
-                    console.log('Error creating game'); // TODO put a message
-                    console.log(xhr.responseText);
-                }
+        else if (gameMode == 'tournament') {
+            var xhr = new XMLHttpRequest();
+            let url = "https://localhost:8001/game/create_tournament";
+            url = url.replace("localhost", window.location.hostname);
+            xhr.withCredentials = true;
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4)
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        localStorage.setItem('tournament-id', response.tournament_id);
+                        console.log(response);
+                        loadPage('tournament', 1);
+                        // localStorage.setItem("gameId", gameId);
+                        // loadPage("pong", 1);
+                    }
+                    else {
+                        console.log('Error creating game'); // TODO put a message
+                        console.log(xhr.responseText);
+                    }
+            }
+            xhr.send("name=tounament&game=pong&start_date=2023-04-01T12:00:00Z");
+        } else {
+            var xhr = new XMLHttpRequest();
+            let url = "https://localhost:8001/game/create";
+            url = url.replace("localhost", window.location.hostname);
+            xhr.withCredentials = true;
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4)
+                    if (xhr.status === 200) {
+                        console.log('Game created');
+                        var gameId = JSON.parse(xhr.responseText).game_id;
+                        console.log("game id :" + gameId);
+                        localStorage.setItem("gameId", gameId);
+                        console.log(xhr.responseText);
+                        if (gameStyle === 'tron')
+                            loadPage("tron", 1);
+                        else
+                            loadPage("pong", 1);
+                    }
+                    else {
+                        console.log('Error creating game'); // TODO put a message
+                        console.log(xhr.responseText);
+                    }
+            }
+            xhr.send("partyName=tmp&game=" + gameStyle + "&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
         }
-        xhr.send("partyName=tmp&game=" + gameStyle + "&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
     });
 }
 

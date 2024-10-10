@@ -28,9 +28,6 @@ function goToButton() {
         var xhr = new XMLHttpRequest();
         let url = "https://localhost:8001/game/join?gameName={{gameStyle}}&gameMode={{gameMode}}&nbPlayers={{nbPlayer}}";
         url = url.replace("localhost", window.location.hostname);
-        url = url.replace("{{gameStyle}}", gameStyle);
-        url = url.replace("{{gameMode}}", gameMode);
-        url = url.replace("{{nbPlayer}}", playerNumber);
         xhr.withCredentials = true;
         xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -102,13 +99,14 @@ function displayTournament(response) {
             newDiv.append(newSpan);
             let newButton = document.createElement('div');
             newButton.classList.add('list-join-button');
+            console.log(response[i]);
             if (response[i].status == 'waiting')
                 newButton.innerHTML = 'Join ➞';
             else
                 newButton.innerHTML = 'Watch ➞';
             newDiv.classList.add(response[i].id);
             newDiv.append(newButton);
-            gameList.append(newDiv);
+            tournamentList.append(newDiv);
         }
     }
 }
