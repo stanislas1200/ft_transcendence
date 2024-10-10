@@ -8,7 +8,7 @@ def register(request):
     context = {
         '42_link': os.environ['OAUTH_LINK'],
     }
-    return render(request, 'home/register.html')
+    return render(request, 'home/register.html', context)
 
 def login(request):
     context = {
