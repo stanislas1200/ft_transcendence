@@ -191,7 +191,9 @@ function createGameButton() {
                 if (xhr.readyState === 4)
                     if (xhr.status === 200) {
                         var response = JSON.parse(xhr.responseText);
+                        localStorage.setItem('tournament-id', response.tournament_id);
                         console.log(response);
+                        loadPage('tournament', 1);
                         // localStorage.setItem("gameId", gameId);
                         // loadPage("pong", 1);
                     }
