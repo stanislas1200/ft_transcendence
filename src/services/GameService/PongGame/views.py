@@ -19,7 +19,10 @@ import os
 # service comunication
 def verify_token(session_key, token, user_id):
     try:
-        response = requests.get('https://auth-service:8000/verify_token/', cookies={'session_key': session_key, 'token': token, 'userId': user_id}, verify=False)
+        headers = {
+            'X-Internal-Secret': os.environ['INTERNAL_SECRET']
+        }
+        response = requests.get('https://auth-service:8000/verify_token/', headers=headers, cookies={'session_key': session_key, 'token': token, 'userId': user_id}, verify=False)
         if response.status_code == 200:
             return True
         return False
