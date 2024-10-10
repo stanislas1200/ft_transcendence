@@ -203,11 +203,8 @@ function createGameButton() {
             xhr.send("name=tounament&game=pong&start_date=2023-04-01T12:00:00Z");
         } else {
             var xhr = new XMLHttpRequest();
-            let url = "https://localhost:8001/game/join?gameName={{gameStyle}}&gameMode={{gameMode}}&nbPlayers={{nbPlayer}}";
+            let url = "https://localhost:8001/game/create";
             url = url.replace("localhost", window.location.hostname);
-            url = url.replace("{{gameStyle}}", gameStyle);
-            url = url.replace("{{gameMode}}", gameMode);
-            url = url.replace("{{nbPlayer}}", playerNumber);
             xhr.withCredentials = true;
             xhr.open("POST", url, true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");

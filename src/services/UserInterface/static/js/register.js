@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			};
 			xhr.send('username=' + encodeURIComponent(usernameInput) + '&first_name=' + encodeURIComponent(firstNameInput)
 				+ '&last_name=' + encodeURIComponent(lastNameInput) + '&email=' + encodeURIComponent(emailInput) + '&password=' + encodeURIComponent(passwordInput)
-				+ '&c_password=' + encodeURIComponent(confirmPasswordInput));
+				+ '&c_password=' + encodeURIComponent(confirmPasswordInput) + '&agree=' + consent.checked);
 		}
 	});
 
