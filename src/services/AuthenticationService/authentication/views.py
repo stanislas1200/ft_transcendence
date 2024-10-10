@@ -617,6 +617,10 @@ def register(request):
 		password = request.POST.get('password')
 		cpassword = request.POST.get('c_password')
 		email = request.POST.get('email')
+		agree = request.POST.get('agree')
+
+		if not agree:
+			return JsonResponse({'error': 'You need to agree to the Privacy Policy and Terms of Service. '}, status=400)
 
 		if not User.objects.filter(username='AI').exists(): # get_or_create Temp so ai have a profile image 
 			ai = User.objects.create_user(username='AI')

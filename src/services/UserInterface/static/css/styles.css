@@ -38,7 +38,7 @@ main {
 .privacy-policy {
   line-height: 1.6;
   padding:  20px;
-  color:white;
+  color: var(--text);
   font-size: 1em;
   
   h1, h2 {

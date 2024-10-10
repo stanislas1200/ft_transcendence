@@ -32,9 +32,10 @@ def get_player(session_key, token, user_id):
     return user
 
 def update_connection(user_id, i):
-    user = User.objects.get(id=user_id)
-    user.is_online += i
-    user.save()
+    if User.objects.filter(id=user_id).exists():
+        user = User.objects.get(id=user_id)
+        user.is_online += i
+        user.save()
 
 @csrf_exempt
 def send_notification(request, users_id=None, message=None):
