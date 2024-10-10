@@ -92,11 +92,13 @@ class TChatConsumer(AsyncWebsocketConsumer):
         small_msg =  json.loads(text_data)['message']
         if not (small_msg):
             return
-        message = f'{self.user}: {small_msg}'
         await self.channel_layer.group_send(
             self.chat_group_name,
             {
                 'type': 'update_message_state',
-                'message': {'message': message}
+                'message': {
+                    'sender': self.user.username,
+                    'message': small_msg
+                }
             }
         )
