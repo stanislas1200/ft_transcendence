@@ -402,7 +402,9 @@ class Party:
 				# print(winner, flush=True)
 				m.winner = winner
 				m.save()
-				if (not m.next_match): #TODO : end tournament
+				if (not m.next_match): #TODO NM : end tournament
+					m.tournament.end_date = timezone.now()
+					m.tournament.save()
 					return
 
 				player = PongPlayer.objects.create(player=winner, score=0, n=m.next_match.game.players.count()+1)

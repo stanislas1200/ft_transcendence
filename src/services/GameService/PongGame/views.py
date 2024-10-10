@@ -275,6 +275,7 @@ def list_tournament(request):
     for t in tournaments:
         d = model_to_dict(t)
         d.pop('players')
+        d['player_number'] = t.players.count()
         ret.append(d)
     return JsonResponse(ret, safe=False)
     
@@ -293,7 +294,7 @@ def leave_game(request):
         #     return JsonResponse({'error': 'Failed to get player'}, status=400)
 
         # game = Game.objects.get(id=game_id)  # Get the game
-        # game.delete()  # End the game # TODO : change this ( delete for now) remove and just disconect ws
+        # game.delete()  # End the game # TODO NM : change this ( delete for now) remove and just disconect ws
         return JsonResponse({'message': 'nope'})
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
@@ -366,7 +367,7 @@ def join_game(request):
             return JsonResponse({'error': 'Failed to get player'}, status=400)
         
 
-        # Check if a player is already in a game # TODO : check waiting and playing and for start_game() 
+        # Check if a player is already in a game # TODO NM : check waiting and playing and for start_game() 
         # if Game.objects.filter(status='waiting', players__in=[player]).exists():
         #     return JsonResponse({'error': 'Player already in a game'}, status=400)
 
@@ -553,7 +554,7 @@ def record_move(request):
         player = get_player(session_key, token, user_id)
         if player == None:
             return JsonResponse({'error': 'Failed to get player'}, status=400)
-        # TODO : multiple game
+        # TODO NM : multiple game
         game = Game.objects.get(id=game_id)  # Get the game
         if not game.gameProperty.players.get(player=player):
             return JsonResponse({'error': 'Player not in game'}, status=400)
@@ -565,7 +566,7 @@ def record_move(request):
         return JsonResponse({'error': 'Game not found'}, status=404)
     except:
         return JsonResponse({'error': 'Server error'}, status=500)
-# TODO : remove date tournament
+
 @require_GET
 @csrf_exempt # Disable CSRF protection for this view
 def get_stats(request):
@@ -685,7 +686,7 @@ def list_achievements(request):
             return JsonResponse({'error': 'Player not found'}, status=404)
         
         user = User.objects.get(id=user_id)
-        # TODO : remove this
+        # TODO NM : remove this
         # test create and add achievement
         ach, created = Achievement.objects.get_or_create(name='list achievements', description='list all achievements', points=0)
         _, created = UserAchievement.objects.get_or_create(user=user, achievement=ach)

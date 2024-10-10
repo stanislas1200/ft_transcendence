@@ -37,8 +37,8 @@ class PlayerStats(models.Model):
     tournament_win = models.IntegerField(default=0)
     tournament_played = models.IntegerField(default=0)
     
-# TODO : Win ration, average score, Time of Day, average play time
-# TODO : Game stats: Play Time, score, ball hit, Time of day, ball bounce,
+# TODO NM : Win ration, average score, Time of Day, average play time
+# TODO NM : Game stats: Play Time, score, ball hit, Time of day, ball bounce,
 class PlayerGameTypeStats(models.Model):
     player = models.ForeignKey(User, on_delete=models.CASCADE)
     game_type = models.ForeignKey(GameType, on_delete=models.CASCADE)
@@ -78,7 +78,7 @@ class GAM(models.Model):
 
 class Game(models.Model):
     players = models.ManyToManyField(User)
-    status = models.CharField(max_length=20, default='waiting')  # pending, ongoing, finished
+    status = models.CharField(max_length=20, default='waiting')
     gameName = models.CharField(max_length=255)
     party_name = models.CharField(max_length=50, default='game')
     start_date = models.DateTimeField(auto_now_add=True)
@@ -89,19 +89,11 @@ class Game(models.Model):
     gameProperty = GenericForeignKey('content_type', 'object_id')
     winners = models.ManyToManyField(User, related_name='games_as_winner', blank=True)
 
-    # def __str__(self):
-    #     return self.gameName
-
-# class GameHistory(models.Model):
-#     player = models.ForeignKey(User, on_delete=models.CASCADE)
-#     game = models.ForeignKey(Game, on_delete=models.CASCADE)
-#     score = models.IntegerField()
-#     date = models.DateTimeField(auto_now_add=True)
 
 class Tournament(models.Model):
     name = models.CharField(max_length=100)
     gameName = models.CharField(max_length=255)
-    start_date = models.DateTimeField()
+    start_date = models.DateTimeField(auto_now_add=True) # for now auto
     end_date = models.DateTimeField(null=True, blank=True)
     players = models.ManyToManyField(PongPlayer)
     max_player = models.PositiveIntegerField(default=10)

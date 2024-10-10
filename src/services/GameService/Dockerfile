@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 COPY . .
 COPY check_and_generate_ssl.sh /usr/local/bin/check_and_generate_ssl.sh
- # TODO : ssl not here but zz
+ # TODO NM : ssl not here but zz
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 

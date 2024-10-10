@@ -106,7 +106,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		)
 		await self.accept()
 		if player:
-			# TODO : check game time or tournament 
+			# TODO NM : check game time or tournament 
 			if game.gameName == 'pong':
 				setting = await sync_to_async(setup)(self.game_id, player, self.token)
 			elif game.gameName == 'tron':
@@ -178,7 +178,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 					}
 				)
 				await self.close()
-				break # TODO : circle game solo
+				break # TODO NM : circle game solo
 			# await asyncio.sleep(1/60)
 			await asyncio.sleep(0)
 
