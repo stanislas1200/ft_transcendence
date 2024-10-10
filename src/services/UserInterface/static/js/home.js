@@ -102,13 +102,14 @@ function displayTournament(response) {
             newDiv.append(newSpan);
             let newButton = document.createElement('div');
             newButton.classList.add('list-join-button');
+            console.log(response[i]);
             if (response[i].status == 'waiting')
                 newButton.innerHTML = 'Join ➞';
             else
                 newButton.innerHTML = 'Watch ➞';
             newDiv.classList.add(response[i].id);
             newDiv.append(newButton);
-            gameList.append(newDiv);
+            tournamentList.append(newDiv);
         }
     }
 }

@@ -180,35 +180,57 @@ function createGameButton() {
 
         if (gameMode == 'local')
             return loadPage("localpong", 1)
-
-        var xhr = new XMLHttpRequest();
-        let url = "https://localhost:8001/game/join?gameName={{gameStyle}}&gameMode={{gameMode}}&nbPlayers={{nbPlayer}}";
-        url = url.replace("localhost", window.location.hostname);
-        url = url.replace("{{gameStyle}}", gameStyle);
-        url = url.replace("{{gameMode}}", gameMode);
-        url = url.replace("{{nbPlayer}}", playerNumber);
-        xhr.withCredentials = true;
-        xhr.open("POST", url, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4)
-                if (xhr.status === 200) {
-                    console.log('Game created');
-                    var gameId = JSON.parse(xhr.responseText).game_id;
-                    console.log("game id :" + gameId);
-                    localStorage.setItem("gameId", gameId);
-                    console.log(xhr.responseText);
-                    if (gameStyle === 'tron')
-                        loadPage("tron", 1);
-                    else
-                        loadPage("pong", 1);
-                }
-                else {
-                    console.log('Error creating game'); // TODO put a message
-                    console.log(xhr.responseText);
-                }
+        else if (gameMode == 'tournament') {
+            var xhr = new XMLHttpRequest();
+            let url = "https://localhost:8001/game/create_tournament";
+            url = url.replace("localhost", window.location.hostname);
+            xhr.withCredentials = true;
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4)
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        console.log(response);
+                        // localStorage.setItem("gameId", gameId);
+                        // loadPage("pong", 1);
+                    }
+                    else {
+                        console.log('Error creating game'); // TODO put a message
+                        console.log(xhr.responseText);
+                    }
+            }
+            xhr.send("name=tounament&game=pong&start_date=2023-04-01T12:00:00Z");
+        } else {
+            var xhr = new XMLHttpRequest();
+            let url = "https://localhost:8001/game/join?gameName={{gameStyle}}&gameMode={{gameMode}}&nbPlayers={{nbPlayer}}";
+            url = url.replace("localhost", window.location.hostname);
+            url = url.replace("{{gameStyle}}", gameStyle);
+            url = url.replace("{{gameMode}}", gameMode);
+            url = url.replace("{{nbPlayer}}", playerNumber);
+            xhr.withCredentials = true;
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4)
+                    if (xhr.status === 200) {
+                        console.log('Game created');
+                        var gameId = JSON.parse(xhr.responseText).game_id;
+                        console.log("game id :" + gameId);
+                        localStorage.setItem("gameId", gameId);
+                        console.log(xhr.responseText);
+                        if (gameStyle === 'tron')
+                            loadPage("tron", 1);
+                        else
+                            loadPage("pong", 1);
+                    }
+                    else {
+                        console.log('Error creating game'); // TODO put a message
+                        console.log(xhr.responseText);
+                    }
+            }
+            xhr.send("partyName=tmp&game=pong&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
         }
-        xhr.send("partyName=tmp&game=pong&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
     });
 }
 

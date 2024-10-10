@@ -24,6 +24,7 @@ function loadProfile() {
 
 function answerdRequest(choice, userId) {
     let url = "https://localhost:8000/decline-request/userId/";
+    var response;
     url = url.replace("localhost", window.location.hostname);
     if (choice == 'accept')
         url = url.replace("decline", choice);
