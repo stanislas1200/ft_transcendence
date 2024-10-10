@@ -173,17 +173,21 @@ function sleep(ms) {
 async function drawEnd() {
 	if (game_state.scores) {
 		winner = ''
-		if (game_state.scores[0] > 9)
-			winner = 'Team 1' // TODO : winner
-		else if (game_state.scores[1] > 9)
-			winner = 'Team 2'
-		else return 0;
+		if (game_state.winner)
+			winner = game_state.winner[0].username;
+		else return 0
+		if (game_state.gameMode === "team") {
+			if (game_state.scores[0] > 9)
+			winner = 'Team 1';
+			else if (game_state.scores[1] > 9)
+			winner = 'Team 2';
+		}
 		
 		c.fillStyle = 'black'
 		c.fillRect(0, 0, 800, 650);
 		drawNS()
 		c.textAlign = 'center'
-		c.fillText("Team 2 won", 800/2, 600/2)
+		c.fillText(winner + " won", 800/2, 600/2)
 
 		if (game_state.tournament)
 			page = "tournament"
@@ -225,6 +229,7 @@ async function drawWaitingState() {
 
 	drawNS()
 	await sleep(500)
+	c.clearRect(0, 0, 800, 650);
 }
 
 async function draw() {

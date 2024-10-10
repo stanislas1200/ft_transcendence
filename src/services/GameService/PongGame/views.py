@@ -107,7 +107,6 @@ def search(request):
 
         return JsonResponse(results)
     except Exception as e:
-        print(e, flush=True)
         return JsonResponse({'error': 'Server error'}, status=500)
     
 @csrf_exempt
@@ -213,13 +212,7 @@ def make_matches(tournament):
 def make_pong_tournament_game(player1, player2):
     pong = Pong.objects.create(playerNumber=2, mapId=0)
     game = Game.objects.create(gameName='pong', gameProperty=pong, start_date=timezone.now())
-    # if player1:
-    #     print("okok", flush=True)
-    #     game.players.add(player1.player)
-    #     game.gameProperty.players.add(player1)
-    #     game.status = 'playing'
-    #     game.save()
-
+    
     if player1 and player2:
         player1.n = 1
         player2.n = 2
@@ -582,20 +575,14 @@ def get_stats(request):
             return JsonResponse({'error': 'Player not found'}, status=404)
         
         # stats = PlayerGameTypeStats.objects.filter(player_id=user_id)
-        player_stats = PlayerStats.objects.filter(player_id=user_id).first()
-
         all_stats_dict = {}
-        stats_dict = model_to_dict(player_stats)
-        all_stats_dict = stats_dict
-        all_stats_dict['pong'] = model_to_dict(player_stats.pong)
-        all_stats_dict['tron'] = model_to_dict(player_stats.tron)
-        # for stat in stats:
-        #     stat_dict = model_to_dict(stat)
-        #     stat_dict.pop('player')
-        #     stat_dict.pop('game_type')
-        #     stat_dict.pop('id')
-        #     if stat.game_type.name == 'pong':
-        #         all_stats_dict['pong'] = stat_dict
+        if PlayerGameTypeStats.objects.filter(player__id=user_id).exists():
+            player_stats = PlayerStats.objects.filter(player_id=user_id).first()
+
+            stats_dict = model_to_dict(player_stats)
+            all_stats_dict = stats_dict
+            all_stats_dict['pong'] = model_to_dict(player_stats.pong)
+            all_stats_dict['tron'] = model_to_dict(player_stats.tron)
         return JsonResponse(all_stats_dict, safe=False)
     
     except:
@@ -632,31 +619,31 @@ def get_history(request):
         # history = GameHistory.objects.filter(player_id=user_id)
 
         history_list = []
-        games = Game.objects.filter(players__id=user_id).order_by('start_date')
-        for game in games:
-            game_dict = model_to_dict(game)
-            game_dict.pop('players')
-            game_dict.pop('content_type')
-            game_dict.pop('object_id')
-            game_dict.pop('winners')
+        if Game.objects.filter(players__id=user_id).exists():
+            games = Game.objects.filter(players__id=user_id).order_by('start_date')
+            for game in games:
+                game_dict = model_to_dict(game)
+                game_dict.pop('players')
+                game_dict.pop('content_type')
+                game_dict.pop('object_id')
+                game_dict.pop('winners')
 
-            game_dict['win'] = game.winners.filter(id=user_id).exists()
-            game_dict['start_date'] = game.start_date
+                game_dict['win'] = game.winners.filter(id=user_id).exists()
+                game_dict['start_date'] = game.start_date
 
-            party = game.gameProperty
-            score = ''
-            for player in party.players.all():
-                if int(player.player.id) == int(user_id):
-                    score = f'{str(player.score)}{score}'
-                else:
-                    score = f'{score}/{str(player.score)}'
-            game_dict['scores'] = score
+                party = game.gameProperty
+                score = ''
+                for player in party.players.all():
+                    if int(player.player.id) == int(user_id):
+                        score = f'{str(player.score)}{score}'
+                    else:
+                        score = f'{score}/{str(player.score)}'
+                game_dict['scores'] = score
 
-            history_list.append(game_dict)
+                history_list.append(game_dict)
         return JsonResponse(history_list, safe=False)
     
     except Exception as e:
-        print(e, flush=True)
         return JsonResponse({'error': 'Error'}, status=500)
 
 def achievement_notif(user_id, achievement):
@@ -707,5 +694,4 @@ def list_achievements(request):
     except (UserAchievement.DoesNotExist, Achievement.DoesNotExist):
         return JsonResponse({'error': 'Achievements not found'}, status=404)
     except Exception as e:
-        print(e, flush=True)
         return JsonResponse({'error': 'Error'}, status=500)
