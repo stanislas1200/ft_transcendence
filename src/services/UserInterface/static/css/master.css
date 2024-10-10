@@ -193,12 +193,17 @@ nav.navbar-top li.active>a {
     padding-left: 0px;
 }
 
-.alert {
+.alerts-container {
     z-index: 999;
     position: absolute;
     top: 65px;
     right: 5px;
+    display: flex;
+    flex-direction: column;
+}
 
+.alert {
+    width: 20vw;
     background-color: var(--primary);
     border: 1px solid var(--tertiary);
     color: var(--text);
