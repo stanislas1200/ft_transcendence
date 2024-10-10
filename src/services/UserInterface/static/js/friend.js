@@ -22,14 +22,30 @@ function chat() {
 
             // Fonction pour ajouter un message à la zone de chat
             function addMessage(message, type) {
+                console.log('addMessage', message, type);
                 const messageElement = document.createElement('div');
                 messageElement.classList.add('message', type);
-                messageElement.textContent = message;
+                if (message.split(' ')[0] === '/invite') { // lorsque le message est /invite {gameId} je voudrais que le message soit un bouton 'join the duel'et que je puisse recuperer le gameId
+                    messageElement.innerHTML = '<button class="join-duel">Join the duel</button>';
+                    const gameId = message.split(' ')[1];
+                    if (!gameId)
+                        return;
+                    const click = ({ target }) => {
+                        console.log('join the duel');
+                        localStorage.setItem("gameId", gameId);
+                        loadPage('pong', 1);
+                        // loadGame(gameId);
+                    }
+                    messageElement.addEventListener('click', click);
+                } else {
+                    messageElement.textContent = message;
+                }
                 chatArea.appendChild(messageElement);
 
                 // Faire défiler vers le bas pour afficher le dernier message
                 chatArea.scrollTop = chatArea.scrollHeight;
                 if (type === 'sent') {
+                    console.log('message envoyé');
                     chatSocket.send(JSON.stringify({
                         'message': message
                     }));
@@ -42,21 +58,28 @@ function chat() {
                 chatArea.innerHTML = '';
 
                 // Demarrer une websocket avec le username de l'ami
+                // if (chatSocket !== undefined) {
+                //     console.log('on passe ici');
+                //     chatSocket.close();
+                // }
                 chatSocket = new WebSocket(
                     'wss://' + window.location.hostname + ':8002/ws/chat/' + getCookie("userId") + '/' + chatusername + '/' + getCookie("token") + '/'
                 );
 
                 chatSocket.onopen = function (e) {
-                    console.log('socket open');
+                    console.log('socket open with ', chatusername);
                 };
 
                 chatSocket.onmessage = function (e) {
                     const data = JSON.parse(e.data);
-                    console.log('message socket ', data);
+                    // console.log('message socket ', data);
                     if (data.sender === chatusername)
                         addMessage(data.message, 'received');
                 };
 
+                chatSocket.onclose = function (e) {
+                    console.log('Chat socket closed unexpectedly');
+                };
 
                 // Ajouter les messages de l'ami sélectionné
                 /*if (messages[chatId]) {
@@ -68,7 +91,17 @@ function chat() {
                 } else {
                     addMessage('This is a new message.', 'sent');
                 } */
-                chatArea.innerHTML = '<p>Sélectionnez un ami ou ajoutez en un pour commencer à discuter.</p>';
+                let chatUsernameDisplay = document.createElement('p');
+                chatUsernameDisplay.innerHTML = chatusername;
+                chatUsernameDisplay.classList.add('chat-username');
+                const click = async ({ target }) => {
+                    await loadPage('friendProfile', 1);
+                    searchUser(target.innerHTML);
+                }
+
+                chatUsernameDisplay.addEventListener('click', click);
+                chatArea.appendChild(chatUsernameDisplay);
+                // chatArea.innerHTML = '<p>Sélectionnez un ami ou ajoutez en un pour commencer à discuter.</p>';
             }
 
             // Ajouter les amis à la liste
@@ -100,7 +133,17 @@ function chat() {
             function sendMessage() {
                 const message = messageInput.value.trim();
                 if (message) {
-                    addMessage(message, 'sent');
+                    if (message.split(' ')[0] == '/invite') { // faire une requete api pour creer une game, recupere le gameId et l'envoyer
+                        createGameChat().then(gameId => {
+                            // console.log('gameId', gameId);
+                            addMessage(`/invite ${gameId}`, 'sent');
+                        }).catch(error => {
+                            console.error(error);
+                        });
+
+                    }
+                    else
+                        addMessage(message, 'sent');
                     messageInput.value = ''; // Efface le champ de saisie
 
                     // Optionnel : Ajouter le message au chat de l'ami sélectionné
@@ -146,5 +189,34 @@ function getFriendList() {
             }
         };
         xhr.send();
+    });
+}
+
+function createGameChat() {
+    return new Promise((resolve, reject) => {
+        var xhr = new XMLHttpRequest();
+        let url = "https://localhost:8001/game/create";
+        url = url.replace("localhost", window.location.hostname);
+        xhr.withCredentials = true;
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {  // Requête terminée
+                if (xhr.status === 200) {  // Succès de la requête
+                    console.log('Game created');
+                    var gameId = JSON.parse(xhr.responseText).game_id;
+                    console.log("game id :" + gameId);
+                    localStorage.setItem("gameId", gameId);
+                    resolve(gameId);  // Résoudre la promesse avec l'ID de la partie
+                } else {
+                    console.log('Error creating game');
+                    console.log(xhr.responseText);
+                    reject(new Error('Failed to create game'));  // Rejeter la promesse
+                }
+            }
+        };
+
+        xhr.send("partyName=tmp&game=pong&gameType=custom&playerNumber=2&gameMode=ffa&map=0&ballSpeed=5&paddleSpeed=30");
     });
 }

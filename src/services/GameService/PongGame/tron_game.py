@@ -181,7 +181,6 @@ async def update_tron(game_id):
 			for other_player in game.players:
 				filtered_trail = other_player['trail'][:-1]
 				if head in filtered_trail:
-					print(f"Player {player['id']} crashed into Player {other_player['id']}'s trail!", flush=True)
 					player['alive'] = False
 				if not player['alive']:
 					break
