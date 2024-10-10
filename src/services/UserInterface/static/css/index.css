@@ -94,6 +94,11 @@
 
 .index-achievement {
 	justify-content: center;
+	cursor: default !important;
+	text-transform: capitalize;
+
+	display: flex;
+	justify-content: flex-start;
 }
 
 .index-button {
