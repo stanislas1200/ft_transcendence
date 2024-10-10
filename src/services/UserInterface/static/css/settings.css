@@ -130,3 +130,7 @@ h2 {
     background-color: red;
     color: var(--tertiary);
 }
+
+button:focus {
+    outline: none;
+}
