@@ -26,6 +26,7 @@ async function loadPage(page, prevent) {
             console.error('There was a problem with the fetch operation:', error);
             // Optionally load an error page or show an error message
         });
+    // console.log('page ' + page);
     testIfLoggedIn()
     switch (page) {
         case 'friend':
