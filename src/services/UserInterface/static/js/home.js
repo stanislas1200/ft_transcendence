@@ -13,10 +13,10 @@ function loadHome() {
 function goToButton() {
 
     const clickChat = ({ target }) => {
-        loadPage('friend');
+        loadPage('friend', 1);
     }
     const clickAchivement = ({ target }) => {
-        loadPage('achievements');
+        loadPage('achievements', 1);
     }
     const clickGame = ({ target }) => {
         let gameStyle = 'pong';
@@ -26,8 +26,7 @@ function goToButton() {
         let ballSpeed = '6';
         let paddleSpeed = '20';
         var xhr = new XMLHttpRequest();
-        let url = "https://localhost:8001/game/join?gameName={{gameStyle}}&gameMode={{gameMode}}&nbPlayers={{nbPlayer}}";
-        url = url.replace("localhost", window.location.hostname);
+        var url = "https://" + window.location.hostname + ":8001/game/join?gameName=" + gameStyle + "&gameMode=" + gameMode + "&nbPlayers=" + playerNumber;
         xhr.withCredentials = true;
         xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -44,7 +43,7 @@ function goToButton() {
                     // console.log(xhr.responseText);
                 }
         }
-        xhr.send("partyName=tmp&game=pong&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
+        xhr.send();
     }
     const clickTournament = ({ target }) => {
         var xhr = new XMLHttpRequest();
@@ -106,8 +105,12 @@ function joinTournamentFromHome(gameId) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4)
             if (xhr.status === 200) {
-                var gameId = JSON.parse(xhr.responseText).game_id;
-                document.cookie = 'tournament_id' + gameId;
+                let response = JSON.parse(xhr.responseText).game_id;
+                // console.log(response);
+                console.log(gameId);
+                console.log(document.cookie);
+                document.cookie = 'tournament_id=' + gameId;
+                console.log(document.cookie);
                 loadPage('tournament', 1)
             }
             else {
