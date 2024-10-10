@@ -36,7 +36,6 @@ function loadSettings() {
 function deleteProfile() {
     const deleteButton = document.getElementById('deleteButton');
 
-
     const click = ({ target }) => {
         let pwd = document.getElementById('oldPassword').value;
         console.log(pwd);

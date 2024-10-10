@@ -47,7 +47,25 @@ function goToButton() {
         xhr.send("partyName=tmp&game=pong&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
     }
     const clickTournament = ({ target }) => {
-        loadPage('tournament');
+        var xhr = new XMLHttpRequest();
+        let url = "https://localhost:8001/game/create_tournament";
+        url = url.replace("localhost", window.location.hostname);
+        xhr.withCredentials = true;
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4)
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    document.cookie = 'tournament_id=' + response.tournament_id;
+                    loadPage('tournament', 1);
+                }
+                else {
+                    console.log('Error creating game'); // TODO put a message
+                    console.log(xhr.responseText);
+                }
+        }
+        xhr.send("name=tounament&game=pong&start_date=2023-04-01T12:00:00Z");
     }
 
     const game = document.getElementById('quick-game');
@@ -77,6 +95,43 @@ function clickOnFriend() {
     });
 }
 
+function joinTournamentFromHome(gameId) {
+    var xhr = new XMLHttpRequest();
+    var url = "https://localhost:8001/game/join_tournament/{{GameId}}";
+    url = url.replace("localhost", window.location.hostname);
+    url = url.replace("{{GameId}}", gameId);
+    xhr.withCredentials = true;
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4)
+            if (xhr.status === 200) {
+                var gameId = JSON.parse(xhr.responseText).game_id;
+                document.cookie = 'tournament_id' + gameId;
+                loadPage('tournament', 1)
+            }
+            else {
+                console.log('Error joining game'); // TODO put a message
+                console.log(xhr.responseText);
+            }
+    };
+    xhr.send();
+}
+
+function clickOnTournamenet() {
+    const click = async ({ target }) => {
+        if (target.classList[0] != 'list-element')
+            target = target.parentElement;
+        console.log(target);
+        joinTournamentFromHome(target.classList[1]);
+    }
+
+    const inputs = document.querySelectorAll('#tournamentList');
+    inputs.forEach((input) => {
+        input.addEventListener('click', click);
+    });
+}
+
 function displayTournament(response) {
     // console.log(response);
     let tournamentList = document.getElementById('tournament-list');
@@ -93,6 +148,7 @@ function displayTournament(response) {
         if (response[i].status != 'finished') {
             let newDiv = document.createElement('div');
             newDiv.classList.add('list-element');
+            newDiv.id = 'tournamentList';
             let newSpan = document.createElement('span');
             newSpan.classList.add('list-span');
             newSpan.innerHTML = response[i].name;
@@ -108,6 +164,7 @@ function displayTournament(response) {
             tournamentList.append(newDiv);
         }
     }
+    clickOnTournamenet();
 }
 
 function loadTounament() {
@@ -185,6 +242,7 @@ function clickOnGame() {
 }
 
 function displayGame(response) {
+    console.log(response);
     let gameList = document.getElementById('game-list');
 
     if (!gameList)
@@ -366,6 +424,7 @@ function showLastGame(response) {
     if (response.length == 0)
         return (title.innerHTML += ' lets play!');
     var lastGame = response[response.length - 1];
+    console.log(lastGame);
 
     /******************************** Check element ********************************/
     if (!result || !title || !score || !date)

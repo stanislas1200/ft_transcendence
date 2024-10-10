@@ -191,8 +191,7 @@ function createGameButton() {
                 if (xhr.readyState === 4)
                     if (xhr.status === 200) {
                         var response = JSON.parse(xhr.responseText);
-                        localStorage.setItem('tournament_id', response.tournament_id);
-                        console.log(response);
+                        document.cookie = 'tournament_id=' + response.tournament_id;
                         loadPage('tournament', 1);
                     }
                     else {
@@ -226,7 +225,7 @@ function createGameButton() {
                         console.log(xhr.responseText);
                     }
             }
-            xhr.send("partyName=tmp&game=pong&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
+            xhr.send("partyName=tmp&game=" + gameStyle + "&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
         }
     });
 }
