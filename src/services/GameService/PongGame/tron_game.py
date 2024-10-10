@@ -75,6 +75,7 @@ class Party:
 			# stats.game_played = F('games_played') + 1
 			if player['alive']:
 				# stats.games_won = F('games_won') + 1
+				game.winners.add(p)
 				player_stats.tron.game_won = F('game_won') + 1
 				player_stats.total_win = F('total_win') + 1
 				player_stats.win_streak = F('win_streak') + 1
