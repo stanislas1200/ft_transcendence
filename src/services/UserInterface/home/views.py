@@ -5,7 +5,10 @@ def master(request):
     return render(request, 'home/master.html')
 
 def register(request):
-    return render(request, 'home/register.html')
+    context = {
+        '42_link': os.environ['OAUTH_LINK'],
+    }
+    return render(request, 'home/register.html', context)
 
 def login(request):
     context = {
