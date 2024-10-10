@@ -6,6 +6,21 @@ function getCookie(name) {
     if (parts.length == 2) return parts.pop().split(";").shift();
 }
 
+// function testNotif() {
+//     let alertHtml = `
+//         <strong>Notification test</strong> 
+//         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+//             <span aria-hidden="true">&times;</span>
+//         </button>
+//     `;
+
+//     let newNotif = document.createElement('div');
+//     newNotif.classList.add('alert', 'alert-success', 'alert-dismissible', 'fade', 'show');
+//     newNotif.innerHTML = alertHtml;
+//     document.getElementById('alert-container').appendChild(newNotif);
+//     removeAlertAfterTimeout(newNotif)
+// }
+
 function connectToNotifications() {
     let userId = getCookie('userId');
     let wsUrl = `wss://localhost:8001/ws/notifications/${userId}`;
@@ -22,17 +37,19 @@ function connectToNotifications() {
         let content = serverMessage.data.content;
 
         let alertHtml = `
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
             <strong>${content}</strong> 
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
-        </div>
         `;
 
-        document.getElementById('main').insertAdjacentHTML('beforeend', alertHtml);
-        let alertElement = document.querySelector('#main .alert:last-child');
-        removeAlertAfterTimeout(alertElement)
+        let newNotif = document.createElement('div');
+        newNotif.classList.add('alert', 'alert-success', 'alert-dismissible', 'fade', 'show');
+        newNotif.innerHTML = alertHtml;
+        document.getElementById('alert-container').appendChild(newNotif);
+        // document.getElementById('main').insertAdjacentHTML('beforeend', alertHtml);
+        // let alertElement = document.querySelector('#main .alert:last-child');
+        removeAlertAfterTimeout(newNotif)
     });
 
     function removeAlertAfterTimeout(alertElement, timeout = 5000) {
