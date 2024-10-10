@@ -68,7 +68,6 @@ def send_notification(request, users_id=None, message=None):
             )
     return JsonResponse({'status': 'Message sent'})
 
-@csrf_exempt
 @require_GET
 def search(request):
     try:
@@ -275,10 +274,8 @@ def list_tournament(request):
         d['player_number'] = t.players.count()
         ret.append(d)
     return JsonResponse(ret, safe=False)
-    
-@csrf_exempt # Disable CSRF protection for this view
+
 @require_POST
-# end a game party
 def leave_game(request):
     try:
         # session_key = request.session.session_key
@@ -296,9 +293,8 @@ def leave_game(request):
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
 
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_GET
-# get game party state
 def get_game_state(request):
     try:
         game_id = request.GET.get('gameId')
@@ -307,7 +303,7 @@ def get_game_state(request):
     except Game.DoesNotExist:
         return JsonResponse({'error': 'Game not found'}, status=404)
 
-@require_GET # return a list of all game
+@require_GET
 def list_game(request):
     games = GameType.objects.all()
     game_list = []
@@ -322,7 +318,7 @@ def user_to_dict(user):
         'last_login': user.last_login
     }
 
-@require_GET # return a list of party
+@require_GET
 def get_party(request):
     try:
         game_id = request.GET.get('gameId')
@@ -345,8 +341,7 @@ def get_party(request):
         return JsonResponse({'error': 'Error'}, status=500)
 
 @require_POST
-@csrf_exempt # Disable CSRF protection for this view
-# join a game party
+@csrf_exempt
 def join_game(request):
     try:
         session_key = request.session.session_key
@@ -502,9 +497,8 @@ def startGAM(request, player, token, gameType, gameMode, playerNumber):
     game.save()
     return JsonResponse({'message': 'Game started', 'game_id': game.id})
     
-# @require_POST
-@csrf_exempt # Disable CSRF protection for this view
-# create a game party
+@require_POST
+@csrf_exempt
 def start_game(request, gameName=None, gameMode=None, playerNumber=None):
     # try:
     # get user
@@ -541,7 +535,7 @@ def start_game(request, gameName=None, gameMode=None, playerNumber=None):
     #     return JsonResponse({'error': 'Failed to start game'}, status=400)
 
 @require_POST
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 def record_move(request):
     try:    
         session_key = request.session.session_key
@@ -566,7 +560,6 @@ def record_move(request):
         return JsonResponse({'error': 'Server error'}, status=500)
 
 @require_GET
-@csrf_exempt # Disable CSRF protection for this view
 def get_stats(request):
     # Get the stats for the player
     try:
@@ -591,8 +584,7 @@ def get_stats(request):
     except:
         return JsonResponse({'error': 'Error'}, status=500)
 
-@require_GET
-@csrf_exempt # Disable CSRF protection for this view   
+@require_GET 
 def get_history(request):
     # Get the history for the player
     try:
@@ -663,7 +655,6 @@ def achievement_notif(user_id, achievement):
     send_notification(None, [user_id], message)
 
 @require_GET
-@csrf_exempt
 def list_achievements(request):
     try:
         user_id = request.GET.get('UserId')
