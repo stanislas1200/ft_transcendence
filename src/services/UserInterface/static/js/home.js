@@ -245,7 +245,7 @@ function clickOnGame() {
 }
 
 function displayGame(response) {
-    console.log(response);
+    // console.log(response);
     let gameList = document.getElementById('game-list');
 
     if (!gameList)
@@ -427,6 +427,7 @@ function showLastGame(response) {
     if (response.length == 0)
         return (title.innerHTML += ' lets play!');
     var lastGame = response[response.length - 1];
+    console.log('lastgame');
     console.log(lastGame);
 
     /******************************** Check element ********************************/
@@ -469,6 +470,7 @@ function showLastGame(response) {
 }
 
 function loadHistoryForHomePage(id) {
+    // console.log('test');
     let url = "https://localhost:8001/game/hist?UserId={{UserId}}";
     url = url.replace("localhost", window.location.hostname);
     url = url.replace("{{UserId}}", id);
@@ -480,6 +482,7 @@ function loadHistoryForHomePage(id) {
         if (xhr.readyState === 4) {
             if (xhr.status === 200 || xhr.status === 201) {
                 response = JSON.parse(xhr.responseText);
+                console.log(response);
                 showLastGame(response);
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
