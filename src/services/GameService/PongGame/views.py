@@ -450,7 +450,8 @@ def startPong(request, player, token, gameType, gameMode, playerNumber):
         # pong.height = request.POST.get('height', 600)
         pong.maxScore = request.POST.get('maxScore', 10)
         pong.ballSpeed = request.POST.get('ballSpeed', 2.0)
-        pong.paddleSpeed = request.POST.get('paddleSpeed', 2.0)
+        speed = int(request.POST.get('paddleSpeed', 2.0))
+        pong.paddleSpeed = speed if speed > 0 else speed * -1
         pong.save()
 
     game.save()
