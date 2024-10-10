@@ -576,7 +576,7 @@ def get_stats(request):
         
         # stats = PlayerGameTypeStats.objects.filter(player_id=user_id)
         all_stats_dict = {}
-        if PlayerGameTypeStats.objects.filter(player__id=user_id).exists():
+        if PlayerStats.objects.filter(player_id=user_id).exists():
             player_stats = PlayerStats.objects.filter(player_id=user_id).first()
 
             stats_dict = model_to_dict(player_stats)
@@ -584,7 +584,6 @@ def get_stats(request):
             all_stats_dict['pong'] = model_to_dict(player_stats.pong)
             all_stats_dict['tron'] = model_to_dict(player_stats.tron)
         return JsonResponse(all_stats_dict, safe=False)
-    
     except:
         return JsonResponse({'error': 'Error'}, status=500)
 
@@ -616,18 +615,15 @@ def get_history(request):
                 ret.append(info)
             return JsonResponse(ret, safe=False)
 
-        # history = GameHistory.objects.filter(player_id=user_id)
-
         history_list = []
         if Game.objects.filter(players__id=user_id).exists():
-            games = Game.objects.filter(players__id=user_id).order_by('start_date')
+            games = Game.objects.filter(players__id=user_id).order_by('-start_date')
             for game in games:
                 game_dict = model_to_dict(game)
                 game_dict.pop('players')
                 game_dict.pop('content_type')
                 game_dict.pop('object_id')
                 game_dict.pop('winners')
-
                 game_dict['win'] = game.winners.filter(id=user_id).exists()
                 game_dict['start_date'] = game.start_date
 
