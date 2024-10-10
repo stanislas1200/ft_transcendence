@@ -2,6 +2,7 @@ let inTheTournament = false;
 
 function showTournamentInfo() {
     getAllInfoTournament();
+    setInterval(getAllInfoTournament, 60000);
 }
 
 function getAllInfoTournament() {
