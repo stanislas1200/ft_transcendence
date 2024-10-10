@@ -2,6 +2,9 @@
 
 async function loadPage(page, prevent) {
     // console.log(page);
+
+	cancelAllAnimationFrames()
+    isGameLoopRunning = false
     await fetch('/' + page + '/', {
         method: 'GET',
         headers: {

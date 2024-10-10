@@ -62,7 +62,7 @@ def send_notif(message, user_id):
 	}
 	response = requests.post(f'https://game-service:8001/game/send-notification/', headers=headers, json={"user_id": [user_id], "message": message}, verify=False)
 
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_POST
 def send_friend_request(request, user_id):
 	try:
@@ -84,22 +84,24 @@ def send_friend_request(request, user_id):
 		receiver = User.objects.get(id=user_id)
 		if sender == receiver:
 			return JsonResponse({'error': 'Users cannot send requests to themselves'}, status=403)
+
+		if sender in receiver.blocked:
+			return JsonResponse({'error': "You can't send the request"}, status=403)
 		
 		if Friendship.objects.filter(user1=sender, user2=receiver).exists() or Friendship.objects.filter(user1=receiver, user2=sender).exists():
 			return JsonResponse({'error': 'Users are already friends'}, status=409)
 		
-		friend_request, created = FriendRequest.objects.get_or_create(sender=sender, receiver=receiver)
-		
-		if created:
-			message = friend_request_notif(sender, receiver)
-			send_notif(message, receiver.id)
-			return JsonResponse({'message': 'Successfully sent request'})
-		else:
-			return JsonResponse({'error': 'Friend request already exists'}, status=409) # TODO : check sender receiver and receiver sender 
+		if FriendRequest.objects.filter(sender=sender, receiver=receiver).exists() or FriendRequest.objects.filter(sender=receiver, receiver=sender).exists():
+			return JsonResponse({'error': 'Friend request already exists'}, status=409)
+
+		FriendRequest.objects.get_or_create(sender=sender, receiver=receiver)
+		message = friend_request_notif(sender, receiver)
+		send_notif(message, receiver.id)
+		return JsonResponse({'message': 'Successfully sent request'})
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_POST
 def accept_friend_request(request, request_id):
 	try:
@@ -132,7 +134,7 @@ def accept_friend_request(request, request_id):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_POST
 def remove_friend(request, user_id):
 	try:
@@ -164,7 +166,7 @@ def remove_friend(request, user_id):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_POST
 def decline_friend_request(request, request_id):
 	try:
@@ -195,7 +197,7 @@ def decline_friend_request(request, request_id):
 @require_GET
 def list_friends(request, user_id):
 	try:
-		# TODO: add option to set as private
+		# TODO NM: add option to set as private
 		if not User.objects.filter(id=user_id).exists():
 			return JsonResponse({'error': 'User not found'}, status=404)
 		user = User.objects.get(id=user_id)
@@ -235,25 +237,15 @@ def list_blocked_user(request):
 		# if request.user.is_authenticated:
 		# 	user = request.user
 		# else:
-		# 	status = verify_token(request) # TODO : check cuz not working for tchat
+		# 	status = verify_token(request) # TODO NM: check cuz not working for tchat
 		# 	if (status == 200):
-		# 		u_id = request.GET.get('UserId')
+		u_id = request.GET.get('UserId')
 		# 		if not u_id:
 		# 			u_id = request.COOKIES.get('userId')
-		u_id = request.COOKIES.get('userId')
-		# if request.user.is_authenticated:
-		# 	user = request.user
-		# else:
-		# 	status = verify_token(request)
-		# 	if (status == 200):
-		# 		u_id = request.GET.get('UserId')
-		# 		if not u_id:
-		# 			u_id = request.COOKIES.get('userId')
-
-		user = User.objects.get(id=u_id)
 		# 	else:
 		# 		return JsonResponse({'error': 'User is not logged in'}, status=401)
-		
+		# u_id = request.COOKIES.get('userId')
+		user = User.objects.get(id=u_id)
 		return JsonResponse({'blocked_user': [{'id': b.id, 'username': b.username} for b in user.blocked]})
 
 	except ObjectDoesNotExist:
@@ -261,7 +253,7 @@ def list_blocked_user(request):
 	except Exception as e:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_POST
 def block_user(request, user_id):
 	try:
@@ -296,7 +288,7 @@ def block_user(request, user_id):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_POST
 def unblock_user(request, user_id):
 	try:
@@ -373,7 +365,7 @@ def process_avatar(avatar, content_type):
 	# validate dimensions
 	if w != h:
 		new_size = min(w, h)
-		# TODO : use Middle ?
+		# TODO NM: use Middle ?
 		left = (w - new_size)/2
 		top = (h - new_size)/2
 		right = (w + new_size)/2
@@ -403,7 +395,7 @@ def process_avatar(avatar, content_type):
 	
 	return avatar
 
-@csrf_exempt
+@require_GET
 def get_avatar(request, user_id):
 	try:
 		user = User.objects.get(id=user_id)
@@ -419,6 +411,7 @@ def get_avatar(request, user_id):
 
 @csrf_exempt
 @login_required
+@require_POST
 def update_user(request, user_id):
 	try:
 		# Check login
@@ -454,14 +447,12 @@ def update_user(request, user_id):
 		avatar = request.FILES.getlist("avatar")
 		
 		
-
-		# Update User TODO : all user info
 		if username and username != user.username:
 			validate_unicode_slug(username)
 			if User.objects.filter(username=username).exists():
 				return JsonResponse({'error': 'Username already taken'}, status=400)
 			user.username = username
-		if email and email != user.email: # TODO : password to change email
+		if email and email != user.email: # TODO NM: password to change email
 			validate_email(email)
 			if User.objects.filter(email=email).exists():
 				return JsonResponse({'error': 'Email already taken'}, status=400)
@@ -488,7 +479,7 @@ def update_user(request, user_id):
 				if not check_password(current_password, user.password):
 					return JsonResponse({'error': 'Current password is incorrect'}, status=400)
 				validate_password(new_password, user)
-				user.set_password(new_password) # TODO : change token ??
+				user.set_password(new_password)
 				password_changed(new_password, user)
 			except Exception as e:
 				return JsonResponse({'error': str(e)}, status=400)
@@ -496,7 +487,7 @@ def update_user(request, user_id):
 		return JsonResponse({'message': f'Successfully updated profile'})
 	except Exception as e:
 		return JsonResponse({'error': str(e)}, status=400)
-	except: # TODO : better except
+	except:
 		return JsonResponse({'error': 'Failed to update user'}, status=400)
 
 
@@ -530,11 +521,6 @@ def delete_user(request):
 	# TODO : delete chat ?
 	return JsonResponse({'message': f'Successfully delete user'})
 
-
-# TODO : decorator : ex remove csrf_exempt
-
-@csrf_exempt
-# 42 auth
 @require_GET
 def oauth42(request):
 	code = request.GET.get('code', None)
@@ -605,7 +591,7 @@ def oauth42(request):
 	except Exception as e:
 		return JsonResponse({'error': 'An error occurred while processing your request'}, status=500)
 
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_POST
 def register(request):
 	try:
@@ -625,9 +611,8 @@ def register(request):
 			ai = User.objects.create_user(username='AI')
 			UserToken.objects.update_or_create(user=ai, defaults={'token': 'TODO : check if can connect as ai'}) # TODO : check if can connect as ai
 
-		#TODO : uncoment
-		# if not username or not password or not email or not first_name or not last_name or not cpassword:
-		# 	return JsonResponse({'error': 'Missing required fields'}, status=400)
+		if not username or not password or not email or not first_name or not last_name or not cpassword:
+			return JsonResponse({'error': 'Missing required fields'}, status=400)
 		if User.objects.filter(username=username).exists() or username == 'delete_user':
 			return JsonResponse({'error': 'Username already taken'}, status=400)
 		if User.objects.filter(email=email).exists():
@@ -639,7 +624,7 @@ def register(request):
 	except:
 		return JsonResponse({'error': 'Failed to register user'}, status=400)
 
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_POST
 def login_view(request):
 	try:
@@ -667,7 +652,8 @@ def login_view(request):
 	except Exception as e:
 		return JsonResponse({'error': 'Failed to login'}, status=500)
 	
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
+@login_required
 @require_POST
 def logout_view(request):
 	try:
@@ -704,7 +690,6 @@ def verify_token(request, token=None, user_id=None):
 	except UserToken.DoesNotExist:
 		return 404
 
-@csrf_exempt # Disable CSRF protection for this view
 @require_GET
 def me(request):
 	try:
@@ -726,7 +711,6 @@ def me(request):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
-@csrf_exempt # Disable CSRF protection for this view
 @require_GET
 def get_user_info(request, user_id):
 	try:
@@ -742,10 +726,15 @@ def get_user_info(request, user_id):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
-@csrf_exempt # Disable CSRF protection for this view
 # service comunication
-def verify_user_token(request): # TODO :add uuid
+def verify_user_token(request):
 	try:
+		if request:
+			internal_secret = request.headers.get('X-Internal-Secret')
+
+			if internal_secret != os.environ['INTERNAL_SECRET']:
+				return JsonResponse({'error': 'Unauthorized access'}, status=403)
+
 		session_key = request.COOKIES.get('session_key')
 		session_key = None
 		token = request.COOKIES.get('token')

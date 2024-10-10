@@ -17,7 +17,7 @@ function keyUp(event) {
 
 function closeWebSocket() {
 	window.removeEventListener('popstate', closeWebSocket);
-	cancelAnimationFrame(animFrame);
+	cancelAllAnimationFrames()
 	socket.close();
 	socket = null;
 	isGameLoopRunning = false
@@ -65,7 +65,7 @@ function connect(game) {
 
 	// socket.addEventListener('close', function (event) {
 	// 	// window.removeEventListener('popstate', closeWebSocket);
-	// 	cancelAnimationFrame(animFrame);
+	
 	// 	// socket = null;
 	// 	// isGameLoopRunning = false
 	// 	console.log('WebSocket is closed now.');
@@ -86,7 +86,6 @@ let c = null;
 let offScreenC = null;
 let offc = null;
 let obstaclesDrawn = false;
-let animFrame;
 
 game_state = {
 	ball: {
@@ -195,7 +194,7 @@ async function drawEnd() {
 			page = "game"
 
 		c.fillText("Moving to " + page + " page", 800/2, 650/2)
-		cancelAnimationFrame(animFrame);
+		
 		await sleep(2000);
 		loadPage(page, 1)
 		return 1
@@ -274,19 +273,26 @@ async function gameLoop(game) {
 			}
 			if (end == 1)
 			{
-				cancelAnimationFrame(animFrame);
+				cancelAllAnimationFrames()
 				game_state.scores = null;
 				game_state.usernames = null;
 				game_state.players = [];
 				game_state.state = 'nope';
 				return;
 			}
-			animFrame = requestAnimationFrame(() => gameLoop(game));
+			requestAnimationFrame(() => gameLoop(game))
 		}
 	} catch (error) {
 		console.log(error)
 	}
 }
+
+function cancelAllAnimationFrames(){
+	var id = window.requestAnimationFrame(function(){});
+	while(id--){
+	  window.cancelAnimationFrame(id);
+	}
+ }
 
 function loadPong() {
 	let partyId = localStorage.getItem('gameId');
@@ -308,6 +314,6 @@ function loadPong() {
 	connect('pong');
 	if (!isGameLoopRunning) {
 		isGameLoopRunning = true;
-		gameLoop('pong');
+		requestAnimationFrame(() => gameLoop('pong'))
 	}
 }
