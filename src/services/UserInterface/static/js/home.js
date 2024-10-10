@@ -7,6 +7,61 @@ function loadHome() {
     loadAchivement(userId);
     loadGame();
     loadTounament();
+    goToButton();
+}
+
+function goToButton() {
+
+    const clickChat = ({ target }) => {
+        loadPage('friend');
+    }
+    const clickAchivement = ({ target }) => {
+        loadPage('achievements');
+    }
+    const clickGame = ({ target }) => {
+        let gameStyle = 'pong';
+        let gameMode = 'ffa';
+        let playerNumber = '2';
+        let mapChoice = '0';
+        let ballSpeed = '6';
+        let paddleSpeed = '20';
+        var xhr = new XMLHttpRequest();
+        let url = "https://localhost:8001/game/join?gameName={{gameStyle}}&gameMode={{gameMode}}&nbPlayers={{nbPlayer}}";
+        url = url.replace("localhost", window.location.hostname);
+        url = url.replace("{{gameStyle}}", gameStyle);
+        url = url.replace("{{gameMode}}", gameMode);
+        url = url.replace("{{nbPlayer}}", playerNumber);
+        xhr.withCredentials = true;
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4)
+                if (xhr.status === 200) {
+                    var gameId = JSON.parse(xhr.responseText).game_id;
+                    localStorage.setItem("gameId", gameId);
+                    console.log(xhr.responseText);
+                    loadPage("pong", 1);
+                }
+                else {
+                    console.log('Error creating game'); // TODO put a message
+                    console.log(xhr.responseText);
+                }
+        }
+        xhr.send("partyName=tmp&game=pong&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
+    }
+    const clickTournament = ({ target }) => {
+        loadPage('tournament');
+    }
+
+    const game = document.getElementById('quick-game');
+    const tournament = document.getElementById('create-tournament');
+    const achievement = document.getElementById('goToAchivement');
+    const chat = document.getElementById('goToChat');
+
+    game.addEventListener('click', clickGame);
+    tournament.addEventListener('click', clickTournament);
+    achievement.addEventListener('click', clickAchivement);
+    chat.addEventListener('click', clickChat);
 }
 
 function clickOnFriend() {

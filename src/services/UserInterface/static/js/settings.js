@@ -1,4 +1,4 @@
-let button;
+// let button;
 // let pp;
 
 function loadSettings() {
@@ -27,9 +27,41 @@ function loadSettings() {
         }
     };
     xhr.send();
-    button = document.getElementById('saveButton');
+    // button = document.getElementById('saveButton');
     // validateForm();
     inputsChangement();
+    deleteProfile();
+}
+
+function deleteProfile() {
+    const deleteButton = document.getElementById('deleteButton');
+
+
+    const click = ({ target }) => {
+        let pwd = document.getElementById('oldPassword').value;
+        console.log(pwd);
+        if (!pwd)
+            return (alert('need your password'));
+        let url = "https://localhost:8000/delete_user/";
+        url = url.replace("localhost", window.location.hostname);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.withCredentials = true;
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200 || xhr.status === 201) {
+                    response = JSON.parse(xhr.responseText);
+                    console.log(response);
+                } else {
+                    alert('Error: ' + JSON.parse(xhr.responseText).error);
+                }
+            }
+        };
+        xhr.send(pwd);
+    }
+
+    deleteButton.addEventListener('click', click);
 }
 
 function containsUpperCase(pwd) {
