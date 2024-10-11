@@ -235,8 +235,8 @@ function graphique(stats) {
         return;
 
     let nbrGame = stats.pong.total_game;
-    let nbrWin = stats.pong.game_won;
-    let nbrLoose = stats.pong.game_lost;
+    let nbrWin = stats.pong.total_win;
+    let nbrLoose = stats.pong.total_lost;
     const winPercent = (nbrWin / nbrGame) * 100;
     let tmp = winPercent + ", 100";
     if (nbrWin > 10 || nbrLoose > 10) {

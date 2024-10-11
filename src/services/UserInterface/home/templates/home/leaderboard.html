@@ -1,0 +1,135 @@
+<style>
+	.filter-section {
+		margin-bottom: 20px;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.filter-section label {
+		margin-right: 10px;
+	}
+
+	select {
+		background-color: transparent;
+		color: var(--secondary);
+		border: 2px solid var(--secondary);
+		padding: 2px;
+		border-radius: 5px;
+		margin-right: 10px;
+	}
+
+	.podium {
+		display: flex;
+		justify-content: center;
+		align-items: flex-end;
+		margin-bottom: 30px;
+
+		img {
+			width: 50px;
+			height: 50px;
+			border-radius: 50%;
+			margin-bottom: 10px;
+			object-fit: cover;
+		}
+	}
+
+	.podium div {
+		color: var(--text);
+		text-align: center;
+		padding: 10px;
+		border-radius: 10px;
+		width: 150px;
+		margin: 0 10px;
+		box-shadow: 0 4px 8px 0px var(--primary);
+	}
+
+	.first {
+		background: linear-gradient(135deg, #FFD700, #FFC700);
+		height: 200px;
+	}
+
+	.second {
+		background: linear-gradient(135deg, #C0C0C0, #B0B0B0);
+		height: 180px;
+	}
+
+	.third {
+		background: linear-gradient(135deg, #CD7F32, #BD6F22);
+		height: 160px;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+	th,
+	td {
+		padding: 15px;
+		text-align: left;
+		border-bottom: 1px solid var(--secondary);
+	}
+
+	th {
+		background-color: #2C2C34;
+		color: var(--primary);
+		text-transform: uppercase;
+		letter-spacing: 1px;
+	}
+
+	td {
+		color: var(--text);
+	}
+
+	tr:hover {
+		background-color: #2C2C34;
+	}
+
+	.username {
+		cursor: pointer;
+	}
+</style>
+
+<div class="filter-section">
+	<label for="game-filter">Game:</label>
+	<select id="game-filter" onchange="filterLeaderboard()">
+		<option value="all">All</option>
+		<option value="pong">Pong</option>
+		<option value="tron">Tron</option>
+	</select>
+</div>
+
+<div class="podium">
+	<div class="second">
+		<img src="" alt="Avatar">
+		<p class="username" data-username="Player3">Player2</p>
+		<p>110 Wins / 40 Losses</p>
+	</div>
+	<div class="first">
+		<img src="" alt="Avatar">
+		<p class="username" data-username="Player3">Player1</p>
+		<p>120 Wins / 30 Losses</p>
+	</div>
+	<div class="third">
+		<img src="" alt="Avatar">
+		<p class="username" data-username="Player3">Player3</p>
+		<p>90 Wins / 50 Losses</p>
+	</div>
+</div>
+
+<table id="leaderboard">
+	<thead>
+		<tr>
+			<th>Rank</th>
+			<th>Player</th>
+			<th>Wins</th>
+			<th>Losses</th>
+		</tr>
+	</thead>
+	<tbody id="leaderboard-body">
+	</tbody>
+</table>
+
+<script>loadLeaderboard()</script>

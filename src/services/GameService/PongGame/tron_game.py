@@ -76,7 +76,7 @@ class Party:
 			if player['alive']:
 				# stats.games_won = F('games_won') + 1
 				game.winners.add(p)
-				player_stats.tron.game_won = F('game_won') + 1
+				player_stats.tron.total_win = F('total_win') + 1
 				player_stats.total_win = F('total_win') + 1
 				player_stats.win_streak = F('win_streak') + 1
 				if not player_stats.tron.fastest_win:
@@ -85,7 +85,7 @@ class Party:
 					player_stats.tron.fastest_win = game_duration
 			else:
 				# stats.games_lost = F('games_lost') + 1
-				player_stats.tron.game_lost = F('game_lost') + 1
+				player_stats.tron.total_lost = F('total_lost') + 1
 				player_stats.total_lost = F('total_lost') + 1
 				player_stats.win_streak = 0
 

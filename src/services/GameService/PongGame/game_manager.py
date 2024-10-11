@@ -76,7 +76,7 @@ def check_achievements(user, stats,  win):
 		if created:
 			achievement_notif(user.id, ach)
 
-	if stats['pong']['game_won'] >= 10:
+	if stats['pong']['total_win'] >= 10:
 		ach, created = Achievement.objects.get_or_create(name='Pong Master', description='Win 10 games of Pong.', points=10)
 		_, created = UserAchievement.objects.get_or_create(user=user, achievement=ach)
 		if created:
@@ -88,7 +88,7 @@ def check_achievements(user, stats,  win):
 		if created:
 			achievement_notif(user.id, ach)
 
-	if stats['tron']['game_won'] >= 10:
+	if stats['tron']['total_win'] >= 10:
 		ach, created = Achievement.objects.get_or_create(name='Tron Champion', description='Win 10 games of Tron.', points=10)
 		_, created = UserAchievement.objects.get_or_create(user=user, achievement=ach)
 		if created:
@@ -362,7 +362,7 @@ class Party:
 					winner = p
 					game.winners.add(p)
 					# stats.games_won = F('games_won') + 1
-					player_stats.pong.game_won = F('game_won') + 1
+					player_stats.pong.total_win = F('total_win') + 1
 					player_stats.total_win = F('total_win') + 1
 					player_stats.win_streak = F('win_streak') + 1
 					if not player_stats.pong.fastest_win:
@@ -371,7 +371,7 @@ class Party:
 						player_stats.pong.fastest_win = game_duration
 				else:
 					# stats.games_lost = F('games_lost') + 1
-					player_stats.pong.game_lost = F('game_lost') + 1
+					player_stats.pong.total_lost = F('total_lost') + 1
 					player_stats.total_lost = F('total_lost') + 1
 					player_stats.win_streak = 0
 

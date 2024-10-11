@@ -8,8 +8,8 @@ class GameType(models.Model):
     name = models.CharField(max_length=100)
 
 class PongStats(models.Model):
-    game_won = models.IntegerField(default=0)
-    game_lost = models.IntegerField(default=0)
+    total_win = models.IntegerField(default=0)
+    total_lost = models.IntegerField(default=0)
     total_game = models.IntegerField(default=0)
     total_score = models.IntegerField(default=0)
     total_hit = models.IntegerField(default=0)
@@ -18,8 +18,8 @@ class PongStats(models.Model):
     play_time = models.DurationField(default="0:00:00")
     
 class TronStats(models.Model):
-    game_won = models.IntegerField(default=0)
-    game_lost = models.IntegerField(default=0)
+    total_win = models.IntegerField(default=0)
+    total_lost = models.IntegerField(default=0)
     total_game = models.IntegerField(default=0)
     total_score = models.IntegerField(default=0)
     fastest_win = models.DurationField(null=True, blank=True)

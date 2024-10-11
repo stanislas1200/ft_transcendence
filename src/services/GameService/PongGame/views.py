@@ -266,14 +266,19 @@ def get_tournament(request, tournament_id):
     return JsonResponse(tournament_data)
 
 def list_tournament(request):
-    tournaments = Tournament.objects.all()
-    ret = []
-    for t in tournaments:
-        d = model_to_dict(t)
-        d.pop('players')
-        d['player_number'] = t.players.count()
-        ret.append(d)
-    return JsonResponse(ret, safe=False)
+    try:
+        tournaments = Tournament.objects.all()
+        ret = []
+        for t in tournaments:
+            d = model_to_dict(t)
+            d.pop('players')
+            d['player_number'] = t.players.count()
+            ret.append(d)
+        return JsonResponse(ret, safe=False)
+    except Tournament.DoesNotExist:
+        return JsonResponse({'error': 'Tournament not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': 'Error'}, status=500)
 
 @require_POST
 def leave_game(request):
@@ -634,7 +639,10 @@ def get_history(request):
 
                 history_list.append(game_dict)
         return JsonResponse(history_list, safe=False)
-    
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Player not found'}, status=404)
+    except Game.DoesNotExist:
+        return JsonResponse({'error': 'Game not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': 'Error'}, status=500)
 
@@ -684,5 +692,45 @@ def list_achievements(request):
         return JsonResponse({'error': 'Player not found'}, status=404)
     except (UserAchievement.DoesNotExist, Achievement.DoesNotExist):
         return JsonResponse({'error': 'Achievements not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': 'Error'}, status=500)
+
+@require_GET
+def leaderboard(request):
+    try:
+        game_name = request.GET.get('game')
+        # time = request.GET.get('time', 'all')
+        if not game_name:
+            return JsonResponse({'error': 'Missing game name'}, status=400)
+        
+
+        order_by = f"-{game_name}__total_win"
+        if game_name == 'all':
+            order_by = "-total_win"
+        
+        # if time == 'all-time':
+        player_stats = PlayerStats.objects.order_by(order_by)
+        # else:
+        #     player_stats = PlayerStats.objects.filter(updated_at__gte=timezone.now() - timezone.timedelta(days=7)).order_by(order_by)
+        
+        leaderboard = []
+        for player_stat in player_stats:
+            player_dict = {}
+            player_dict['id'] = player_stat.player.id
+            player_dict['username'] = player_stat.player.username
+            player_dict['total_win'] = player_stat.total_win
+            player_dict['total_lost'] = player_stat.total_lost
+            player_dict['total_game'] = player_stat.total_game
+            player_dict['win_streak'] = player_stat.win_streak
+            # player_dict['pong_win'] = player_stat.pong.total_win
+            # player_dict['pong_lost'] = player_stat.pong.total_lost
+            # player_dict['pong_game'] = player_stat.pong.total_game
+            # player_dict['tron_win'] = player_stat.tron.total_win
+            # player_dict['tron_lost'] = player_stat.tron.total_lost
+            # player_dict['tron_game'] = player_stat.tron.total_game
+            leaderboard.append(player_dict)
+        return JsonResponse(leaderboard, safe=False)
+    except PlayerStats.DoesNotExist:
+        return JsonResponse({'error': 'Player stats not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': 'Error'}, status=500)

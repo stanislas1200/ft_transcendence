@@ -62,6 +62,9 @@ async function loadPage(page, prevent) {
         case 'tron':
             loadTron();
             break;
+        case 'leaderboard':
+            loadLeaderboard();
+            break;
         default:
             break;
     }
