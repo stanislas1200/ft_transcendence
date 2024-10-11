@@ -1,48 +1,41 @@
 /* Container pour la SPA */
-.spa-container {
-    display: flex;
+.chat-container {
     width: 100%;
-    /* height: 100%; */
+    height: 100%;
+    background-color: var(--tertiary);
     border: 1px solid var(--secondary);
-    height: 90vh!important;
-    border-radius: 30px;
+    border-radius: 10px;
+    display: flex;
 }
-
-/* .chat-container {
-  } */
 
 /* Colonne de gauche pour la liste des amis */
 .sidebar {
     width: 30%;
-    /* background-color: #f4f4f4; */
     border-right: 1px solid var(--secondary);
     padding: 10px;
-    box-sizing: border-box;
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
 }
 
 /* Liste des amis */
 #friend-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
     display: flex;
     flex-direction: column;
 }
 
 #friend-list li {
     display: flex;
-    flex-direction: column;
     padding: 10px;
-    border-bottom: 1px solid var(--secondary);
+    border-top: 1px solid var(--secondary);
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
-#friend-list li:hover {
-    background-color: #e0e0e0;
+#friend-list li:first-child {
+    border-top: none;
+}
+
+#friend-list li:hover span{
+    scale: 1.2;
 }
 
 .friend-name {
