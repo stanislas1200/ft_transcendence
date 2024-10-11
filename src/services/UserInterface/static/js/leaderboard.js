@@ -75,8 +75,8 @@ async function renderLeaderboard(data) {
 
 function filterLeaderboard() {
 	const gameFilter = document.getElementById('game-filter').value;
-	const timeFilter = document.getElementById('time-filter').value;
-
+	// const timeFilter = document.getElementById('time-filter').value;
+	timeFilter = null;
 	fetchLeaderboardData(gameFilter, timeFilter);
 }
 

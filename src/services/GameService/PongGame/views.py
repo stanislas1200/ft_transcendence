@@ -718,16 +718,20 @@ def leaderboard(request):
             player_dict = {}
             player_dict['id'] = player_stat.player.id
             player_dict['username'] = player_stat.player.username
-            player_dict['total_win'] = player_stat.total_win
-            player_dict['total_lost'] = player_stat.total_lost
-            player_dict['total_game'] = player_stat.total_game
-            player_dict['win_streak'] = player_stat.win_streak
-            # player_dict['pong_win'] = player_stat.pong.total_win
-            # player_dict['pong_lost'] = player_stat.pong.total_lost
-            # player_dict['pong_game'] = player_stat.pong.total_game
-            # player_dict['tron_win'] = player_stat.tron.total_win
-            # player_dict['tron_lost'] = player_stat.tron.total_lost
-            # player_dict['tron_game'] = player_stat.tron.total_game
+            if game_name == 'all':
+                player_dict['total_win'] = player_stat.total_win
+                player_dict['total_lost'] = player_stat.total_lost
+                player_dict['total_game'] = player_stat.total_game
+                player_dict['win_streak'] = player_stat.win_streak
+            elif game_name == 'pong':
+                player_dict['total_win'] = player_stat.pong.total_win
+                player_dict['total_lost'] = player_stat.pong.total_lost
+                player_dict['total_game'] = player_stat.pong.total_game
+            elif game_name == 'tron':
+                player_dict['total_win'] = player_stat.tron.total_win
+                player_dict['total_lost'] = player_stat.tron.total_lost
+                player_dict['total_game'] = player_stat.tron.total_game
+                
             leaderboard.append(player_dict)
         return JsonResponse(leaderboard, safe=False)
     except PlayerStats.DoesNotExist:
