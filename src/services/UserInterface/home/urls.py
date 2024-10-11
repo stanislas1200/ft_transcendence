@@ -7,6 +7,7 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('bootstrap/', views.bootstrap, name='bootstrap'),
     path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
+    path('unabletoconnect/', views.unabletoconnect, name='unabletoconnect'),
     path('terms-of-service/', views.terms_of_service, name='terms_of_service'),
     path('<str:page>/', views.load_page, name='load_page'),
 ]

@@ -25,6 +25,9 @@ def terms_of_service(request):
 def bootstrap(request):
     return render(request, 'home/bootstrap.html')
 
+def unabletoconnect(request):
+    return render(request, 'home/unabletoconnect.html')
+
 def load_page(request, page):
     # Determine if the request is an AJAX request (for SPA)
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
