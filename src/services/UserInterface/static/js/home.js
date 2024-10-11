@@ -363,9 +363,9 @@ function displayFriendList(response) {
             newSpan.classList.add('list-span');
             newSpan.innerHTML = response.friends[i].username;
             if (response.friends[i].is_online)
-                newSpan.innerHTML += '(online)';
+                newSpan.innerHTML += ' (online)';
             else
-                newSpan.innerHTML += '(offline)';
+                newSpan.innerHTML += ' (offline)';
             newDiv.append(newSpan);
             let newButton = document.createElement('div');
             newButton.classList.add('list-join-button');
