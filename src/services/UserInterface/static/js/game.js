@@ -155,6 +155,8 @@ function randomJoinGameButton() {
                     console.log(xhr.responseText);
                     if (gameStyle === 'tron')
                         await loadPage("tron", 1);
+                    else if (gameStyle === 'gun_and_monsters')
+                        await loadPage("gam", 1);
                     else
                         await loadPage("pong", 1);
                     randomGameButton.disabled = false;

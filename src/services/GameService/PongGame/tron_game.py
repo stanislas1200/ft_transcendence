@@ -1,4 +1,4 @@
-from .models import Game, PongPlayer, User, GameType, PlayerGameTypeStats, Match, PlayerStats, PongStats, TronStats
+from .models import Game, PongPlayer, User, Match, PlayerStats, PongStats, TronStats
 from django.db.models import F
 from django.utils import timezone
 from asgiref.sync import sync_to_async

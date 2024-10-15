@@ -1,7 +1,10 @@
-from .models import Game, PongPlayer, User, GameType, PlayerGameTypeStats, Match
+from .models import Game, PongPlayer, User, PlayerStats, Match
 from django.db.models import F
 from django.utils import timezone
 from asgiref.sync import sync_to_async
+import math
+import random
+import time
 
 party_list = {}
 
@@ -12,7 +15,7 @@ class Party:
 		players = prop.players.all()
 		self.players = []
 		self.add_player(players, user, token)
-		self.state = 'waiting' # TODO : check
+		self.state = 'waiting'
 		self.players = sorted(self.players, key=lambda x: x['n'])
 		self.date = prop.start_date
 
@@ -29,11 +32,13 @@ class Party:
 			if not player_found and player.player == user:
 				self.players.append(self.get_player_info(player, token))
 				break
+		self.players = sorted(self.players, key=lambda x: x['n'])
 
 	def get_player_info(self, player, token=None):
 		return {
 			'name': player.player.username,
 			'id': player.id,
+			'user_id': player.player.id,
 			'token': token,
 			'n': player.n,
 			'x': TILE_SIZE * 2,
@@ -58,16 +63,29 @@ class Party:
 			p.save()
 
 			p = User.objects.get(username=player['name'])
-			game_type = GameType.objects.get(name='gun_and_monsters')
+			# game_type = GameType.objects.get(name='gun_and_monsters')
 
-			stats, created = PlayerGameTypeStats.objects.get_or_create(player=p, game_type=game_type)
-			stats.game_played = F('games_played') + 1
+			# stats, created = PlayerGameTypeStats.objects.get_or_create(player=p, game_type=game_type)
+			if not PlayerStats.objects.filter(player=p).exists():
+				PlayerStats.objects.get_or_create(player=p, pong=PongStats.objects.create(), tron=TronStats.objects.create())
+			player_stats = PlayerStats.objects.get(player=p)
+			
+			game.end_time = timezone.now()
+			game_duration = game.end_time - game.start_date
+			player_stats.total_game = F('total_game') + 1
+			# stats.game_played = F('games_played') + 1
 			if player['alive']:
-				stats.games_won = F('games_won') + 1
+				game.winners.add(p)
+				player_stats.total_win = F('total_win') + 1
+				player_stats.win_streak = F('win_streak') + 1
+				# stats.games_won = F('games_won') + 1
 			else:
-				stats.games_lost = F('games_lost') + 1
-			stats.total_score = F('total_score') + score
-			stats.save()
+				# stats.games_lost = F('games_lost') + 1
+				player_stats.total_lost = F('total_lost') + 1
+				player_stats.win_streak = 0
+			# stats.total_score = F('total_score') + score
+			# stats.save()
+			player_stats.save()
 
 			game.status = 'finished'
 			game.save()
@@ -106,31 +124,114 @@ def setup_gam(game_id, player, token):
 		else:
 			party.add_player(prop.players.all(), player, token)
 
-		if party.player_number <= prop.players.count() and prop.players.filter(player__id=player.id):
+		if party.player_number <= len(party.players) and prop.players.filter(player__id=player.id):
 			party.state = 'playing'
 
 		return "{'obstacles': party.map}"
 	return None
 
 map = [
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 1, 0, 1, 1, 0, 1, 0, 1],
-  [1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
-  [1, 0, 0, 0, 1, 1, 0, 0, 0, 1],
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-];
-
-TILE_SIZE = 64;
-monsters = [
-    {"x": TILE_SIZE * 2, "y": TILE_SIZE * 2, "hp": 100}
+	[1, 1, 1, 1, 1, 1, 1, 1],
+	[1, 0, 0, 0, 0, 0, 0, 1],
+	[1, 0, 0, 0, 0, 1, 0, 1],
+	[1, 0, 0, 0, 0, 1, 0, 1],
+	[1, 0, 1, 0, 1, 1, 0, 1],
+	[1, 0, 0, 0, 0, 0, 0, 1],
+	[1, 0, 0, 0, 0, 0, 0, 1],
+	[1, 1, 1, 1, 1, 1, 1, 1],
 ]
 
-# def update_monsters(game):
-# 	for monster in monsters:
-		# TODO : monster movement and attack
+TILE_SIZE = 64
+monsters = []
+projectiles = []
+waves = [
+	{"count": 5, "hp": 100, "speed": 1},
+	{"count": 10, "hp": 150, "speed": 1.5},
+	{"count": 15, "hp": 200, "speed": 2},
+]
 
-import math
+current_wave = 0
+
+ATTACK_COOLDOWN = 2.0
+
+def is_valid_spawn(x, y, game):
+	"""Check if the spawn position is valid"""
+	mapX = x // TILE_SIZE
+	mapY = y // TILE_SIZE
+	if mapX < 0 or mapX >= len(map[0]) or mapY < 0 or mapY >= len(map):
+		return False
+	if map[mapY][mapX] == 1:
+		return False
+	return True
+
+def spawn_wave(wave, game):
+	"""Spawn a wave of monsters"""
+	global monsters
+	monsters = []
+	for _ in range(wave["count"]):
+		while True:
+			x = random.randint(0, len(map[0]) - 1) * TILE_SIZE
+			y = random.randint(0, len(map) - 1) * TILE_SIZE
+			if is_valid_spawn(x, y, game):
+				monsters.append({"x": x, "y": y, "hp": wave["hp"], "speed": wave["speed"], "angle": 0})
+				break
+
+def update_monsters(game):
+	radius = 200
+	tile_size_half = TILE_SIZE / 2
+
+	players = [(player['x'], player['y'], player['hp'], player['alive']) for player in game.players]
+	for monster in monsters:
+		if monster["hp"] <= 0:
+			continue
+
+		nearest_player_index = None
+		nearest_distance = float('inf')
+		for i, (px, py, php, palive) in enumerate(players):
+			if palive:
+				dx = px - monster['x']
+				dy = py - monster['y']
+				distance = dx * dx + dy * dy
+				if distance < nearest_distance and distance <= radius*radius:
+					nearest_distance = distance
+					nearest_player_index = i
+
+		if not nearest_player_index:
+			continue
+
+		px, py, php = players[nearest_player_index][:3]
+
+		# Move towards the player
+		dx = px - monster['x']
+		dy = py - monster['y']
+		angle = math.atan2(dy, dx)
+		monster['angle'] = angle
+
+		sinangle = math.sin(angle)
+		cosangle = math.cos(angle)
+		newX = monster['x'] + cosangle * monster['speed']
+		newY = monster['y'] + sinangle * monster['speed']
+
+		mapX = math.floor(newX / TILE_SIZE)
+		mapY = math.floor(newY / TILE_SIZE)
+		monster_mapX = math.floor(monster['x'] / TILE_SIZE)
+		monster_mapY = math.floor(monster['y'] / TILE_SIZE)
+
+		if map[monster_mapY][mapX] != 1:
+			monster['x'] = newX
+
+		if map[mapY][monster_mapX] != 1:
+			monster['y'] = newY
+
+		# Check for collision with player
+		if abs(px - monster['x']) < tile_size_half and abs(py - monster['y']) < tile_size_half:
+			current_time = time.time()
+			if current_time - monster.get('last_attack_time', 0) >= ATTACK_COOLDOWN:
+				game.players[nearest_player_index]['hp'] -= 10
+				monster['last_attack_time'] = current_time
+				if game.players[nearest_player_index]['hp'] <= 0:
+					game.players[nearest_player_index]['alive'] = False
+
 async def update_gam(game_id):
 	"""Update the game state and handle player movement"""
 	if game_id not in party_list:
@@ -139,10 +240,15 @@ async def update_gam(game_id):
 	if game.state != 'playing':
 		return
 	
+	players_alive = 0
 	for player in game.players:
 		if player['alive']:
-			newX = player['x'] - math.sin(player['angle']) * player['speedX'] + math.cos(player['angle']) * player['speed'];
-			newY = player['y'] + math.cos(player['angle']) * player['speedX'] + math.sin(player['angle']) * player['speed'];
+			players_alive += 1
+			sinangle = math.sin(player['angle'])
+			cosangle = math.cos(player['angle'])
+			newX = player['x'] - sinangle * player['speedX'] + cosangle * player['speed'];
+			newY = player['y'] + cosangle * player['speedX'] + sinangle * player['speed'];
+
 
 			mapX = math.floor(newX / TILE_SIZE);
 			mapY = math.floor(newY / TILE_SIZE);
@@ -152,12 +258,27 @@ async def update_gam(game_id):
 
 			if (map[mapY][math.floor(player['x'] / TILE_SIZE)] != 1):
 				player['y'] = newY;
-	# update_monsters(game)
+	if players_alive == 1:
+		game.state = 'finished'
+		await sync_to_async(game.save)()
+		return game.state, game.game_id
+
+	update_monsters(game)
+	update_projectiles(game)
+
+	if all(monster["hp"] <= 0 for monster in monsters):
+		global current_wave
+		current_wave += 1
+		if current_wave < len(waves):
+			spawn_wave(waves[current_wave], game)
+		# else:
+		# 	game.state = 'won'
 	
 def get_gam_n(id, token):
 	game = party_list.get(id)
 	if game is None:
 		return
+
 	for player in game.players:
 		if player['token'] == token:
 			return player['n']
@@ -168,7 +289,10 @@ def dict_player(player):
 		"username": player['name'],
 		"x": player['x'],
 		"y": player['y'],
-		"alive": player['alive']
+		"alive": player['alive'],
+		"user_id": player['user_id'],
+		"angle": player['angle'],
+		'hp': player['hp'],
 	}
 
 def get_gam_state(game_id):
@@ -183,37 +307,62 @@ def get_gam_state(game_id):
 	}
 	return game_state
 
-def keyDown(game, n, k):
-	if (k == 'ArrowUp'): 
-		game.players[n-1]['speed']= 2
-	if (k == 'z'): 
-		game.players[n-1]['speed']= 2
-	if (k == 'ArrowDown'): 
-		game.players[n-1]['speed']= -2
-	if (k == 's'): 
-		game.players[n-1]['speed']= -2
-	
-	if (k == 'ArrowLeft'): 
-		game.players[n-1]['speedX'] = -2
-	if (k == 'q'): 
-		game.players[n-1]['speedX'] = -2
-	if (k == 'ArrowRight'): 
-		game.players[n-1]['speedX'] = 2
-	if (k == 'd'): 
-		game.players[n-1]['speedX'] = 2
-
-def keyUp(game, n, k):
-	if (k == 'ArrowUp' or k == 'z' or k == 'ArrowDown' or k == 's'): 
-		game.players[n-1]['speed']= 0
-	if (k == 'ArrowLeft' or k == 'q' or k == 'ArrowRight' or k == 'd'): 
-		game.players[n-1]['speedX'] = 0
-
-def move_gam(game_id, n, k, direction, angle):
+def move_gam(game_id, n, keyStates, angle):
 	game = party_list.get(game_id)
 	if not game:
 		return
+	
 	game.players[n-1]['angle'] = angle
-	if direction == 'down':
-		keyDown(game, n, k)
-	elif direction == 'up':
-		keyUp(game, n, k)
+
+	game.players[n-1]['speed'] = 0
+	game.players[n-1]['speedX'] = 0
+	if keyStates.get('ArrowUp', False) or keyStates.get('z', False):
+		game.players[n-1]['speed'] += 2
+
+	if keyStates.get('ArrowDown', False) or keyStates.get('s', False):
+		game.players[n-1]['speed'] += -1
+
+	if keyStates.get('ArrowLeft', False) or keyStates.get('q', False):
+		game.players[n-1]['speedX'] += -2
+
+	if keyStates.get('ArrowRight', False) or keyStates.get('d', False):
+		game.players[n-1]['speedX'] += 2
+
+	game.players[n-1]['speed'] = min(2, max(-1, game.players[n-1]['speed']))
+	game.players[n-1]['speedX'] = min(2, max(-2, game.players[n-1]['speedX']))
+
+	if keyStates.get(' ', False):
+		shoot(game.players[n-1])
+		
+def shoot(player):
+	"""Create a projectile when the player shoots"""
+	projectile_speed = 5
+	angle = player['angle']
+	x = player['x']
+	y = player['y']
+	dx = math.cos(angle) * projectile_speed
+	dy = math.sin(angle) * projectile_speed
+	projectiles.append({'x': x, 'y': y, 'dx': dx, 'dy': dy})
+
+def update_projectiles(game):
+	"""Update projectiles and handle collisions"""
+	global projectiles
+	new_projectiles = []
+	for projectile in projectiles:
+		projectile['x'] += projectile['dx']
+		projectile['y'] += projectile['dy']
+
+		mapX = math.floor(projectile['x'] / TILE_SIZE)
+		mapY = math.floor(projectile['y'] / TILE_SIZE)
+
+		if map[mapY][mapX] == 1:
+			continue
+
+		for monster in monsters:
+			if monster['hp'] > 0 and abs(monster['x'] - projectile['x']) < TILE_SIZE / 2 and abs(monster['y'] - projectile['y']) < TILE_SIZE / 2:
+				monster['hp'] -= 10				
+				break
+		else:
+			new_projectiles.append(projectile)
+
+	projectiles = new_projectiles

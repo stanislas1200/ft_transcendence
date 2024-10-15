@@ -18,6 +18,7 @@
 		padding: 2px;
 		border-radius: 5px;
 		margin-right: 10px;
+		cursor: pointer;
 	}
 
 	.podium {
@@ -27,37 +28,57 @@
 		margin-bottom: 30px;
 
 		img {
-			width: 50px;
-			height: 50px;
+			width: 70px;
+			height: 70px;
 			border-radius: 50%;
-			margin-bottom: 10px;
 			object-fit: cover;
+		}
+
+		.username {
+			font-size: 18px;
+			font-weight: bold;
 		}
 	}
 
-	.podium div {
-		color: var(--text);
-		text-align: center;
-		padding: 10px;
+	.player-card {
 		border-radius: 10px;
-		width: 150px;
-		margin: 0 10px;
-		box-shadow: 0 4px 8px 0px var(--primary);
+		padding: 20px;
+		color: var(--text);
+		box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+		transition: transform 0.3s ease;
+		margin: 0 10px 10px;
+		width: 160px;
+
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: space-evenly;
+		cursor: pointer;
+
+		p {
+			font-size: 12px;
+		}
 	}
 
-	.first {
-		background: linear-gradient(135deg, #FFD700, #FFC700);
+	.player-card:hover {
+		transform: translateY(-10px);
+	}
+
+
+	.player-card.rank-1 {
+		height: 220px;
+		background-color: gold;
+		color: black;
+	}
+
+	.player-card.rank-2 {
 		height: 200px;
+		background-color: silver;
 	}
 
-	.second {
-		background: linear-gradient(135deg, #C0C0C0, #B0B0B0);
+	.player-card.rank-3 {
 		height: 180px;
-	}
-
-	.third {
-		background: linear-gradient(135deg, #CD7F32, #BD6F22);
-		height: 160px;
+		background-color: #cd7f32;
 	}
 
 	table {
@@ -65,29 +86,23 @@
 		border-collapse: collapse;
 	}
 
-	th,
-	td {
-		padding: 15px;
-		text-align: left;
-		border-bottom: 1px solid var(--secondary);
-	}
-
-	th {
-		background-color: #2C2C34;
-		color: var(--primary);
-		text-transform: uppercase;
-		letter-spacing: 1px;
-	}
-
-	td {
+	table th,
+	table td {
+		padding: 12px;
+		border-bottom: 1px solid var(--primary);
 		color: var(--text);
 	}
 
-	tr:hover {
-		background-color: #2C2C34;
+	table tr:hover {
+		background-color: var(--primary);
 	}
 
-	.username {
+	table th {
+		background-color: #3a3a5a;
+		letter-spacing: 1px;
+	}
+
+	table td {
 		cursor: pointer;
 	}
 </style>
@@ -102,19 +117,19 @@
 </div>
 
 <div class="podium">
-	<div class="second">
+	<div class="player-card rank-2">
 		<img src="" alt="Avatar">
-		<p class="username" data-username="Player3">Player2</p>
+		<p class="username" data-username="Player3">Player2</p><span>🥈</span>
 		<p>110 Wins / 40 Losses</p>
 	</div>
-	<div class="first">
+	<div class="player-card rank-1">
 		<img src="" alt="Avatar">
-		<p class="username" data-username="Player3">Player1</p>
+		<p class="username" data-username="Player3">Player1</p><span>🥇</span>
 		<p>120 Wins / 30 Losses</p>
 	</div>
-	<div class="third">
+	<div class="player-card rank-3">
 		<img src="" alt="Avatar">
-		<p class="username" data-username="Player3">Player3</p>
+		<p class="username" data-username="Player3">Player3</p><span>🥉</span>
 		<p>90 Wins / 50 Losses</p>
 	</div>
 </div>

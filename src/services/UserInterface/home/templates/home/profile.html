@@ -1,54 +1,267 @@
 {% load static %}
 
-<div class="wrapper">
-    <div class="settings-grid-userCard">
-        <!-- profile picture + userName + add friend + message -->
-        <div class="profile-container" id="profile-container">
-            <div class="profilePictureUserCard" id="profilePictureUserCard">
-                <img id="profileImage" class="profilePictureUserCard" src="{% static 'images/pp.png' %}" alt="">
-            </div>
-            <p id="userName">
-                <!-- UserName -->
-            </p>
-            <div class="request-recieve" id="request-recieve">
-                <!-- <div class="friend-request"> -->
-                <!-- contient nom et boutton -->
-                <!-- </div> -->
-                <!-- all pending request -->
-            </div>
+<style>
+    .profile-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: space-between;
+    }
+
+    .profile-info {
+        flex: 1 1 200px;
+        max-width: 300px;
+        text-align: center;
+        padding: 10px;
+        border: 2px solid var(--secondary);
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .profile-pic {
+        border-radius: 50%;
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+    }
+
+    /* Stats and Game History */
+    .stats-and-history {
+        display: flex;
+        flex-wrap: wrap;
+        flex: 2;
+        padding: 10px;
+        border: 2px solid var(--secondary);
+        border-radius: 5px;
+        gap: 10px;
+    }
+
+    .game-history {
+        flex: 1;
+        margin-bottom: 20px;
+        max-height: 500px;
+    }
+
+    .party-info-section {
+        flex: 1;
+    }
+
+    .graph-section {
+        display: flex;
+        border: 2px solid var(--secondary);
+        border-radius: 5px;
+        justify-content: center;
+        align-items: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin-top: 20px;
+        flex: 1;
+        gap: 10px;
+    }
+
+    .party-state {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: space-between;
+    }
+
+    .party-details {
+        flex: 1;
+        color: var(--text);
+        padding: 10px;
+    }
+
+    .player-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+        justify-content: space-evenly;
+    }
+
+    .player-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 120px;
+        padding: 10px;
+        background: var(--tertiary);
+        border-radius: 10px;
+        cursor: pointer;
+
+        img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+    }
+
+    .line-charts,
+    .bar-charts {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    canvas {
+        width: 100% !important;
+        max-width: 300px;
+        max-height: 200px;
+    }
+
+    .skeleton-loader {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+
+    .skeleton-row {
+        max-width: 90%;
+        height: 20px;
+    }
+
+    .skeleton {
+        background-color: #cbcbcb94;
+        border-radius: 4px;
+        width: 100%;
+        margin: 10px;
+        animation: pulse 1.5s infinite;
+    }
+
+    .skeleton-chart {
+        max-width: 300px;
+        height: 180px;
+    }
+
+    @keyframes pulse {
+        0% {
+            background-color: #cbcbcb94;
+        }
+
+        50% {
+            background-color: #8b8b8b94;
+        }
+
+        100% {
+            background-color: #cbcbcb94;
+        }
+    }
+
+
+    .stats-section {
+        margin-top: 20px;
+        padding-bottom: 10px;
+        color: var(--text);
+    }
+
+    .stats-section h4 {
+        margin-bottom: 10px;
+        color: var(--secondary);
+    }
+
+    .stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        background-color: var(--tertiary);
+        padding: 10px;
+        border-radius: 5px;
+        flex: 1;
+    }
+
+    .stat-label {
+        font-weight: bold;
+        color: var(--primary);
+    }
+
+    .stat-value {
+        margin-top: 5px;
+    }
+</style>
+
+<div class="profile-section">
+    <!-- Profile and User Info -->
+    <div class="profile-info">
+        <img id="profileImage" class="profilePictureUserCard profile-pic" src="{% static 'images/pp.png' %}" alt="">
+        <p id="userName">
+            <!-- UserName -->
+        </p>
+        <div class="request-recieve" id="request-recieve">
+            <!-- <div class="friend-request"> -->
+            <!-- contient nom et boutton -->
+            <!-- </div> -->
+            <!-- all pending request -->
         </div>
     </div>
-    <div class="settings-grid-userInformation">
-        <div class="info-area">
-            <div class="legend">
-                <p class="history_win_loose">Win/Loose</p>
-                <p class="pipe">|</p>
-                <p class="history_game_mode">Game mode</p>
-                <p class="pipe">|</p>
-                <p class="history_score">Score</p>
-                <p class="pipe">|</p>
-                <p class="history_date">Date</p>
-                <p class="pipe">|</p>
-                <p class="history_status">Status</p>
-            </div>
-            <div class="border_history">
-                <div class="history" id="history">
+
+    <!-- Game History -->
+    <div class="stats-and-history">
+        <div class="game-history">
+            <div class="info-area">
+                <div class="legend">
+                    <p class="history_win_loose">Win/Loose</p>
+                    <p class="pipe">|</p>
+                    <p class="history_game_mode">Game mode</p>
+                    <p class="pipe">|</p>
+                    <p class="history_score">Score</p>
+                    <p class="pipe">|</p>
+                    <p class="history_date">Date</p>
+                    <p class="pipe">|</p>
+                    <p class="history_status">Status</p>
                 </div>
+                <div class="border_history">
+                    <div class="history" id="history">
+                        <!-- Skeleton Loader -->
+                        <div class="skeleton-loader" id="skeleton-loader-hist" style="flex-direction: column;">
+                            <div class="skeleton skeleton-row"></div>
+                            <div class="skeleton skeleton-row"></div>
+                            <div class="skeleton skeleton-row"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="achivement">
+                    achivement
+                </div> -->
             </div>
-            <!-- <div class="achivement">
-                achivement
-            </div> -->
         </div>
-        <div class="directionColumn center oneGameInformation" id="oneGameInformation">
-            <!-- one game information -->
-            <p class="gameModeHistory" id="gameModeHistory"></p>
-            <div class="player-versus">
-                <img id="player1" class="player" src="" alt="IMG">
-                <div class="current-score" id="score">X : X</div>
-                <img id="player2" class="player" src="" alt="IMG">
+
+        <div class="party-details">
+            <div class="party-state" style="display: none">
+                <p><strong>Game: </strong> Pong</p>
+                <p><strong>Status:</strong> finished</p>
+
+                <p><strong>Start Date:</strong> 10/14/24</p>
+                <p><strong>End Time:</strong> 10/14/24</p>
             </div>
-            <div class="nameOfPlayer" id="nameOfPlayer"></div>
+            <!-- Player Cards -->
+            <div class="player-cards">
+            </div>
         </div>
+
+    </div>
+</div>
+
+
+<!-- Stats and Graph Section -->
+<div class="graph-section">
+    <!-- Circle Graphs -->
+    <div class="circle-graphs">
         <div class="directionColumn center graphInformation" id="graphInformation">
             <svg viewBox="0 0 36 36" class="circle-svg">
 
@@ -64,6 +277,120 @@
             <p id="totalScore">Total of points scored: </p>
         </div>
     </div>
+
+    <!-- Skeleton Loader -->
+    <div id="skeleton-loader" class="skeleton-loader">
+        <div class="skeleton skeleton-chart"></div>
+        <div class="skeleton skeleton-chart"></div>
+        <div class="skeleton skeleton-chart"></div>
+    </div>
+
+    <!-- Line Charts -->
+    <div class="line-charts">
+        <canvas id="gamePlaysChart"></canvas>
+        <canvas id="pongPlaysChart"></canvas>
+        <canvas id="tronPlaysChart"></canvas>
+    </div>
+
+    <!-- Bar Charts -->
+    <div class="bar-charts">
+        <canvas id="winLossChart"></canvas>
+        <canvas id="pongWinLossChart"></canvas>
+        <canvas id="tronWinLossChart"></canvas>
+    </div>
+</div>
+
+<div class="stats-section">
+    <h4>Player Stats:</h4>
+    <div class="stats">
+        <div class="stat">
+            <span class="stat-label">Total Wins:</span>
+            <span class="stat-value" id="totalWins">11</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Losses:</span>
+            <span class="stat-value" id="totalLosses">17</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Games:</span>
+            <span class="stat-value" id="totalGames">28</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Win Streak:</span>
+            <span class="stat-value" id="winStreak">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Tournament Wins:</span>
+            <span class="stat-value" id="tournamentWins">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Tournament Played:</span>
+            <span class="stat-value" id="tournamentPlayed">0</span>
+        </div>
+    </div>
+    <h4>Pong Stats:</h4>
+    <div class="stats">
+        <div class="stat">
+            <span class="stat-label">Total Wins:</span>
+            <span class="stat-value" id="pongTotalWins">1</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Losses:</span>
+            <span class="stat-value" id="pongTotalLosses">7</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Games:</span>
+            <span class="stat-value" id="pongTotalGames">8</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Score:</span>
+            <span class="stat-value" id="pongTotalScore">11</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Fastest Win:</span>
+            <span class="stat-value" id="pongFastestWin">P0DT00H02M39.675351S</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Longest Game:</span>
+            <span class="stat-value" id="pongLongestGame">P0DT00H02M39.675351S</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Play Time:</span>
+            <span class="stat-value" id="pongPlayTime">P0DT00H10M31.772206S</span>
+        </div>
+    </div>
+    <h4>Tron Stats:</h4>
+    <div class="stats">
+        <div class="stat">
+            <span class="stat-label">Total Wins:</span>
+            <span class="stat-value" id="tronTotalWins">5</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Losses:</span>
+            <span class="stat-value" id="tronTotalLosses">5</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Games:</span>
+            <span class="stat-value" id="tronTotalGames">10</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Score:</span>
+            <span class="stat-value" id="tronTotalScore">50</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Fastest Win:</span>
+            <span class="stat-value" id="tronFastestWin">P0DT00H00M17.579581S</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Longest Game:</span>
+            <span class="stat-value" id="tronLongestGame">P0DT00H01M36.395804S</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Play Time:</span>
+            <span class="stat-value" id="tronPlayTime">P0DT00H05M12.064745S</span>
+        </div>
+    </div>
 </div>
 <script>loadProfile();</script>
 <!-- <script>listRequest();</script> -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

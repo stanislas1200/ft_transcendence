@@ -20,7 +20,7 @@ import time
 async def closeWithMessage(ws, str):
 	await ws.accept()
 	await asyncio.sleep(0.5)
-	await ws.send(text_data=str)
+	await ws.send(text_data=json.dumps({"error": str}))
 	await ws.close(code=4001)
 
 
@@ -35,12 +35,12 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 			self.user_id = cookie['userId'].value if 'userId' in cookie else None
 
 		if not self.token or not self.user_id:
-			return await closeWithMessage(self, 'User not connected')
+			return await closeWithMessage(self, "User not connected")
 
 		user = await sync_to_async(get_player)(None, self.token, self.user_id)
 
 		if not user:
-			return await closeWithMessage(self, 'User not connected')
+			return await closeWithMessage(self, "User not connected")
 
 		self.user_id = user.id
 		self.group_name = f'notifications_{self.user_id}'
@@ -146,31 +146,26 @@ class GameConsumer(AsyncWebsocketConsumer):
 			return
 
 	async def game_loop(self):
-		last_time = time.time()
 		ret = 0
 		while True:
-			current_time = time.time()
-			elapsed_time = current_time - last_time
-			if elapsed_time >= (1/60):
-				if self.game == 'pong':
-					ret, game_id = await update_pong(self.game_id) or (None, None)
-					game_state = get_pong_state(self.game_id)
-				elif self.game == 'tron':
-					ret, game_id = await update_tron(self.game_id) or (None, None)
-					game_state = get_tron_state(self.game_id)
-				elif self.game == 'gun_and_monsters':
-					ret, game_id = await update_gam(self.game_id) or (None, None)
-					game_state = get_gam_state(self.game_id)
-				
-				if game_state:
-					await self.channel_layer.group_send(
-						self.game_group_name,
-						{
-							'type': 'update_game_state',
-							'game_state': game_state
-						}
-					)
-					last_time = current_time
+			if self.game == 'pong':
+				ret, game_id = await update_pong(self.game_id) or (None, None)
+				game_state = get_pong_state(self.game_id)
+			elif self.game == 'tron':
+				ret, game_id = await update_tron(self.game_id) or (None, None)
+				game_state = get_tron_state(self.game_id)
+			elif self.game == 'gun_and_monsters':
+				ret, game_id = await update_gam(self.game_id) or (None, None)
+				game_state = get_gam_state(self.game_id)
+			
+			if game_state:
+				await self.channel_layer.group_send(
+					self.game_group_name,
+					{
+						'type': 'update_game_state',
+						'game_state': game_state
+					}
+				)
 
 			if ret:
 				await self.channel_layer.group_send(
@@ -183,8 +178,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				if self.is_connected:
 					await self.close()
 				break # TODO NM : circle game solo
-			# await asyncio.sleep(1/60)
-			await asyncio.sleep(0)
+			await asyncio.sleep(1/30)
 
 	async def update_game_state(self, event):
 		await self.send(text_data=json.dumps(event['game_state']))
@@ -192,7 +186,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 	async def receive(self, text_data):
 		try:
 			data = json.loads(text_data)
-			direction = data['direction']
+			direction = data.get('direction', False)
 
 			if self.game == 'pong':
 				n = get_n(self.game_id, self.token)
@@ -205,12 +199,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 				return self.send(text_data=json.dumps({
 					'error': 'Not a player'
 				}))
+			
 			if self.game == 'pong':
 				move_pong(self.game_id, n, direction)
 			elif self.game == 'tron':
 				move_tron(self.game_id, n, direction)
 			elif self.game == 'gun_and_monsters':
-				move_gam(self.game_id, n, data['k'], direction, data['angle'])
+				move_gam(self.game_id, n, data['k'], data['angle'])
 
 		except Exception as e:
 			await self.send(text_data=json.dumps({
