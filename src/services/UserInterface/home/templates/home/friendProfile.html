@@ -69,3 +69,9 @@
         </div>
     </div>
 </div>
+
+<script>
+    const queryString = window.location.search;
+    const queryWithoutQuestionMark = queryString.substring(1); // get username ~.~
+    searchUser(queryWithoutQuestionMark)
+</script>

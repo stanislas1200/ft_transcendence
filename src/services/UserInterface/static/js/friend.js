@@ -95,8 +95,8 @@ function chat() {
                 chatUsernameDisplay.innerHTML = chatusername;
                 chatUsernameDisplay.classList.add('chat-username');
                 const click = async ({ target }) => {
-                    await loadPage('friendProfile', 1);
-                    searchUser(target.innerHTML);
+                    await loadPage('friendProfile', 1, target.innerHTML);
+                    // searchUser(target.innerHTML);
                 }
 
                 chatUsernameDisplay.addEventListener('click', click);

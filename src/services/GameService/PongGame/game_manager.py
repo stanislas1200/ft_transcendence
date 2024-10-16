@@ -8,17 +8,6 @@ from django.forms.models import model_to_dict
 from channels.layers import get_channel_layer
 
 def send_notification(request, users_id=None, message=None):
-	if request:
-		internal_secret = request.headers.get('X-Internal-Secret')
-
-		if internal_secret != os.environ['INTERNAL_SECRET']:
-			return JsonResponse({'error': 'Unauthorized access'}, status=403)
-		
-	if not message:
-		data = request.body.decode()
-		data = json.loads(data)
-		message = data.get('message')
-		users_id = data.get('user_id')
 
 	if message and users_id:
 		channel_layer = get_channel_layer()
@@ -31,7 +20,6 @@ def send_notification(request, users_id=None, message=None):
 					'message': message
 				}
 			)
-	return JsonResponse({'status': 'Message sent'})
 
 
 def achievement_notif(user_id, achievement):
@@ -76,7 +64,7 @@ def check_achievements(user, stats,  win):
 		if created:
 			achievement_notif(user.id, ach)
 
-	if stats['pong']['game_won'] >= 10:
+	if stats['pong']['total_win'] >= 10:
 		ach, created = Achievement.objects.get_or_create(name='Pong Master', description='Win 10 games of Pong.', points=10)
 		_, created = UserAchievement.objects.get_or_create(user=user, achievement=ach)
 		if created:
@@ -88,7 +76,7 @@ def check_achievements(user, stats,  win):
 		if created:
 			achievement_notif(user.id, ach)
 
-	if stats['tron']['game_won'] >= 10:
+	if stats['tron']['total_win'] >= 10:
 		ach, created = Achievement.objects.get_or_create(name='Tron Champion', description='Win 10 games of Tron.', points=10)
 		_, created = UserAchievement.objects.get_or_create(user=user, achievement=ach)
 		if created:
@@ -362,7 +350,7 @@ class Party:
 					winner = p
 					game.winners.add(p)
 					# stats.games_won = F('games_won') + 1
-					player_stats.pong.game_won = F('game_won') + 1
+					player_stats.pong.total_win = F('total_win') + 1
 					player_stats.total_win = F('total_win') + 1
 					player_stats.win_streak = F('win_streak') + 1
 					if not player_stats.pong.fastest_win:
@@ -371,7 +359,7 @@ class Party:
 						player_stats.pong.fastest_win = game_duration
 				else:
 					# stats.games_lost = F('games_lost') + 1
-					player_stats.pong.game_lost = F('game_lost') + 1
+					player_stats.pong.total_lost = F('total_lost') + 1
 					player_stats.total_lost = F('total_lost') + 1
 					player_stats.win_streak = 0
 
@@ -476,6 +464,8 @@ def get_pong_state(game_id):
 	game_state = {
 		'x': game.ball['x'],
 		'y': game.ball['y'],
+		'dx': game.ball['dx'],
+		'dy': game.ball['dy'],
 		'positions': game.positions,
 		'scores': scores,
 		'usernames': username,
@@ -524,29 +514,37 @@ def move_pong(game_id, n, direction):
 import time
 def ai_play(game):
 	last_update_time = 0
+	prediction_interval = 1
+	move_interval = 0.05
+	if game.map:
+		prediction_frames = 20
+	else:
+		prediction_frames = 40
+
 	while True:
-		if game.ball['dx'] > 0 or game.ball['x'] > game.width/2:
-			# pass
+		if game.ball['x'] > game.width / 2:
 			current_time = time.time()
-			if current_time - last_update_time >= 1:
+			if current_time - last_update_time >= prediction_interval*2:
 				# Update future ball position
 				future_y = game.ball['y']
 				future_x = game.ball['x']
 				future_dy = game.ball['dy']
 				future_dx = game.ball['dx']
-				for _ in range(100):  # Predict x frames ahead
+				for _ in range(prediction_frames):  # Predict x frames ahead
 					future_y += future_dy
 					future_x += future_dx
 					# Check for future collision with top and bottom
-					if future_y <= 0 + game.ballR or future_y >= game.height - game.ballR:
+					if future_y <= game.ballR or future_y >= game.height - game.ballR:
 						future_dy *= -1  # Reverse future y direction
-						future_y += future_dy*1.5
-				
+						future_y += future_dy * 1.5
+
 					new_ball = {'x': future_x, 'y': future_y}
 					for shape in game.map:
+						if shape['vertices'][0]['x'] < game.width/2:
+							pass
 						if in_polygon_with_radius(new_ball, shape['vertices'], game.ballR):
-							nex_x = future_x + (future_dx * -1)
-							new_point = {'x': nex_x, 'y': future_y}
+							next_x = future_x - future_dx
+							new_point = {'x': next_x, 'y': future_y}
 							if in_polygon_with_radius(new_point, shape['vertices'], game.ballR):
 								future_dy *= -1
 								future_y += future_dy
@@ -567,16 +565,16 @@ def ai_play(game):
 			for _ in range(20):
 				if future_y < game.positions[1] - 10:
 					move_pong(game.game_id, 2, 'up')
-					time.sleep(0.01)
+					time.sleep(move_interval)
 					if future_y >= game.positions[1]:
 						break
 				elif future_y > game.positions[1] + 10:
 					move_pong(game.game_id, 2, 'down')
-					time.sleep(0.01)
+					time.sleep(move_interval)
 					if future_y <= game.positions[1]:
 						break
 		else:
-			time.sleep(0.5)
+			time.sleep(0.2)
 		time.sleep(0.1)
 
 def check_collision(game, vertices, n):
@@ -603,7 +601,7 @@ import threading
 def randomize_direction(game):
 	# angle = random.uniform(0, 2 * math.pi)  # Full circle (0 to 2π)
 	angle = random.uniform(math.radians(-60), math.radians(60))
-    #|/-45
+	#|/-45
 	#|---0
 	#|\ 45
 	dx = math.cos(angle)
@@ -753,23 +751,23 @@ async def update_pong(game_id):
 
 import math
 def in_polygon_with_radius(point, vertices, radius=0):
-    x, y = point['x'], point['y']
+	x, y = point['x'], point['y']
 
-    # Check the point itself first
-    if in_polygon(point, vertices):
-        return True
+	# Check the point itself first
+	if in_polygon(point, vertices):
+		return True
 
-    # Check around the point in a circle defined by the radius
-    for angle in range(0, 360, 20):  # Check every 20 degrees
-        rad = math.radians(angle)
-        x_offset = radius * math.cos(rad)
-        y_offset = radius * math.sin(rad)
+	# Check around the point in a circle defined by the radius
+	for angle in range(0, 360, 20):  # Check every 20 degrees
+		rad = math.radians(angle)
+		x_offset = radius * math.cos(rad)
+		y_offset = radius * math.sin(rad)
 
-        test_point = {'x': x + x_offset, 'y': y + y_offset}
-        if in_polygon(test_point, vertices):
-            return True
+		test_point = {'x': x + x_offset, 'y': y + y_offset}
+		if in_polygon(test_point, vertices):
+			return True
 
-    return False
+	return False
 
 def in_polygon(point, vertices):
 	x, y = point['x'], point['y']

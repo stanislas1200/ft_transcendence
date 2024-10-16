@@ -23,7 +23,37 @@ function closeWebSocket() {
 	isGameLoopRunning = false
 }
 
+let obstacles = null;
+
+let game_state = {
+	ball: {
+		x: 400,
+		y: 300,
+		r: 5
+	},
+	mode: "ffa",
+	obstacles: [],
+	usernames: null,
+	positions: null,
+	scores: null
+}
+
+function drawError(error) {
+	cancelAllAnimationFrames();
+	c.clearRect(0, 0, 800, 650);
+	c.font = "30px monospace";
+	c.textAlign = 'center';
+	c.textBaseline = 'middle';
+	c.fillStyle = 'red';
+	c.fillText(error, 800 / 2, 600 / 2);
+	c.fillText('Moving to game page', 800 / 2, 650 / 2);
+	setTimeout(() => {
+		loadPage('game', 1)
+	}, 2000);
+}
+
 function connect(game) {
+	// TODO : close connection if page left
 	window.addEventListener('popstate', closeWebSocket);
 
 	socket.addEventListener('open', function (event) {
@@ -33,8 +63,10 @@ function connect(game) {
 	socket.addEventListener('message', function (event) {
 		let serverMessage = JSON.parse(event.data);
 
-		if (serverMessage.error)
+		if (serverMessage.error) {
+			drawError(serverMessage.error);
 			return;
+		}
 
 		if (game === 'pong') {
 			if (serverMessage.message === 'Setup') {
@@ -56,11 +88,22 @@ function connect(game) {
 				}
 			}
 		}
+		set = false
+		if (!game_state.old_dx)
+			set = true;
+		else {
+			old_dx = game_state.old_dx;
+			old_dy = game_state.old_dy;
+		}
 		game_state = serverMessage;
-		// else if (game === 'tron') {
-		// 	game_state = serverMessage.state
-		// 	players = serverMessage.players;
-		// }
+		if (set) {
+			game_state.old_dx = game_state.dx;
+			game_state.old_dy = game_state.dx;
+		}
+		else{
+			game_state.old_dx = old_dx;
+			game_state.old_dy = old_dy;
+		}
 	});
 
 	// socket.addEventListener('close', function (event) {
@@ -87,18 +130,6 @@ let offScreenC = null;
 let offc = null;
 let obstaclesDrawn = false;
 
-game_state = {
-	ball: {
-		x: 400,
-		y: 300,
-		r: 5
-	},
-	mode: "ffa",
-	obstacles: [],
-	usernames: null,
-	positions: null,
-	scores: null
-}
 
 function updatePlayers() {
 	var direction
@@ -118,7 +149,7 @@ function updatePlayers() {
 	}
 }
 
-function drawPlayers() {
+function drawPaddle() {
 	colors = ['#7e3047', '#498d14', '#a891d5', 'white']
 	c.fillStyle = colors[0]
 	if (game_state.positions) {
@@ -240,7 +271,7 @@ async function draw() {
 	c.fillRect(0, 0, 800, 650);
 	c.fillStyle = "#8791ed";
 	for (i = 5; i < 600; i += 20)c.fillRect(400, i, 4, 10)
-	drawPlayers()
+	drawPaddle()
 	drawNS()
 	c.fillStyle = "#FFFFFF";
 	// if (game_state.state == 'waiting')
@@ -258,13 +289,32 @@ async function draw() {
 	c.fill()
 }
 
-async function gameLoop(game) {
+function detectHit() {
+	if (game_state.dx != game_state.old_dx || game_state.dy != game_state.old_dy) {
+		game_state.old_dx = game_state.dx
+		game_state.old_dy = game_state.dy
+		hitSound.currentTime = 0;
+		hitSound.play();
+	}
+}
+
+let lastTimestamp = 0;
+async function gameLoop(game, timestamp) {
 	try {
 		if (isGameLoopRunning) {
+            const deltaTime = timestamp - lastTimestamp;
+            lastTimestamp = timestamp;
+
 			if ( game == 'pong') {
 				await draw();
+				detectHit();
 				updatePlayers();
 				end = await drawEnd();
+			}
+			else if (game == 'gam') {
+				await drawGam(deltaTime);
+				// updatePlayersGam();
+				end = await drawEndGam();
 			}
 			else {
 				await drawTron();
@@ -280,7 +330,7 @@ async function gameLoop(game) {
 				game_state.state = 'nope';
 				return;
 			}
-			requestAnimationFrame(() => gameLoop(game))
+			requestAnimationFrame((timestamp) => gameLoop(game, timestamp))
 		}
 	} catch (error) {
 		console.log(error)
@@ -294,6 +344,7 @@ function cancelAllAnimationFrames(){
 	}
  }
 
+ let hitSound = new Audio('https://localhost:8003/usr/src/app/static/sounds/hit.mp3'); // need global var {% static 'sounds/hit.mp3' %}
 function loadPong() {
 	let partyId = localStorage.getItem('gameId');
 	// localStorage.removeItem('gameId');

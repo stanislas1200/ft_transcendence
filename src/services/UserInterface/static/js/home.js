@@ -84,8 +84,8 @@ function clickOnFriend() {
         userName = userName.substr(24, 5);
         let match = userName.match(/^(.*?)</);
 
-        await loadPage('friendProfile', 1);
-        searchUser(match[1]);
+        await loadPage('friendProfile', 1, match[1]);
+        // searchUser(match[1]);
     }
 
     const inputs = document.querySelectorAll('#friendList');

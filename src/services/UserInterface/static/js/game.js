@@ -135,6 +135,7 @@ function randomJoinGameButton() {
     const randomGameButton = document.getElementById('random-game-button');
 
     randomGameButton.addEventListener('click', function () {
+        randomGameButton.disabled = true;
         const gameModeSelect = document.getElementById('game-mode');
         const maxPlayersSelectRandom = document.getElementById('max-players-random');
         const gameStyle = document.getElementById('gameRandom').value;
@@ -144,7 +145,7 @@ function randomJoinGameButton() {
         xhr.withCredentials = true;
         xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.onreadystatechange = function () {
+        xhr.onreadystatechange = async function () {
             if (xhr.readyState === 4)
                 if (xhr.status === 200) {
                     console.log('Game joined');
@@ -153,9 +154,12 @@ function randomJoinGameButton() {
                     localStorage.setItem("gameId", gameId);
                     console.log(xhr.responseText);
                     if (gameStyle === 'tron')
-                        loadPage("tron", 1);
+                        await loadPage("tron", 1);
+                    else if (gameStyle === 'gun_and_monsters')
+                        await loadPage("gam", 1);
                     else
-                        loadPage("pong", 1);
+                        await loadPage("pong", 1);
+                    randomGameButton.disabled = false;
                 }
                 else {
                     console.log('Error joining game'); // TODO put a message
@@ -178,7 +182,7 @@ function createGameButton() {
         const paddleSpeed = document.getElementById('paddle-speed').value;
         const gameStyle = document.getElementById('gameCreate').value;
 
-        if (gameMode == 'local')
+        if (gameStyle == 'local')
             return loadPage("localpong", 1)
         else if (gameMode == 'tournament') {
             var xhr = new XMLHttpRequest();
@@ -201,13 +205,14 @@ function createGameButton() {
             }
             xhr.send("name=tounament&game=pong&start_date=2023-04-01T12:00:00Z");
         } else {
+            createGameButton.disabled = true;
             var xhr = new XMLHttpRequest();
             let url = "https://localhost:8001/game/create";
             url = url.replace("localhost", window.location.hostname);
             xhr.withCredentials = true;
             xhr.open("POST", url, true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function () {
+            xhr.onreadystatechange = async function () {
                 if (xhr.readyState === 4)
                     if (xhr.status === 200) {
                         console.log('Game created');
@@ -219,6 +224,7 @@ function createGameButton() {
                             loadPage("tron", 1);
                         else
                             loadPage("pong", 1);
+                        createGameButton.disabled = false;
                     }
                     else {
                         console.log('Error creating game'); // TODO put a message

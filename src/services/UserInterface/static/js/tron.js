@@ -22,26 +22,30 @@ function updatePlayersTron() {
 	}
 }
 
+function drawTronLive(player, player_nb, i) {
+	c.fillStyle = 'white';
+	c.fillRect(0, 600, 800, 2);
+
+	c.font = "20px monospace";
+	c.textAlign = 'left';
+	c.textBaseline = "middle";
+	c.fillStyle = player['color'];
+	spaceB = c.width / player_nb;
+	c.fillText(player.username, spaceB * i, 625, 100);
+}
+
 async function drawTron() {
 	if (game_state.state == 'waiting')
 		return await drawWaitingState();
     if (game_state.players) {
         game_state.players.forEach((player, index) => {
-            // Calculate x and y positions for each player
             const x = player['x']
             const y = player['y']
-
-            // Set the fill color based on player data
+			
             c.fillStyle = player['color'];
-
-            // Draw the square
             c.fillRect(x, y, 5, 5);
 
-            // Optionally, draw the player's name inside the square
-            // c.fillStyle = 'white'; // Text color
-            c.font = '14px Arial';
-            c.textAlign = 'center';
-            c.fillText(player.username, 100 * (index + 1), 100);
+			drawTronLive(player, game_state.players.length, index)
         });
     }
 }
@@ -62,7 +66,7 @@ async function drawEndTron() {
 		c.fillText(winner + " won", 800/2, 600/2)
 
 		c.fillText("Moving to " + page + " page", 800/2, 650/2)
-		cancelAnimationFrame(animFrame);
+		
 		await sleep(2000);
 		loadPage(page, 1)
 		return 1
@@ -82,6 +86,8 @@ function loadTron() {
 	
 	c = document.getElementById('pongCanvas').getContext('2d')
 	c.font = "60px monospace"
+	c.width = 800;
+	c.height = 650;
 	connect('tron');
 	if (!isGameLoopRunning) {
 		isGameLoopRunning = true;

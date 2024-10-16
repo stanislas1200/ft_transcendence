@@ -190,8 +190,8 @@ function findFriend() {
     const inputs = document.querySelectorAll('.proposition-item');
 
     const click = async ({ target }) => {
-        await loadPage('friendProfile', 1);
-        searchUser(target.innerHTML);
+        await loadPage('friendProfile', 1, target.innerHTML);
+        // searchUser(target.innerHTML);
         const searchFriend = document.getElementById('searchValue');
         const proposition = document.getElementById('proposition');
         searchFriend.value = "";
