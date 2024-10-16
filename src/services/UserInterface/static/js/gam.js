@@ -177,48 +177,6 @@ function render3DScene() {
 	}
 }
 
-
-function updatePlayersTron() {
-	var direction
-	if (keyState["ArrowUp"]) {
-		direction = "up";
-	} else if (keyState["ArrowDown"]) {
-		direction = "down";
-	} else if (keyState["ArrowLeft"]) {
-		direction = "left";
-	} else if (keyState["ArrowRight"]) {
-		direction = "right";
-	}
-
-	if (direction && socket && socket.readyState === WebSocket.OPEN) {
-		var sessionId = getCookie('sessionid');
-		socket.send(JSON.stringify({ sessionId: sessionId, command: 'move', player: 'p1', direction: direction }));
-	}
-}
-
-// function movePlayer() {
-// 	// if (socket.readyState === WebSocket.OPEN) {
-// 	// 	socket.send(JSON.stringify({ command: 'move', k: keyState, direction: 'down', angle: player.angle }));
-// 	// }
-
-// 	let newX = player.x - Math.sin(player.angle) * player.speedX + Math.cos(player.angle) * player.speed;
-// 	let newY = player.y + Math.cos(player.angle) * player.speedX + Math.sin(player.angle) * player.speed;
-
-// 	// Calculate map positions for potential new positions
-// 	let mapX = Math.floor(newX / TILE_SIZE);
-// 	let mapY = Math.floor(newY / TILE_SIZE);
-
-// 	// Check for wall collisions in the X direction
-// 	if (map[Math.floor(player.y / TILE_SIZE)][mapX] !== 1) {
-// 		player.x = newX;
-// 	}
-
-// 	// Check for wall collisions in the Y direction
-// 	if (map[mapY][Math.floor(player.x / TILE_SIZE)] !== 1) {
-// 		player.y = newY;
-// 	}
-// }
-
 function drawCross() {
 	const centerX = c.width / 2;
 	const centerY = c.height / 2;
@@ -244,8 +202,8 @@ function light() {
 	);
 
 	gradient.addColorStop(0, 'rgba(0, 0, 0, 0.2)');
-	gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.7)');
-	gradient.addColorStop(1, 'rgba(0, 0, 0, 0.9)');
+	gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.5)');
+	gradient.addColorStop(1, 'rgba(0, 0, 0, 0.6)');
 
 	c.fillStyle = gradient;
 	c.fillRect(0, 0, screenWidth, screenHeight);
@@ -348,6 +306,10 @@ function drawEntity(x, y, entity) {
 
 	if (Math.abs(angleToE) < FOV / 2) {
         let texture;
+		if (entity.username)
+			c.fillStyle = 'green';
+		else
+			c.fillStyle = 'red';
         // if (entity === 'monster') {
         //     texture = monsterTexture;
         // } else {
@@ -376,7 +338,8 @@ function drawEntity(x, y, entity) {
 
 		
         // c.drawImage(playerSpriteSheet, eScreenX - size / 2, c.height / 2 - size / 2, size, size);
-		c.drawImage(playerSpriteSheet, 3*playerSpriteSheet.width/11 + spriteX, 30, playerSpriteSheet.width/11, playerSpriteSheet.height/10, eScreenX - size / 2, c.height / 2 - size / 2, size, size*4)
+		// c.drawImage(playerSpriteSheet, 3*playerSpriteSheet.width/11 + spriteX, 30, playerSpriteSheet.width/11, playerSpriteSheet.height/10, eScreenX - size / 2, c.height / 2 - size / 2, size, size*4)
+		c.fillRect(eScreenX - size / 2, c.height / 2 - size / 2, size, size*4)
 	}
 }
 

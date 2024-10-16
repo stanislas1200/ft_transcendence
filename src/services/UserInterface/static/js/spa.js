@@ -1,7 +1,6 @@
 /********************************* GESTION SPA *********************************/
 
-async function loadPage(page, prevent) {
-    // console.log(page);
+async function loadPage(page, prevent, username) {
 
 	cancelAllAnimationFrames()
     isGameLoopRunning = false
@@ -21,7 +20,9 @@ async function loadPage(page, prevent) {
             console.log(page);
             document.getElementById('spa-content').innerHTML = html;
             if (prevent == 1)
-                window.history.pushState({}, '', '/' + page + '/');
+                window.history.pushState({}, '', `/${page}/${username ? `?${username}` : ''}`);
+            if (username)
+				searchUser(username);
             // If there are any specific scripts or functions to run for the page, you can call them here.
             // Example: if(page === 'page2') { initializePage2(); }
         })
@@ -76,7 +77,8 @@ async function loadPage(page, prevent) {
 window.onpopstate = function () {
     // // Handle the back/forward buttons properly
     const path = window.location.pathname.replace(/^\/+|\/+$/g, ''); // Trim leading/trailing slashes
-    loadPage(path || 'index', 2); // Default to 'page1' if no path
-    console.log('popstate');
+    const queryString = window.location.search;
+    const queryWithoutQuestionMark = queryString.substring(1); // get username ~.~
+    loadPage(path || 'index', 2, queryWithoutQuestionMark); // Default to 'page1' if no path
     // loadPage();
 };

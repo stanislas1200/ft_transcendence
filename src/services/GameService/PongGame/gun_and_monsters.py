@@ -177,7 +177,7 @@ def spawn_wave(wave, game):
 				break
 
 def update_monsters(game):
-	radius = 200
+	# radius = 200
 	tile_size_half = TILE_SIZE / 2
 
 	players = [(player['x'], player['y'], player['hp'], player['alive']) for player in game.players]
@@ -185,18 +185,19 @@ def update_monsters(game):
 		if monster["hp"] <= 0:
 			continue
 
-		nearest_player_index = None
+		nearest_player_index = -1
 		nearest_distance = float('inf')
 		for i, (px, py, php, palive) in enumerate(players):
 			if palive:
 				dx = px - monster['x']
 				dy = py - monster['y']
 				distance = dx * dx + dy * dy
-				if distance < nearest_distance and distance <= radius*radius:
+				# if distance < nearest_distance and distance <= radius*radius:
+				if distance < nearest_distance:
 					nearest_distance = distance
 					nearest_player_index = i
 
-		if not nearest_player_index:
+		if nearest_player_index == -1:
 			continue
 
 		px, py, php = players[nearest_player_index][:3]
@@ -246,18 +247,18 @@ async def update_gam(game_id):
 			players_alive += 1
 			sinangle = math.sin(player['angle'])
 			cosangle = math.cos(player['angle'])
-			newX = player['x'] - sinangle * player['speedX'] + cosangle * player['speed'];
-			newY = player['y'] + cosangle * player['speedX'] + sinangle * player['speed'];
+			newX = player['x'] - sinangle * player['speedX'] + cosangle * player['speed']
+			newY = player['y'] + cosangle * player['speedX'] + sinangle * player['speed']
 
 
-			mapX = math.floor(newX / TILE_SIZE);
-			mapY = math.floor(newY / TILE_SIZE);
+			mapX = math.floor(newX / TILE_SIZE)
+			mapY = math.floor(newY / TILE_SIZE)
 
 			if (map[math.floor(player['y'] / TILE_SIZE)][mapX] != 1):
-				player['x'] = newX;
+				player['x'] = newX
 
 			if (map[mapY][math.floor(player['x'] / TILE_SIZE)] != 1):
-				player['y'] = newY;
+				player['y'] = newY
 	if players_alive == 1:
 		game.state = 'finished'
 		await sync_to_async(game.save)()
@@ -316,16 +317,16 @@ def move_gam(game_id, n, keyStates, angle):
 
 	game.players[n-1]['speed'] = 0
 	game.players[n-1]['speedX'] = 0
-	if keyStates.get('ArrowUp', False) or keyStates.get('z', False):
+	if keyStates.get('ArrowUp', False) or keyStates.get('z', False) or keyStates.get('w', False):
 		game.players[n-1]['speed'] += 2
 
 	if keyStates.get('ArrowDown', False) or keyStates.get('s', False):
 		game.players[n-1]['speed'] += -1
 
-	if keyStates.get('ArrowLeft', False) or keyStates.get('q', False):
+	if keyStates.get('ArrowLeft', False) or keyStates.get('q', False) or keyStates.get('a', False):
 		game.players[n-1]['speedX'] += -2
 
-	if keyStates.get('ArrowRight', False) or keyStates.get('d', False):
+	if keyStates.get('ArrowRight', False) or keyStates.get('d', False) or keyStates.get('d', False):
 		game.players[n-1]['speedX'] += 2
 
 	game.players[n-1]['speed'] = min(2, max(-1, game.players[n-1]['speed']))
@@ -358,9 +359,11 @@ def update_projectiles(game):
 		if map[mapY][mapX] == 1:
 			continue
 
-		for monster in monsters:
+		for i, monster in enumerate(monsters):
 			if monster['hp'] > 0 and abs(monster['x'] - projectile['x']) < TILE_SIZE / 2 and abs(monster['y'] - projectile['y']) < TILE_SIZE / 2:
-				monster['hp'] -= 10				
+				monster['hp'] -= 10
+				if monster['hp'] <= 0:
+					del monsters[i]
 				break
 		else:
 			new_projectiles.append(projectile)

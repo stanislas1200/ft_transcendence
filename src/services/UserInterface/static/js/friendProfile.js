@@ -112,8 +112,8 @@ function displayHistoryFromOneGame(response) {
         playerCard.appendChild(playerScore);
 
         playerCard.addEventListener('click', async () => {
-            await loadPage('friendProfile', 1);
-            searchUser(player.name);
+            await loadPage('friendProfile', 1, player.name);
+            // searchUser(player.name);
         });
         playerCardsContainer.appendChild(playerCard);
 
@@ -231,7 +231,10 @@ function displayHistorique(userId, response) {
             console.log('not a number');
     }
 
-    document.getElementById('skeleton-loader-hist').style.display = 'none';
+    skel = document.getElementById('skeleton-loader-hist')
+    if (!skel) return;
+
+    skel.style.display = 'None';
     const inputs = document.querySelectorAll('.history');
     inputs.forEach((input) => {
         input.addEventListener('click', click);
@@ -260,7 +263,7 @@ function graphique(stats) {
     const text = document.getElementById('text');
     const totalScore = document.getElementById('totalScore');
 
-    if (!percent || !text || !totalScore || !stats)
+    if (!percent || !text || !totalScore || !stats || !stats.pong)
         return;
 
     let nbrGame = stats.pong.total_game;
@@ -277,8 +280,13 @@ function graphique(stats) {
     percent.setAttribute('stroke-dasharray', tmp);
     totalScore.innerHTML += stats.pong.total_score;
 }
+let gamePlaysChart, pongPlaysChart, tronPlaysChart, winLossChart, pongWinLossChart, tronWinLossChart;
 
-function createChart(ctx, type, data, options) {
+function createChart(chartVariable, ctx, type, data, options) {
+    if (chartVariable) {
+        chartVariable.destroy(); // TODO : fix disapear
+    }
+
     return new Chart(ctx, {
         type: type,
         data: data,
@@ -287,7 +295,10 @@ function createChart(ctx, type, data, options) {
 }
 
 function displayMetrics(data) {
-    document.getElementById('skeleton-loader').style.display = 'flex';
+    skel = document.getElementById('skeleton-loader')
+    if (!skel) return;
+
+    skel.style.display = 'flex';
 
     // Format date to 'YYYY-MM-DD'
     function formatDate(dateString) {
@@ -442,18 +453,20 @@ function displayMetrics(data) {
         maintainAspectRatio: true
     };
 
-    createChart(document.getElementById('gamePlaysChart').getContext('2d'), 'line', lineChartData, winLossOptions);
-    createChart(document.getElementById('pongPlaysChart').getContext('2d'), 'line', pongLineChartData, winLossOptions);
-    createChart(document.getElementById('tronPlaysChart').getContext('2d'), 'line', tronLineChartData, winLossOptions);
+    gamePlaysChart = createChart(gamePlaysChart, document.getElementById('gamePlaysChart').getContext('2d'), 'line', lineChartData, winLossOptions);
+    pongPlaysChart = createChart(pongPlaysChart, document.getElementById('pongPlaysChart').getContext('2d'), 'line', pongLineChartData, winLossOptions);
+    tronPlaysChart = createChart(tronPlaysChart, document.getElementById('tronPlaysChart').getContext('2d'), 'line', tronLineChartData, winLossOptions);
 
-    createChart(document.getElementById('winLossChart').getContext('2d'), 'bar', winLossData, winLossOptions);
-    createChart(document.getElementById('pongWinLossChart').getContext('2d'), 'bar', pongWinLossData, winLossOptions);
-    createChart(document.getElementById('tronWinLossChart').getContext('2d'), 'bar', tronWinLossData, winLossOptions);
+    winLossChart = createChart(winLossChart, document.getElementById('winLossChart').getContext('2d'), 'bar', winLossData, winLossOptions);
+    pongWinLossChart = createChart(pongWinLossChart, document.getElementById('pongWinLossChart').getContext('2d'), 'bar', pongWinLossData, winLossOptions);
+    tronWinLossChart = createChart(tronWinLossChart, document.getElementById('tronWinLossChart').getContext('2d'), 'bar', tronWinLossData, winLossOptions);
 
-    document.getElementById('skeleton-loader').style.display = 'none';
+    skel.style.display = 'none';
 }
 
 function formatDuration(isoDuration) {
+    if (!isoDuration) return '0 seconds';
+
     // Use a regular expression to parse the ISO 8601 duration string
     const regex = /P(?:([0-9,.]+)D)?T(?:([0-9,.]+)H)?(?:([0-9,.]+)M)?(?:([0-9,.]+)S)?/;
     const matches = isoDuration.match(regex);
@@ -476,30 +489,36 @@ function formatDuration(isoDuration) {
 
 
 function displayStats(data) {
-    const pongPlayTime = formatDuration(data.pong.play_time);
-    const tronPlayTime = formatDuration(data.tron.play_time);
-
-    // Add code to display these stats in the UI as needed
-    document.getElementById('totalWins').textContent = data.total_win;
-    document.getElementById('totalLosses').textContent = data.total_lost;
-    document.getElementById('totalGames').textContent = data.total_game;
-    document.getElementById('winStreak').textContent = data.win_streak;
-    document.getElementById('tournamentWins').textContent = data.tournament_win;
-    document.getElementById('tournamentPlayed').textContent = data.tournament_played;
-
-    document.getElementById('pongTotalWins').textContent = data.pong.total_win;
-    document.getElementById('pongTotalLosses').textContent = data.pong.total_lost;
-    document.getElementById('pongTotalGames').textContent = data.pong.total_game;
-    document.getElementById('pongTotalScore').textContent = data.pong.total_score;
-    document.getElementById('pongPlayTime').textContent = pongPlayTime;
-    document.getElementById('pongFastestWin').textContent = formatDuration(data.pong.fastest_win);
-    document.getElementById('pongLongestGame').textContent = formatDuration(data.pong.longest_game);
-
-    document.getElementById('tronTotalWins').textContent = data.tron.total_win;
-    document.getElementById('tronTotalLosses').textContent = data.tron.total_lost;
-    document.getElementById('tronTotalGames').textContent = data.tron.total_game;
-    document.getElementById('tronTotalScore').textContent = data.tron.total_score;
-    document.getElementById('tronPlayTime').textContent = tronPlayTime;
-    document.getElementById('tronFastestWin').textContent = formatDuration(data.tron.fastest_win);
-    document.getElementById('tronLongestGame').textContent = formatDuration(data.tron.longest_game);
+    try {
+        if (!data) return;
+        
+        document.getElementById('totalWins').textContent = data.total_win;
+        document.getElementById('totalLosses').textContent = data.total_lost;
+        document.getElementById('totalGames').textContent = data.total_game;
+        document.getElementById('winStreak').textContent = data.win_streak;
+        document.getElementById('tournamentWins').textContent = data.tournament_win;
+        document.getElementById('tournamentPlayed').textContent = data.tournament_played;
+        
+        if (!data.pong) return;
+        
+        document.getElementById('pongTotalWins').textContent = data.pong.total_win;
+        document.getElementById('pongTotalLosses').textContent = data.pong.total_lost;
+        document.getElementById('pongTotalGames').textContent = data.pong.total_game;
+        document.getElementById('pongTotalScore').textContent = data.pong.total_score;
+        document.getElementById('pongPlayTime').textContent = formatDuration(data.pong.play_time);
+        document.getElementById('pongFastestWin').textContent = formatDuration(data.pong.fastest_win);
+        document.getElementById('pongLongestGame').textContent = formatDuration(data.pong.longest_game);
+        
+        if (!data.tron) return;
+        
+        document.getElementById('tronTotalWins').textContent = data.tron.total_win;
+        document.getElementById('tronTotalLosses').textContent = data.tron.total_lost;
+        document.getElementById('tronTotalGames').textContent = data.tron.total_game;
+        document.getElementById('tronTotalScore').textContent = data.tron.total_score;
+        document.getElementById('tronPlayTime').textContent = formatDuration(data.tron.play_time);
+        document.getElementById('tronFastestWin').textContent = formatDuration(data.tron.fastest_win);
+        document.getElementById('tronLongestGame').textContent = formatDuration(data.tron.longest_game);
+    } catch (error) {
+        return
+    }
 }
