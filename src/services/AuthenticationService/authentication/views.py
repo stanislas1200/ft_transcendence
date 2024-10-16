@@ -490,7 +490,8 @@ def update_user(request, user_id):
 	except:
 		return JsonResponse({'error': 'Failed to update user'}, status=400)
 
-
+@csrf_exempt
+@require_POST
 @login_required
 def delete_user(request):
 	if request.user.is_authenticated:

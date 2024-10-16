@@ -60,15 +60,16 @@ services:
     restart: unless-stopped
     volumes:
       - ./services/Tchat:/usr/src/app
-      - ssl_cert_volume:/etc/ssl/certs
+      - ssl_cert_volume:/etc/ssl/certs:ro
     depends_on:
       - db
+      - game-service
   
   ui-service:
     build: ./services/UserInterface
     volumes:
       - ./services/UserInterface:/usr/src/app
-      - ssl_cert_volume:/etc/ssl/certs
+      - ssl_cert_volume:/etc/ssl/certs:ro
     ports:
       - "8003:8003"
     environment:
