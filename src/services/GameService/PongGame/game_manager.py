@@ -1,4 +1,4 @@
-from .models import Game, PongPlayer, GameType, PlayerGameTypeStats, Match, PlayerStats, PongStats, TronStats, UserAchievement, Achievement
+from .models import Game, PongPlayer, GameType, GamStats, Match, PlayerStats, PongStats, TronStats, UserAchievement, Achievement
 from django.contrib.auth.models import User
 from django.db.models import F
 from asgiref.sync import sync_to_async, async_to_sync
@@ -197,6 +197,7 @@ def make_map3():
 
 class Party:
 	def __init__(self, prop, id, user, token):
+		self.stop_event = threading.Event()
 		self.game_id = id
 		self.width = prop.width
 		self.height = prop.height
@@ -313,10 +314,17 @@ class Party:
 		# 	'hit': 0,
 		# 	'ai': True
 		# })
-		threading.Thread(target=ai_play, args=(self,)).start()
+		self.ai_thread = threading.Thread(target=ai_play, args=(self,))
+		self.ai_thread.start()
 	
-	def save(self):
+	def stop_ai_player(self):
+		self.stop_event.set()
+		self.ai_thread.join()
+	
+	def save(self, winners):
 		try:
+			if hasattr(self, 'ai_thread'):
+				self.stop_ai_player()
 			game = Game.objects.get(id=self.game_id)  # Get the game
 			winner = None
 			for player in self.players:
@@ -334,7 +342,7 @@ class Party:
 				# stats, created = PlayerGameTypeStats.objects.get_or_create(player=p, game_type=game_type)
 
 				if not PlayerStats.objects.filter(player=p).exists():
-					PlayerStats.objects.get_or_create(player=p, pong=PongStats.objects.create(), tron=TronStats.objects.create())
+					PlayerStats.objects.get_or_create(player=p, pong=PongStats.objects.create(), tron=TronStats.objects.create(), gam=GamStats.objects.create())
 				player_stats = PlayerStats.objects.get(player=p)
 
 
@@ -346,7 +354,7 @@ class Party:
 				player_stats.total_game = F('total_game') + 1
 				player_stats.pong.total_game = F('total_game') + 1
 				# stats.games_played = F('games_played') + 1
-				if player['score'] >= self.score:
+				if player['score'] >= self.score or player in winners:
 					winner = p
 					game.winners.add(p)
 					# stats.games_won = F('games_won') + 1
@@ -438,6 +446,21 @@ def setup(game_id, player, token):
 		else:
 			party.add_player(prop.players.all(), player, token)
 
+		if party.player_number == game.players.count():
+			for player in game.players.all():
+				active_players = [p for p in party.players if 'deleted_user' not in p['name']]
+				if len(active_players) == 1 or (len(active_players) == 2 and len(party.players) == 4 and party.gameMode == 'team' and ((party.player[0] in active_players and party.player[2] in active_players) or (party.player[1] in active_players and party.player[3] in active_players))):
+					winning_players = [p for p in party.players if 'deleted_user' not in p['name']]
+					party.state = 'finished'
+					party.save(winning_players)
+					# del party_list[game_id]  # remove party from party_list
+					return {
+						'message': 'Game finished',
+						'winner': [p['name'] for p in winning_players],
+						'reason': 'All other players have been deleted.'
+					}
+
+
 		if party.player_number <= len(party.players) and prop.players.filter(player__id=player.id):
 			game.start_date = timezone.now()
 			party.state = 'playing'
@@ -521,7 +544,7 @@ def ai_play(game):
 	else:
 		prediction_frames = 40
 
-	while True:
+	while not game.stop_event.is_set():
 		if game.ball['x'] > game.width / 2:
 			current_time = time.time()
 			if current_time - last_update_time >= prediction_interval*2:
@@ -653,13 +676,16 @@ def ffa_update(game):
 
 async def update_pong(game_id):
 	if game_id not in party_list:
-		return
+		return 1, 1
 	game = party_list[game_id]
+	if (game.state == 'finished'):
+		return game.state, game.game_id
 	if game.state != 'playing':
 		return
 
 	if game.timer and game.timer_start + game.timer > time.time():
 		return
+
 	game.timer = 0
 	
 	# move ball

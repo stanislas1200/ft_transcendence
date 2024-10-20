@@ -4,7 +4,6 @@
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		justify-content: center;
 	}
 
 	.filter-section label {
@@ -12,12 +11,11 @@
 	}
 
 	select {
-		background-color: transparent;
-		color: var(--secondary);
+		background-color: var(--tertiary);
+		color: var(--text);
 		border: 2px solid var(--secondary);
 		padding: 2px;
 		border-radius: 5px;
-		margin-right: 10px;
 		cursor: pointer;
 	}
 
@@ -67,18 +65,19 @@
 
 	.player-card.rank-1 {
 		height: 220px;
-		background-color: gold;
-		color: black;
+		background: linear-gradient(175deg, gold, rgba(255, 217, 0, 0.400), transparent);
 	}
 
 	.player-card.rank-2 {
 		height: 200px;
 		background-color: silver;
+		background: linear-gradient(175deg, silver, rgba(192, 192, 192, 0.400), transparent);
 	}
 
 	.player-card.rank-3 {
 		height: 180px;
 		background-color: #cd7f32;
+		background: linear-gradient(175deg, rgb(202 97 55), rgba(202, 97, 0, 0.400), transparent);
 	}
 
 	table {
@@ -107,15 +106,6 @@
 	}
 </style>
 
-<div class="filter-section">
-	<label for="game-filter">Game:</label>
-	<select id="game-filter" onchange="filterLeaderboard()">
-		<option value="all">All</option>
-		<option value="pong">Pong</option>
-		<option value="tron">Tron</option>
-	</select>
-</div>
-
 <div class="podium">
 	<div class="player-card rank-2">
 		<img src="" alt="Avatar">
@@ -132,6 +122,16 @@
 		<p class="username" data-username="Player3">Player3</p><span>🥉</span>
 		<p>90 Wins / 50 Losses</p>
 	</div>
+</div>
+
+<div class="filter-section">
+	<label for="game-filter">Game:</label>
+	<select id="game-filter" onchange="filterLeaderboard()">
+		<option value="all">All</option>
+		<option value="pong">Pong</option>
+		<option value="tron">Tron</option>
+		<option value="gam">Gun and monsters</option>
+	</select>
 </div>
 
 <table id="leaderboard">

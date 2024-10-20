@@ -28,8 +28,10 @@ function answerdRequest(choice, userId) {
     url = url.replace("localhost", window.location.hostname);
     if (choice == 'accept')
         url = url.replace("decline", choice);
-    else if (choice == 'block')
+    else if (choice == 'Block user')
         url = url.replace("decline-request", "block_user");
+    else if (choice == 'Unblock user')
+        url = url.replace("decline-request", "unblock_user");
     url = url.replace("userId", userId);
     var xhr = new XMLHttpRequest();
     xhr.open('POST', url, true);
@@ -40,7 +42,7 @@ function answerdRequest(choice, userId) {
             if (xhr.status === 200 || xhr.status === 201) {
                 response = JSON.parse(xhr.responseText);
             } else {
-                alert('Error: ' + JSON.parse(xhr.responseText).error);
+                notifications(JSON.parse(xhr.responseText).error);
             }
         }
     };
@@ -48,13 +50,25 @@ function answerdRequest(choice, userId) {
 }
 
 function displayRequest(response) {
-    // console.log(response);
+    if (response.sent_requests.length) {
+        const profileName = document.getElementById('userNameFriend');
+        if (profileName && profileName.innerHTML == response.sent_requests[0].receiver) {
+            const addFriend = document.getElementById('addFriend');
+            if (addFriend) {
+                addFriend.innerHTML = 'Request pending';
+                addFriend.classList.add('disabled');
+            }
+        }
+    }
+
     if (response.received_requests.length == 0)
         console.log('no request pending');
     else {
         const requestRecieve = document.getElementById('request-recieve');
         if (!requestRecieve)
             return;
+
+        requestRecieve.innerHTML = "";
 
         for (let i = 0; i < response.received_requests.length; i++) {
             const newRequest = document.createElement('div');
@@ -69,17 +83,19 @@ function displayRequest(response) {
             // console.log(userId);
             button.innerHTML += "<button class=\"fa fa-check my-fa\" value=\"" + userId + "\"><\/button>";
             button.innerHTML += "<button class=\"fa fa-times my-fa\" value=\"" + userId + "\"><\/button>";
-            button.innerHTML += "<button class=\"fa fa-ban my-fa\" value=\"" + userId + "\"><\/button>";
+            // button.innerHTML += "<button class=\"fa fa-ban my-fa\" value=\"" + userId + "\"><\/button>";
             newRequest.appendChild(button);
             requestRecieve.appendChild(newRequest);
         }
         const click = async ({ target }) => {
             if (target.classList[1] == 'fa-times')
                 answerdRequest('decline', target.value);
-            if (target.classList[1] == 'fa-ban')
-                answerdRequest('block', target.value);
+            // if (target.classList[1] == 'fa-ban')
+            //     answerdRequest('block', target.value);
             if (target.classList[1] == 'fa-check')
                 answerdRequest('accept', target.value);
+
+            target.parentElement.parentElement.remove();
         }
 
         const inputs = document.querySelectorAll('.my-fa');

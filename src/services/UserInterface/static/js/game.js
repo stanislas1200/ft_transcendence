@@ -60,10 +60,10 @@ function gameModeDisablerForCreate() {
 
     gameStyle.addEventListener('change', function () {
         if (this.value === 'tron') {
-            gameModeSelect.value = 'ffa';
-            gameModeSelect.disabled = true;
-            maxPlayersSelect.value = '2';
-            maxPlayersSelect.disabled = true;
+            // gameModeSelect.value = 'ffa';
+            // gameModeSelect.disabled = true;
+            // maxPlayersSelect.value = '2';
+            // maxPlayersSelect.disabled = true;
             map.value = '0';
             map.disabled = true;
         } else {

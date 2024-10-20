@@ -84,7 +84,7 @@ function clickOnFriend() {
         userName = userName.substr(24, 5);
         let match = userName.match(/^(.*?)</);
 
-        await loadPage('friendProfile', 1, match[1]);
+        await loadPage('profile', 1, match[1]);
         // searchUser(match[1]);
     }
 
@@ -404,7 +404,7 @@ function clickOnbackToGame() {
         // userName = userName.substr(24, 5);
         // let match = userName.match(/^(.*?)</);
 
-        // await loadPage('friendProfile', 1);
+        // await loadPage('profile', 1);
         // searchUser(match[1]);
         // console.log(target.classList[2]);
         // localStorage.setItem("gameId", target.classList[2]);
@@ -423,6 +423,9 @@ function showLastGame(response) {
     let title = document.getElementById('index-title');
     let score = document.getElementById('index-final-score');
     let date = document.getElementById('index-date');
+
+    if (!result || !title || !score || !date)
+        return;
 
     if (response.length == 0)
         return (title.innerHTML += ' lets play!');

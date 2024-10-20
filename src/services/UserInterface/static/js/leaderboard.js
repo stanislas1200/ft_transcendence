@@ -55,7 +55,7 @@ async function renderLeaderboard(data) {
 		card.addEventListener('click', async () => {
 			const usernameElement = card.querySelector('.username');
 			if (usernameElement) {
-				await loadPage('friendProfile', 1, usernameElement.dataset.username);
+				await loadPage('profile', 1, usernameElement.dataset.username);
 				// searchUser(usernameElement.dataset.username);
 			}
 		});
@@ -71,7 +71,7 @@ async function renderLeaderboard(data) {
 				<td>${player.total_lost}</td>
 				`;
 			row.addEventListener('click', async () => {
-				await loadPage('friendProfile', 1, player.username);
+				await loadPage('profile', 1, player.username);
 				// searchUser(player.username);
 			});
 			leaderboardBody.appendChild(row);

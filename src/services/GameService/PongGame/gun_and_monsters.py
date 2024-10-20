@@ -1,10 +1,11 @@
-from .models import Game, PongPlayer, User, PlayerStats, Match
+from .models import Game, PongPlayer, User, PlayerStats, Match, GamStats, PongStats, TronStats
 from django.db.models import F
 from django.utils import timezone
 from asgiref.sync import sync_to_async
 import math
 import random
 import time
+from .game_manager import check_achievements
 
 party_list = {}
 
@@ -67,25 +68,40 @@ class Party:
 
 			# stats, created = PlayerGameTypeStats.objects.get_or_create(player=p, game_type=game_type)
 			if not PlayerStats.objects.filter(player=p).exists():
-				PlayerStats.objects.get_or_create(player=p, pong=PongStats.objects.create(), tron=TronStats.objects.create())
+				PlayerStats.objects.get_or_create(player=p, pong=PongStats.objects.create(), tron=TronStats.objects.create(), gam=GamStats.objects.create())
 			player_stats = PlayerStats.objects.get(player=p)
 			
 			game.end_time = timezone.now()
 			game_duration = game.end_time - game.start_date
+			player_stats.gam.play_time = F('play_time') + game_duration
+			player_stats.gam.save()
+			player_stats.gam.refresh_from_db()
 			player_stats.total_game = F('total_game') + 1
-			# stats.game_played = F('games_played') + 1
+			player_stats.gam.total_game = F('total_game') + 1
 			if player['alive']:
 				game.winners.add(p)
+				player_stats.gam.total_win = F('total_win') + 1
 				player_stats.total_win = F('total_win') + 1
 				player_stats.win_streak = F('win_streak') + 1
-				# stats.games_won = F('games_won') + 1
+				if not player_stats.gam.fastest_win:
+					player_stats.gam.fastest_win = game_duration
+				elif game_duration < player_stats.gam.fastest_win:
+					player_stats.gam.fastest_win = game_duration
 			else:
-				# stats.games_lost = F('games_lost') + 1
+				player_stats.gam.total_lost = F('total_lost') + 1
 				player_stats.total_lost = F('total_lost') + 1
 				player_stats.win_streak = 0
-			# stats.total_score = F('total_score') + score
-			# stats.save()
+			
+			player_stats.gam.total_score = F('total_score') + score
+				
+			
+			if not player_stats.gam.longest_game:
+				player_stats.gam.longest_game = game_duration
+			elif game_duration > player_stats.gam.longest_game:
+				player_stats.gam.longest_game = game_duration
+			player_stats.gam.save()
 			player_stats.save()
+			check_achievements(p, player_stats, None)
 
 			game.status = 'finished'
 			game.save()
@@ -123,6 +139,25 @@ def setup_gam(game_id, player, token):
 			party_list[game_id] = party
 		else:
 			party.add_player(prop.players.all(), player, token)
+
+		
+		
+		if party.player_number == game.players.count():
+			for player in game.players.all():
+				active_players = [p for p in party.players if 'deleted_user' not in p['name']]
+				if len(active_players) == 1:
+					winning_players = [p for p in party.players if 'deleted_user' not in p['name']]
+					for p in party.players:
+						if 'deleted_user' in p['name']:
+							p['alive'] = False
+					party.state = 'finished'
+					party.save()
+					# del party_list[game_id]  # remove party from party_list
+					return {
+						'message': 'Game finished',
+						'winner': [p['name'] for p in winning_players],
+						'reason': 'All other players have been deleted.'
+					}
 
 		if party.player_number <= len(party.players) and prop.players.filter(player__id=player.id):
 			party.state = 'playing'

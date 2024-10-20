@@ -1,199 +1,5 @@
 {% load static %}
 
-<style>
-    .profile-section {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        justify-content: space-between;
-    }
-
-    .profile-info {
-        flex: 1 1 200px;
-        max-width: 300px;
-        text-align: center;
-        padding: 10px;
-        border: 2px solid var(--secondary);
-        border-radius: 5px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .profile-pic {
-        border-radius: 50%;
-        width: 150px;
-        height: 150px;
-        object-fit: cover;
-    }
-
-    /* Stats and Game History */
-    .stats-and-history {
-        display: flex;
-        flex-wrap: wrap;
-        flex: 2;
-        padding: 10px;
-        border: 2px solid var(--secondary);
-        border-radius: 5px;
-        gap: 10px;
-    }
-
-    .game-history {
-        flex: 1;
-        margin-bottom: 20px;
-        max-height: 500px;
-    }
-
-    .party-info-section {
-        flex: 1;
-    }
-
-    .graph-section {
-        display: flex;
-        border: 2px solid var(--secondary);
-        border-radius: 5px;
-        justify-content: center;
-        align-items: center;
-        flex-direction: row;
-        flex-wrap: wrap;
-        margin-top: 20px;
-        flex: 1;
-        gap: 10px;
-    }
-
-    .party-state {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: space-between;
-    }
-
-    .party-details {
-        flex: 1;
-        color: var(--text);
-        padding: 10px;
-    }
-
-    .player-cards {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-        margin-top: 20px;
-        justify-content: space-evenly;
-    }
-
-    .player-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 120px;
-        padding: 10px;
-        background: var(--tertiary);
-        border-radius: 10px;
-        cursor: pointer;
-
-        img {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 10px;
-        }
-    }
-
-    .line-charts,
-    .bar-charts {
-        display: flex;
-        justify-content: space-around;
-        width: 100%;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    canvas {
-        width: 100% !important;
-        max-width: 300px;
-        max-height: 200px;
-    }
-
-    .skeleton-loader {
-        display: flex;
-        justify-content: space-around;
-        width: 100%;
-        margin-bottom: 20px;
-    }
-
-
-    .skeleton-row {
-        max-width: 90%;
-        height: 20px;
-    }
-
-    .skeleton {
-        background-color: #cbcbcb94;
-        border-radius: 4px;
-        width: 100%;
-        margin: 10px;
-        animation: pulse 1.5s infinite;
-    }
-
-    .skeleton-chart {
-        max-width: 300px;
-        height: 180px;
-    }
-
-    @keyframes pulse {
-        0% {
-            background-color: #cbcbcb94;
-        }
-
-        50% {
-            background-color: #8b8b8b94;
-        }
-
-        100% {
-            background-color: #cbcbcb94;
-        }
-    }
-
-
-    .stats-section {
-        margin-top: 20px;
-        padding-bottom: 10px;
-        color: var(--text);
-    }
-
-    .stats-section h4 {
-        margin-bottom: 10px;
-        color: var(--secondary);
-    }
-
-    .stats {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .stat {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        background-color: var(--tertiary);
-        padding: 10px;
-        border-radius: 5px;
-        flex: 1;
-    }
-
-    .stat-label {
-        font-weight: bold;
-        color: var(--primary);
-    }
-
-    .stat-value {
-        margin-top: 5px;
-    }
-</style>
 
 <div class="profile-section">
     <!-- Profile and User Info -->
@@ -202,6 +8,21 @@
         <p id="userName">
             <!-- UserName -->
         </p>
+        <div class="buttonFriendMessage", id="buttonFriendMessage">
+            <div class="addFriend" id="addFriend">
+                <span class="plus">+</span>
+                <span class="text">Add Friend</span>
+            </div>
+            <div class="addFriend" id="message">
+                <span class="text">Message me</span>
+            </div>
+            <div class="addFriend" id="duel">
+                <span class="text">Challenge me</span>
+            </div>
+            <div class="addFriend" id="block">
+                <span class="text">Block user</span>
+            </div>
+        </div>
         <div class="request-recieve" id="request-recieve">
             <!-- <div class="friend-request"> -->
             <!-- contient nom et boutton -->
@@ -260,43 +81,101 @@
 
 <!-- Stats and Graph Section -->
 <div class="graph-section">
+    
+    <!-- <div id="skeleton-loader-circle" class="skeleton-loader">
+        <div class="skeleton skeleton-circle"></div>
+        <div class="skeleton skeleton-circle"></div>
+        <div class="skeleton skeleton-circle"></div>
+        <div class="skeleton skeleton-circle"></div>
+    </div> -->
     <!-- Circle Graphs -->
     <div class="circle-graphs">
-        <div class="directionColumn center graphInformation" id="graphInformation">
+        <div class="graphInformation" id="graphInformation">
             <svg viewBox="0 0 36 36" class="circle-svg">
 
                 <path class="around" stroke-dasharray="100, 100"
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
 
-                <path id="percent" class="percent" stroke-dasharray="80, 100"
+                <path id="percentTot" class="percent" stroke-dasharray="80, 100"
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
 
-                <text id="text" class="valueForGraph" x="18" y="14" dy="7">none</text>
+                <text id="textTot" class="valueForGraph" x="18" y="14" dy="7">none</text>
 
             </svg>
-            <p id="totalScore">Total of points scored: none</p>
+            <p id="totalScoreTot">Total of points scored: none</p>
+        </div>
+        <div class="graphInformation" id="graphInformation">
+            <svg viewBox="0 0 36 36" class="circle-svg">
+
+                <path class="around" stroke-dasharray="100, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <path id="percentPong" class="percent" stroke-dasharray="80, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <text id="textPong" class="valueForGraph" x="18" y="14" dy="7">none</text>
+
+            </svg>
+            <p id="totalScorePong">Total of points scored: none</p>
+        </div>
+        <div class="graphInformation" id="graphInformation">
+            <svg viewBox="0 0 36 36" class="circle-svg">
+
+                <path class="around" stroke-dasharray="100, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <path id="percentTron" class="percent" stroke-dasharray="80, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <text id="textTron" class="valueForGraph" x="18" y="14" dy="7">none</text>
+
+            </svg>
+            <p id="totalScoreTron">Total of points scored: none</p>
+        </div>
+        <div class="graphInformation" id="graphInformation">
+            <svg viewBox="0 0 36 36" class="circle-svg">
+
+                <path class="around" stroke-dasharray="100, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <path id="percentGam" class="percent" stroke-dasharray="80, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <text id="textGam" class="valueForGraph" x="18" y="14" dy="7">none</text>
+
+            </svg>
+            <p id="totalScoreGam">Total of points scored: none</p>
         </div>
     </div>
 
     <!-- Skeleton Loader -->
-    <div id="skeleton-loader" class="skeleton-loader">
+    <div id="skeleton-loader-graph1" class="skeleton-loader">
+        <div class="skeleton skeleton-chart"></div>
+        <div class="skeleton skeleton-chart"></div>
+        <div class="skeleton skeleton-chart"></div>
+        <div class="skeleton skeleton-chart"></div>
+    </div>
+    <div id="skeleton-loader-graph2" class="skeleton-loader">
+        <div class="skeleton skeleton-chart"></div>
         <div class="skeleton skeleton-chart"></div>
         <div class="skeleton skeleton-chart"></div>
         <div class="skeleton skeleton-chart"></div>
     </div>
 
     <!-- Line Charts -->
-    <div class="line-charts">
+    <div class="line-charts" id="line-charts" style="display: none;">
         <canvas id="gamePlaysChart"></canvas>
         <canvas id="pongPlaysChart"></canvas>
         <canvas id="tronPlaysChart"></canvas>
+        <canvas id="gamPlaysChart"></canvas>
     </div>
 
     <!-- Bar Charts -->
-    <div class="bar-charts">
+    <div class="bar-charts" id="bar-charts" style="display: none;">
         <canvas id="winLossChart"></canvas>
         <canvas id="pongWinLossChart"></canvas>
         <canvas id="tronWinLossChart"></canvas>
+        <canvas id="gamWinLossChart"></canvas>
     </div>
 </div>
 
@@ -390,6 +269,45 @@
             <span class="stat-value" id="tronPlayTime">none</span>
         </div>
     </div>
+    <h4>Gun and Monsters Stats:</h4>
+    <div class="stats">
+        <div class="stat">
+            <span class="stat-label">Total Wins:</span>
+            <span class="stat-value" id="gamTotalWins">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Losses:</span>
+            <span class="stat-value" id="gamTotalLosses">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Games:</span>
+            <span class="stat-value" id="gamTotalGames">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Score:</span>
+            <span class="stat-value" id="gamTotalScore">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Fastest Win:</span>
+            <span class="stat-value" id="gamFastestWin">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Longest Game:</span>
+            <span class="stat-value" id="gamLongestGame">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Play Time:</span>
+            <span class="stat-value" id="gamPlayTime">none</span>
+        </div>
+    </div>
 </div>
-<script>loadProfile();</script>
+
+<script>
+    const queryString = window.location.search;
+    const queryWithoutQuestionMark = queryString.substring(1); // get username ~.~
+    if (queryWithoutQuestionMark)
+        searchUser(queryWithoutQuestionMark);
+    else
+        loadProfile();
+</script>
 <!-- <script>listRequest();</script> -->

@@ -240,8 +240,8 @@ def list_blocked_user(request):
 		# 	status = verify_token(request) # TODO NM: check cuz not working for tchat
 		# 	if (status == 200):
 		u_id = request.GET.get('UserId')
-		# 		if not u_id:
-		# 			u_id = request.COOKIES.get('userId')
+		if not u_id:
+			u_id = request.COOKIES.get('userId')
 		# 	else:
 		# 		return JsonResponse({'error': 'User is not logged in'}, status=401)
 		# u_id = request.COOKIES.get('userId')
@@ -439,6 +439,7 @@ def update_user(request, user_id):
 
 		# Get Input
 		username = request.POST.get('username')
+		username = escape(username)
 		email = request.POST.get('email')
 		first_name = request.POST.get('first_name')
 		last_name = request.POST.get('last_name')
@@ -446,6 +447,8 @@ def update_user(request, user_id):
 		new_password = request.POST.get('new_password')
 		avatar = request.FILES.getlist("avatar")
 		
+		if "deleted_user" in username:
+			return JsonResponse({'error': 'Username already taken'}, status=403)
 		
 		if username and username != user.username:
 			validate_unicode_slug(username)
@@ -508,10 +511,10 @@ def delete_user(request):
 			return JsonResponse({'error': 'User is not logged in'}, status=401)
 	
 	# user.delete()
-	user.username = "delete_user"
-	user.email = "delete@delete.delete"
-	user.first_name = "delete"
-	user.last_name = "delete"
+	user.username = "deleted_user"+str(user.id)
+	user.email = "deleted@deleted.deleted"
+	user.first_name = "deleted"
+	user.last_name = "deleted"
 	user.is_active = False
 	user.save()
 
@@ -558,7 +561,7 @@ def oauth42(request):
 		make_avatar = False
 		# Check if a user with this email already exists
 		if not User.objects.filter(email=email).exists():
-			if User.objects.filter(username=username).exists():
+			if User.objects.filter(username=username).exists() or 'delete_user' in username:
 				username += secrets.token_hex(4)
 				if User.objects.filter(username=username).exists():
 					return JsonResponse({'error': 'Username already taken, please retry'}, status=400)
@@ -580,7 +583,7 @@ def oauth42(request):
 				avatar = BytesIO(avatar)
 				content_type = response.headers['Content-Type']
 
-				if profile.avatar:
+				if profile.avatar and profile.avatar.name != 'default.png':
 					profile.avatar.delete(save=True)
 				profile.avatar = process_avatar(avatar, content_type)
 				profile.save()
@@ -614,7 +617,7 @@ def register(request):
 
 		if not username or not password or not email or not first_name or not last_name or not cpassword:
 			return JsonResponse({'error': 'Missing required fields'}, status=400)
-		if User.objects.filter(username=username).exists() or username == 'delete_user':
+		if User.objects.filter(username=username).exists() or "deleted_user" in username:
 			return JsonResponse({'error': 'Username already taken'}, status=400)
 		if User.objects.filter(email=email).exists():
 			return JsonResponse({'error': 'Email already taken'}, status=400)

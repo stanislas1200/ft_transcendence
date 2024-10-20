@@ -1,35 +1,60 @@
 /********************************* GESTION SPA *********************************/
 
-async function loadPage(page, prevent, username) {
+const CACHE_EXPIRATION_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
+const CACHE_VERSION = 'v1';
 
-	cancelAllAnimationFrames()
-    isGameLoopRunning = false
+async function fetchPage(page, prevent, username, cacheKey) {
     await fetch('/' + page + '/', {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest'  // Add this header to indicate an AJAX request
         }
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.text();
-        })
-        .then(html => {
-            console.log(page);
-            document.getElementById('spa-content').innerHTML = html;
-            if (prevent == 1)
-                window.history.pushState({}, '', `/${page}/${username ? `?${username}` : ''}`);
-            if (username)
-				searchUser(username);
-            // If there are any specific scripts or functions to run for the page, you can call them here.
-            // Example: if(page === 'page2') { initializePage2(); }
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-            // Optionally load an error page or show an error message
-        });
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.text();
+    }).then(html => {
+        console.log(page);
+        document.getElementById('spa-content').innerHTML = html;
+        try {
+            sessionStorage.setItem(cacheKey, html);
+            sessionStorage.setItem(`${cacheKey}-timestamp`, Date.now());
+        }
+        catch (e) {
+            console.error('Unable to save to sessionStorage:', e);
+        }
+        if (prevent == 1)
+            window.history.pushState({}, '', `/${page}/${username ? `?${username}` : ''}`);
+        if (username)
+            searchUser(username);
+    }).catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
+}
+
+async function loadPage(page, prevent, username) {
+
+    cancelAllAnimationFrames()
+    // destroyCharts()
+    isGameLoopRunning = false
+    stopTournamentInfo()
+
+    const cacheKey = `${CACHE_VERSION}-${page}`;
+    const cachedContent = sessionStorage.getItem(cacheKey);
+    const cacheTimestamp = sessionStorage.getItem(`${cacheKey}-timestamp`);
+
+    if (cachedContent && cacheTimestamp && (Date.now() - cacheTimestamp < CACHE_EXPIRATION_TIME)) {
+        console.log('Cached content loaded');
+        document.getElementById('spa-content').innerHTML = cachedContent;
+        if (prevent == 1)
+            window.history.pushState({}, '', `/${page}/${username ? `?${username}` : ''}`);
+        if (username)
+            searchUser(username);
+    }
+    else {
+        await fetchPage(page, prevent, username, cacheKey);
+    }
     // console.log('page ' + page);
     testIfLoggedIn()
     switch (page) {
@@ -43,7 +68,8 @@ async function loadPage(page, prevent, username) {
             loadSettings();
             break;
         case 'profile':
-            loadProfile();
+            if (!username)
+                loadProfile();
             break;
         case 'achievements':
             loadArchievements();
