@@ -1,15 +1,23 @@
 let inTheTournament = false;
+let tournamentIntervalId = null;
 
 function showTournamentInfo() {
     getAllInfoTournament();
-    setInterval(getAllInfoTournament, 60000);
+    tournamentIntervalId = setInterval(getAllInfoTournament, 60000);
+}
+
+function stopTournamentInfo() {
+    if (tournamentIntervalId !== null) {
+        clearInterval(tournamentIntervalId);
+        tournamentIntervalId = null;
+    }
 }
 
 function getAllInfoTournament() {
-    console.log(document.cookie);
+    // console.log(document.cookie);
     let tournament_id = getCookie('tournament_id');
     if (tournament_id == "" || tournament_id == null || tournament_id == undefined) {
-        alert("No tournament selected");
+        // alert("No tournament selected");
         return;
     }
     let url = "https://" + window.location.hostname + ":8001/game/get_tournament/" + tournament_id;

@@ -52,6 +52,7 @@ function deleteProfile() {
                 if (xhr.status === 200 || xhr.status === 201) {
                     response = JSON.parse(xhr.responseText);
                     console.log(response);
+                    testIfLoggedIn();
                 } else {
                     alert('Error: ' + JSON.parse(xhr.responseText).error);
                 }

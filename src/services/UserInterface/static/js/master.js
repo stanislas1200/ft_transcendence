@@ -6,23 +6,36 @@ function getCookie(name) {
     if (parts.length == 2) return parts.pop().split(";").shift();
 }
 
-// function testNotif() {
-//     let alertHtml = `
-//         <strong>Notification test</strong> 
-//         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-//             <span aria-hidden="true">&times;</span>
-//         </button>
-//     `;
+function removeAlertAfterTimeout(alertElement, timeout = 5000) {
+    setTimeout(() => {
+        alertElement.classList.remove('show');
+        alertElement.classList.add('fade');
+        setTimeout(() => {
+            alertElement.remove();
+        }, 1000);
+    }, timeout);
+}
 
-//     let newNotif = document.createElement('div');
-//     newNotif.classList.add('alert', 'alert-success', 'alert-dismissible', 'fade', 'show');
-//     newNotif.innerHTML = alertHtml;
-//     document.getElementById('alert-container').appendChild(newNotif);
-//     removeAlertAfterTimeout(newNotif)
-// }
+function notifications(Title) {
+    let alertHtml = `
+        <strong>${Title}</strong>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    `;
+
+    let newNotif = document.createElement('div');
+    newNotif.classList.add('alert', `alert-succes`, 'alert-dismissible', 'fade', 'show');
+    newNotif.innerHTML = alertHtml;
+    document.getElementById('alert-container').appendChild(newNotif);
+    removeAlertAfterTimeout(newNotif)
+}
 
 function connectToNotifications() {
     let userId = getCookie('userId');
+    if (!userId) {
+        return;
+    }
     let wsUrl = `wss://localhost:8001/ws/notifications/${userId}`;
     wsUrl = wsUrl.replace('localhost', window.location.hostname);
 
@@ -35,33 +48,12 @@ function connectToNotifications() {
     wss.addEventListener('message', function (event) {
         let serverMessage = JSON.parse(event.data);
         let content = serverMessage.data.content;
+        notifications(content);
+        if (serverMessage.type === 'friend_request' && window.location.pathname === '/profile/') {
+            listRequest();
+        }
 
-        let alertHtml = `
-            <strong>${content}</strong> 
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        `;
-
-        let newNotif = document.createElement('div');
-        newNotif.classList.add('alert', 'alert-success', 'alert-dismissible', 'fade', 'show');
-        newNotif.innerHTML = alertHtml;
-        document.getElementById('alert-container').appendChild(newNotif);
-        // document.getElementById('main').insertAdjacentHTML('beforeend', alertHtml);
-        // let alertElement = document.querySelector('#main .alert:last-child');
-        removeAlertAfterTimeout(newNotif)
     });
-
-    function removeAlertAfterTimeout(alertElement, timeout = 5000) {
-        setTimeout(() => {
-            alertElement.classList.remove('show');
-            alertElement.classList.add('fade');
-            setTimeout(() => {
-                alertElement.remove();
-            }, 1000);
-        }, timeout);
-    }
-
 
     wss.addEventListener('close', function (event) {
         connectToNotifications()
@@ -190,7 +182,7 @@ function findFriend() {
     const inputs = document.querySelectorAll('.proposition-item');
 
     const click = async ({ target }) => {
-        await loadPage('friendProfile', 1, target.innerHTML);
+        await loadPage('profile', 1, target.innerHTML);
         // searchUser(target.innerHTML);
         const searchFriend = document.getElementById('searchValue');
         const proposition = document.getElementById('proposition');

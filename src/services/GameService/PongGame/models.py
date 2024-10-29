@@ -16,6 +16,16 @@ class PongStats(models.Model):
     fastest_win = models.DurationField(null=True, blank=True)
     longest_game = models.DurationField(null=True, blank=True)
     play_time = models.DurationField(default="0:00:00")
+
+class GamStats(models.Model):
+    total_win = models.IntegerField(default=0)
+    total_lost = models.IntegerField(default=0)
+    total_game = models.IntegerField(default=0)
+    total_score = models.IntegerField(default=0)
+    total_kill = models.IntegerField(default=0)
+    fastest_win = models.DurationField(null=True, blank=True)
+    longest_game = models.DurationField(null=True, blank=True)
+    play_time = models.DurationField(default="0:00:00")
     
 class TronStats(models.Model):
     total_win = models.IntegerField(default=0)
@@ -30,22 +40,13 @@ class PlayerStats(models.Model):
     player = models.ForeignKey(User, on_delete=models.CASCADE)
     pong = models.ForeignKey(PongStats, on_delete=models.CASCADE)
     tron = models.ForeignKey(TronStats, on_delete=models.CASCADE)
+    gam = models.ForeignKey(GamStats, on_delete=models.CASCADE)
     total_win = models.IntegerField(default=0)
     total_lost = models.IntegerField (default=0)
     total_game = models.IntegerField(default=0)
     win_streak = models.IntegerField(default=0)
     tournament_win = models.IntegerField(default=0)
     tournament_played = models.IntegerField(default=0)
-    
-# TODO NM : Win ration, average score, Time of Day, average play time
-# TODO NM : Game stats: Play Time, score, ball hit, Time of day, ball bounce,
-class PlayerGameTypeStats(models.Model):
-    player = models.ForeignKey(User, on_delete=models.CASCADE)
-    game_type = models.ForeignKey(GameType, on_delete=models.CASCADE)
-    games_played = models.IntegerField(default=0)
-    games_won = models.IntegerField(default=0)
-    games_lost = models.IntegerField(default=0)
-    total_score = models.IntegerField(default=0)
 
 class PongPlayer(models.Model):
     player = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -74,6 +75,7 @@ class Tron(models.Model):
 class GAM(models.Model):
     players = models.ManyToManyField(PongPlayer)
     playerNumber = models.IntegerField(default=1)
+    gameMode = models.CharField(max_length=20, default='ffa')
 
 
 class Game(models.Model):

@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Game, Pong, PongPlayer, PlayerGameTypeStats, Tournament, Match, Tron, GameType, UserAchievement, Achievement, GAM, PlayerStats
+from .models import Game, Pong, PongPlayer, GamStats, Tournament, Match, Tron, GameType, UserAchievement, Achievement, GAM, PlayerStats
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST, require_GET
 from django.forms.models import model_to_dict
@@ -148,12 +148,11 @@ def make_tournament_notif(tournament):
                 "user_id": None,
                 "metadata": {
                     "tournament_id": tournament.id,
-                    "start_time": tournament.start_date
+                    "start_time": tournament.start_date.isoformat()
                 }
             }
         }
-
-    users_id = [player.id for player in tournament.players.all()]
+    users_id = [player.player.id for player in tournament.players.all()]
     send_notification(None, users_id, message)
 
 @csrf_exempt
@@ -164,10 +163,12 @@ def join_tournament(request, tournament_id):
     user_id = request.COOKIES.get('userId')
     player = get_player(session_key, token, user_id)
     if player == None:
-        return JsonResponse({'error': 'Failed to get player'}, status=400)
+        return JsonResponse({'error': 'Failed to get player'}, status=404)
 
     tournament = Tournament.objects.get(id=tournament_id)
-    if tournament.players.count() < tournament.max_player: # TODO : no double join should have use user and not ponguser
+    if tournament.players.count() < tournament.max_player: # TODO : no double join should have use user and not ponguser check player.player
+        if tournament.players.filter(player=player).exists():
+            return JsonResponse({"error": "Already joined"}, status=409)
         player = PongPlayer.objects.create(player=player, score=0, n=1)
         tournament.players.add(player)
         message = "Joined tournament"
@@ -176,7 +177,7 @@ def join_tournament(request, tournament_id):
             message += " and matchmaking started"
             make_tournament_notif(tournament)
     else:
-        return JsonResponse({"success": False, "message": "Tournament is full"})
+        return JsonResponse({"error": "Tournament is full"}, status=400)
     return JsonResponse({"success": True, "message": message})
 
 def make_matches(tournament):
@@ -422,7 +423,7 @@ def startPong(request, player, token, gameType, gameMode, playerNumber):
 
     if not playerNumber or not gameType:
         return JsonResponse({'error': 'Missing setting'}, status=400)
-    if int(playerNumber) < 1:
+    if int(playerNumber) not in [1, 2, 4]:
         return JsonResponse({'error': 'Invalid player number'}, status=400)
 
     if gameMode == 'team' and int(playerNumber) < 4:
@@ -466,8 +467,11 @@ def startTron(request, player, token, gameType, gameMode, playerNumber):
 
     if not playerNumber or not gameType:
         return JsonResponse({'error': 'Missing setting'}, status=400)
-    if int(playerNumber) < 1:
+    if int(playerNumber) not in [1, 2]:
         return JsonResponse({'error': 'Invalid player number'}, status=400)
+
+    if gameMode == 'solo-ia' and int(playerNumber) > 1:
+        gameMode = 'ffa'
 
     tron = Tron.objects.create(playerNumber=playerNumber)
     party_name = request.POST.get('partyName', 'tron')
@@ -475,6 +479,18 @@ def startTron(request, player, token, gameType, gameMode, playerNumber):
     game.players.add(player)
     player = PongPlayer.objects.create(player=player, score=0, n=1)
     game.gameProperty.players.add(player)
+
+
+    # Ai user
+    if int(playerNumber) == 1:
+        if not User.objects.filter(username='AI').exists(): # get_or_create
+            player = User.objects.create_user(username='AI')
+        else:
+            player = User.objects.get(username='AI')
+
+        game.players.add(player)
+        player = PongPlayer.objects.create(player=player, score=0, n=2)
+        game.gameProperty.players.add(player)
 
     game.status = 'waiting' if int(playerNumber) > 1 else 'playing'
 
@@ -487,7 +503,7 @@ def startGAM(request, player, token, gameType, gameMode, playerNumber):
 
     if not playerNumber or not gameType:
         return JsonResponse({'error': 'Missing setting'}, status=400)
-    if int(playerNumber) < 1:
+    if int(playerNumber) not in [2]:
         return JsonResponse({'error': 'Invalid player number'}, status=400)
 
     gam = GAM.objects.create(playerNumber=playerNumber)
@@ -585,6 +601,7 @@ def get_stats(request):
             all_stats_dict = stats_dict
             all_stats_dict['pong'] = model_to_dict(player_stats.pong)
             all_stats_dict['tron'] = model_to_dict(player_stats.tron)
+            all_stats_dict['gam'] = model_to_dict(player_stats.gam)
         return JsonResponse(all_stats_dict, safe=False)
     except:
         return JsonResponse({'error': 'Error'}, status=500)
@@ -707,6 +724,9 @@ def leaderboard(request):
         order_by = f"-{game_name}__total_win"
         if game_name == 'all':
             order_by = "-total_win"
+
+        if game_name not in ['pong', 'gam', 'tron', 'all']:
+            return JsonResponse({'error': 'Invalid game name provided'}, status=400)
         
         # if time == 'all-time':
         player_stats = PlayerStats.objects.order_by(order_by)
@@ -731,6 +751,11 @@ def leaderboard(request):
                 player_dict['total_win'] = player_stat.tron.total_win
                 player_dict['total_lost'] = player_stat.tron.total_lost
                 player_dict['total_game'] = player_stat.tron.total_game
+            elif game_name == 'gam':
+                player_dict['total_win'] = player_stat.gam.total_win
+                player_dict['total_lost'] = player_stat.gam.total_lost
+                player_dict['total_game'] = player_stat.gam.total_game
+
                 
             leaderboard.append(player_dict)
         return JsonResponse(leaderboard, safe=False)
