@@ -25,6 +25,8 @@ function searchUser(usernameSearching) {
                     response = JSON.parse(xhr.responseText);
                     numUser = findGoodUser(usernameSearching, response);
                     var tmp = userNameFriend.textContent;
+                    if (!response.users[numUser])
+                        return loadPage('index', 1);
                     userNameFriend.innerHTML = response.users[numUser].username;
                     const friendButtons = document.getElementById('buttonFriendMessage');
                     const ownId = getCookie('userId');

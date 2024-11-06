@@ -81,11 +81,12 @@ function goToButton() {
 function clickOnFriend() {
     const click = async ({ target }) => {
         let userName = target.innerHTML;
-        userName = userName.substr(24, 5);
-        let match = userName.match(/^(.*?)</);
-
-        await loadPage('profile', 1, match[1]);
-        // searchUser(match[1]);
+        userName = userName.substr(24, userName.length - 24);
+        let match = userName.match(/^(.*?)\(/);
+        if (match) {
+            userName = match[1].trim();
+            await loadPage('profile', 1, userName);
+        }
     }
 
     const inputs = document.querySelectorAll('#friendList');
@@ -369,7 +370,7 @@ function displayFriendList(response) {
             newDiv.append(newSpan);
             let newButton = document.createElement('div');
             newButton.classList.add('list-join-button');
-            newButton.innerHTML = 'Send message ➞';
+            newButton.innerHTML = 'View profile ➞';
             newDiv.append(newButton);
             friendList.append(newDiv);
         }
