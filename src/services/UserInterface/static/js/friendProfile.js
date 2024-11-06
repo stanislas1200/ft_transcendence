@@ -391,7 +391,6 @@ let gamePlaysChart, pongPlaysChart, tronPlaysChart, gamPlaysChart, winLossChart,
 
 function createChart(chartVariable, ctx, type, data, options) {
     const existingChart = Chart.getChart(ctx);
-    console.log(existingChart)
     if (existingChart) {
         existingChart.destroy();
     }

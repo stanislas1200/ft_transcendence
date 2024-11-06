@@ -1,7 +1,12 @@
-document.addEventListener('DOMContentLoaded', () => {
+function loadLogin() {
     const inputs = document.querySelectorAll('.input');
     const button = document.querySelector('.login__button');
     const loginButton = document.getElementById("loginButton");
+    const register = document.getElementById("register");
+
+    register.addEventListener("click", () => {
+        loadPage("register", 1);
+    });
 
     const handleFocus = ({ target }) => {
         const span = target.previousElementSibling;
@@ -43,28 +48,27 @@ document.addEventListener('DOMContentLoaded', () => {
         login(username, password);
     });
 
-});
+    function login(username, password) {
+        let url = "https://localhost:8000/login";
+        url = url.replace("localhost", window.location.hostname);
 
-function login(username, password) {
-    let url = "https://localhost:8000/login";
-    url = url.replace("localhost", window.location.hostname);
-
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', url, true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.withCredentials = true;
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200 || xhr.status === 201) {
-                console.log('Login Success:', xhr.responseText);
-                var response = JSON.parse(xhr.responseText);
-                localStorage.setItem('token', response.token);
-                // Here you can store the session ID or token if needed
-                window.location.replace("/");
-            } else {
-                alert('Error: ' + JSON.parse(xhr.responseText).error);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.withCredentials = true;
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200 || xhr.status === 201) {
+                    console.log('Login Success:', xhr.responseText);
+                    var response = JSON.parse(xhr.responseText);
+                    localStorage.setItem('token', response.token);
+                    loadPage("index", 1);
+                    connectToNotifications();
+                } else {
+                    alert('Error: ' + JSON.parse(xhr.responseText).error);
+                }
             }
-        }
-    };
-    xhr.send('username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password));
+        };
+        xhr.send('username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password));
+    }
 }

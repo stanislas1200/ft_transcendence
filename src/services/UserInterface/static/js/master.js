@@ -15,15 +15,14 @@ function removeAlertAfterTimeout(alertElement, timeout = 5000) {
         }, 1000);
     }, timeout);
 }
-
 function notifications(Title) {
     let alertHtml = `
-        <strong>${Title}</strong>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
+    <strong>${Title}</strong>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+    </button>
     `;
-
+    
     let newNotif = document.createElement('div');
     newNotif.classList.add('alert', `alert-succes`, 'alert-dismissible', 'fade', 'show');
     newNotif.innerHTML = alertHtml;
@@ -31,9 +30,20 @@ function notifications(Title) {
     removeAlertAfterTimeout(newNotif)
 }
 
+let wss;
+function disconnectFromNotifications() {
+    if (wss) {
+        wss.close();
+        wss = null;
+        console.log('Disconnected from notifications system.');
+    }
+}
 function connectToNotifications() {
     let userId = getCookie('userId');
     if (!userId) {
+        return;
+    }
+    if (window.location.pathname.includes('/login') || window.location.pathname.includes('/register')) {
         return;
     }
     let wsUrl = `wss://localhost:8001/ws/notifications/${userId}`;
@@ -47,6 +57,8 @@ function connectToNotifications() {
 
     wss.addEventListener('message', function (event) {
         let serverMessage = JSON.parse(event.data);
+        if (!(serverMessage && serverMessage.data && serverMessage.data.content))
+            return
         let content = serverMessage.data.content;
         notifications(content);
         if (serverMessage.type === 'friend_request' && window.location.pathname === '/profile/') {
@@ -57,17 +69,18 @@ function connectToNotifications() {
 
     wss.addEventListener('close', function (event) {
         connectToNotifications()
-        console.log('Close: ', event);
+        // console.log('Close: ', event);
     });
 
     wss.addEventListener('error', function (event) {
-        console.log('Error: ', event);
+        // console.log('Error: ', event);
     });
 }
 
 connectToNotifications()
 
 function logout() {
+    event.preventDefault();
     let url = "https://localhost:8000/logout";
     url = url.replace("localhost", window.location.hostname);
 
@@ -101,8 +114,10 @@ function setActive(element, pageName) {
     loadPage(pageName, 1);
 }
 
-
 function testIfLoggedIn() {
+    if (window.location.pathname === '/login/' || window.location.pathname === '/register/') {
+        return;
+    }
     let url = "https://localhost:8000/me";
     url = url.replace("localhost", window.location.hostname);
 
@@ -113,7 +128,8 @@ function testIfLoggedIn() {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status !== 200 && xhr.status !== 201) {
-                window.location.replace("/login");
+                disconnectFromNotifications();
+                loadPage("login", 1);
             }
             // console.log(xhr.responseText);
         }

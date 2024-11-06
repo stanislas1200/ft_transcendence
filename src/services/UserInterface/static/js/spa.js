@@ -95,6 +95,12 @@ async function loadPage(page, prevent, username) {
         case 'leaderboard':
             loadLeaderboard();
             break;
+        case 'login':
+            loadLogin();
+            break;
+        case 'register':
+            loadRegister();
+            break;
         default:
             break;
     }

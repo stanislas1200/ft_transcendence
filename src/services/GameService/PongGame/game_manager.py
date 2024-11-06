@@ -321,7 +321,7 @@ class Party:
 		self.stop_event.set()
 		self.ai_thread.join()
 	
-	def save(self, winners):
+	def save(self, winners=[]):
 		try:
 			if hasattr(self, 'ai_thread'):
 				self.stop_ai_player()
