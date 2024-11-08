@@ -107,6 +107,7 @@ class TChatConsumer(AsyncWebsocketConsumer):
         message = await sync_to_async(Message.objects.create)(user=self.user, content=small_msg)
         await sync_to_async(self.chat.messages.add)(message)
         print(message, flush=True)
+
         await self.channel_layer.group_send(
             self.chat_group_name,
             {

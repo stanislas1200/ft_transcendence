@@ -19,6 +19,10 @@ urlpatterns = [
 	path('create_tournament', views.create_tournament),
 	path('join_tournament/<int:tournament_id>', views.join_tournament),
 	path('get_tournament/<int:tournament_id>', views.get_tournament),
+	path('list_achievements', views.list_achievements),
+	path('send-notification/', views.send_notification),
+	path('list_tournament', views.list_tournament),
+	path('leaderboard', views.leaderboard),
 
 	path('search', views.search)
 	

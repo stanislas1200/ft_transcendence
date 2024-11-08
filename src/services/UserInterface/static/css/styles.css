@@ -12,6 +12,7 @@
   --background: #fafafa;
   --primary: #8791ed;
   --secondary: #d47aeb;
+  --tertiary: #efdaf7;
   --accent: red;
 }
 
@@ -20,6 +21,7 @@
   --background: #050724;
   --primary: #8791ed;
   --secondary: #7b1b93;
+  --tertiary: #1b1037;
   --accent: #e24091;
 }
 
@@ -31,4 +33,33 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.privacy-policy {
+  line-height: 1.6;
+  padding:  20px;
+  color: var(--text);
+  font-size: 1em;
+  
+  h1, h2 {
+      color: var(--secondary);
+      margin-bottom: 10px;
+  }
+  p {
+      font-size: 0.9em;
+      padding-bottom: 15px;
+  }
+  ul {
+      margin-left: 20px;
+      font-size: 0.9em;
+  }
+  a {
+      color: var(--accent)
+  }    
+  footer {
+      margin-top: 20px;
+      font-size: 0.9em;
+      text-align: center;
+      color: #888;
+  }
 }

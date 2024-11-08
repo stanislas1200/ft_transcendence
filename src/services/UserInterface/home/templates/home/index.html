@@ -1,2 +1,71 @@
-<h1>Welcome to the Homepage</h1>
-<p>This is the main content area of the homepage.</p>
+<div class="homepage-container">
+	<div class="info-grid">
+		<div id="index-title" class="index-info index-title">last game played:</div>
+		<div id="index-date" class="index-info index-date">DD/MM/YYYY</div>
+		<div id="status" class="index-info index-wl">
+			<!-- <span data-status="win"></span> -->
+		</div>
+		<div class="index-info index-score">
+			<span>final score:</span>
+			&nbsp;
+			<span id="index-final-score" class="index-final-score">10 | 10</span>
+		</div>
+	</div>
+	<div class="index-quicklinks">
+		<div class="index-quicklink">
+			<span>active games</span>
+			<div id="game-list" class="home-list">
+				<!-- <div class="list-element">
+					<span class="list-span">
+						Game name
+					</span>
+					<div class="list-join-button">
+						Join ➞
+					</div>
+				</div> -->
+			</div>
+			<div id="quick-game" class="index-button">Quick-play</div>
+		</div>
+		<div class="index-quicklink">
+			<span>active tournaments</span>
+			<div id="tournament-list" class="home-list">
+				<!-- <div class="list-element">
+					<span class="list-span">
+						Tournament name
+					</span>
+					<div class="list-join-button">
+						Join ➞
+					</div>
+				</div> -->
+			</div>
+
+			<div id="create-tournament" class="index-button">create</div>
+		</div>
+		<div class="index-quicklink">
+			<span>achievements</span>
+			<div id="achivement-list" class="home-list">
+				<!-- <div class="list-element index-achievement">
+					<span class="list-span">
+						Achievement name
+					</span>
+				</div> -->
+			</div>
+			<div id="goToAchivement" class="index-button">list</div>
+		</div>
+		<div class="index-quicklink">
+			<span>Friends list</span>
+			<div id="friend-list-home-page" class="home-list">
+				<!-- <div class="list-element">
+					<span class="list-span">
+						Friend name
+					</span>
+					<div class="list-join-button">
+						Send message ➞
+					</div>
+				</div> -->
+			</div>
+			<div id="goToChat" class="index-button">list</div>
+		</div>
+	</div>
+</div>
+<script>loadHome();</script>

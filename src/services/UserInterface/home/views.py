@@ -1,13 +1,26 @@
 from django.shortcuts import render
+import os
 
 def master(request):
     return render(request, 'home/master.html')
 
 def register(request):
-    return render(request, 'home/register.html')
+    context = {
+        '42_link': os.environ['OAUTH_LINK'],
+    }
+    return render(request, 'home/register.html', context)
 
 def login(request):
-    return render(request, 'home/login.html')
+    context = {
+        '42_link': os.environ['OAUTH_LINK'],
+    }
+    return render(request, 'home/login.html', context)
+
+def privacy_policy(request):
+    return render(request, 'home/privacy-policy.html')
+
+def terms_of_service(request):
+    return render(request, 'home/terms-of-service.html')
 
 def bootstrap(request):
     return render(request, 'home/bootstrap.html')

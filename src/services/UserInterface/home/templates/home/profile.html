@@ -1,39 +1,313 @@
 {% load static %}
 
-<div class="wrapper">
-    <div class="settings-grid-userCard">
-        <!-- profile picture + userName + add friend + message -->
-        <div class="profile-container" id="profile-container">
-            <div class="profile-picture" id="profile-picture">
-                <img id="profileImage" class="profileImage" src="{% static 'images/pp.png' %}" alt="">
+
+<div class="profile-section">
+    <!-- Profile and User Info -->
+    <div class="profile-info">
+        <img id="profileImage" class="profilePictureUserCard profile-pic" src="{% static 'images/pp.png' %}" alt="">
+        <p id="userName">
+            <!-- UserName -->
+        </p>
+        <div class="buttonFriendMessage", id="buttonFriendMessage">
+            <div class="addFriend" id="addFriend">
+                <span class="plus">+</span>
+                <span class="text">Add Friend</span>
             </div>
-            <div id="userName">
-                <!-- UserName -->
+            <div class="addFriend" id="message">
+                <span class="text">Message me</span>
             </div>
-            <div class="buttonFriendMessage">
-                <div class="addFriend">
-                    <span class="plus">+</span>
-                    <span class="text">Add Friend</span>
-                </div>
-                <div class="addFriend">
-                    <span class="text">Message me</span>
-                </div>
-            </div>
-            <div class="addFriend">
+            <div class="addFriend" id="duel">
                 <span class="text">Challenge me</span>
             </div>
+            <div class="addFriend" id="block">
+                <span class="text">Block user</span>
+            </div>
+        </div>
+        <div class="request-recieve" id="request-recieve">
+            <!-- <div class="friend-request"> -->
+            <!-- contient nom et boutton -->
+            <!-- </div> -->
+            <!-- all pending request -->
         </div>
     </div>
-    <div class="settings-grid-userInformation">
-        player information
-        <div class="info-area">
-            <div class="hystory">
-                hystory
+
+    <!-- Game History -->
+    <div class="stats-and-history">
+        <div class="game-history">
+            <div class="info-area">
+                <div class="legend">
+                    <p class="history_win_loose">Win/Loose</p>
+                    <p class="pipe">|</p>
+                    <p class="history_game_mode">Game mode</p>
+                    <p class="pipe">|</p>
+                    <p class="history_score">Score</p>
+                    <p class="pipe">|</p>
+                    <p class="history_date">Date</p>
+                    <p class="pipe">|</p>
+                    <p class="history_status">Status</p>
+                </div>
+                <div class="border_history">
+                    <div class="history" id="history">
+                        <!-- Skeleton Loader -->
+                        <div class="skeleton-loader" id="skeleton-loader-hist" style="flex-direction: column;">
+                            <div class="skeleton skeleton-row"></div>
+                            <div class="skeleton skeleton-row"></div>
+                            <div class="skeleton skeleton-row"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="achivement">
+                    achivement
+                </div> -->
             </div>
-            <div class="achivement">
-                achivement
+        </div>
+
+        <div class="party-details">
+            <div class="party-state" style="display: none">
+                <p><strong>Game: </strong> none</p>
+                <p><strong>Status:</strong> none</p>
+
+                <p><strong>Start Date:</strong> none</p>
+                <p><strong>End Time:</strong> none</p>
             </div>
+            <!-- Player Cards -->
+            <div class="player-cards">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- Stats and Graph Section -->
+<div class="graph-section">
+    
+    <!-- <div id="skeleton-loader-circle" class="skeleton-loader">
+        <div class="skeleton skeleton-circle"></div>
+        <div class="skeleton skeleton-circle"></div>
+        <div class="skeleton skeleton-circle"></div>
+        <div class="skeleton skeleton-circle"></div>
+    </div> -->
+    <!-- Circle Graphs -->
+    <div class="circle-graphs">
+        <div class="graphInformation" id="graphInformation">
+            <svg viewBox="0 0 36 36" class="circle-svg">
+
+                <path class="around" stroke-dasharray="100, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <path id="percentTot" class="percent" stroke-dasharray="80, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <text id="textTot" class="valueForGraph" x="18" y="14" dy="7">none</text>
+
+            </svg>
+            <p id="totalScoreTot">Total of points scored: none</p>
+        </div>
+        <div class="graphInformation" id="graphInformation">
+            <svg viewBox="0 0 36 36" class="circle-svg">
+
+                <path class="around" stroke-dasharray="100, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <path id="percentPong" class="percent" stroke-dasharray="80, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <text id="textPong" class="valueForGraph" x="18" y="14" dy="7">none</text>
+
+            </svg>
+            <p id="totalScorePong">Total of points scored: none</p>
+        </div>
+        <div class="graphInformation" id="graphInformation">
+            <svg viewBox="0 0 36 36" class="circle-svg">
+
+                <path class="around" stroke-dasharray="100, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <path id="percentTron" class="percent" stroke-dasharray="80, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <text id="textTron" class="valueForGraph" x="18" y="14" dy="7">none</text>
+
+            </svg>
+            <p id="totalScoreTron">Total of points scored: none</p>
+        </div>
+        <div class="graphInformation" id="graphInformation">
+            <svg viewBox="0 0 36 36" class="circle-svg">
+
+                <path class="around" stroke-dasharray="100, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <path id="percentGam" class="percent" stroke-dasharray="80, 100"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+
+                <text id="textGam" class="valueForGraph" x="18" y="14" dy="7">none</text>
+
+            </svg>
+            <p id="totalScoreGam">Total of points scored: none</p>
+        </div>
+    </div>
+
+    <!-- Skeleton Loader -->
+    <div id="skeleton-loader-graph1" class="skeleton-loader">
+        <div class="skeleton skeleton-chart"></div>
+        <div class="skeleton skeleton-chart"></div>
+        <div class="skeleton skeleton-chart"></div>
+        <div class="skeleton skeleton-chart"></div>
+    </div>
+    <div id="skeleton-loader-graph2" class="skeleton-loader">
+        <div class="skeleton skeleton-chart"></div>
+        <div class="skeleton skeleton-chart"></div>
+        <div class="skeleton skeleton-chart"></div>
+        <div class="skeleton skeleton-chart"></div>
+    </div>
+
+    <!-- Line Charts -->
+    <div class="line-charts" id="line-charts" style="display: none;">
+        <canvas id="gamePlaysChart"></canvas>
+        <canvas id="pongPlaysChart"></canvas>
+        <canvas id="tronPlaysChart"></canvas>
+        <canvas id="gamPlaysChart"></canvas>
+    </div>
+
+    <!-- Bar Charts -->
+    <div class="bar-charts" id="bar-charts" style="display: none;">
+        <canvas id="winLossChart"></canvas>
+        <canvas id="pongWinLossChart"></canvas>
+        <canvas id="tronWinLossChart"></canvas>
+        <canvas id="gamWinLossChart"></canvas>
+    </div>
+</div>
+
+<div class="stats-section">
+    <h4>Player Stats:</h4>
+    <div class="stats">
+        <div class="stat">
+            <span class="stat-label">Total Wins:</span>
+            <span class="stat-value" id="totalWins">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Losses:</span>
+            <span class="stat-value" id="totalLosses">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Games:</span>
+            <span class="stat-value" id="totalGames">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Win Streak:</span>
+            <span class="stat-value" id="winStreak">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Tournament Wins:</span>
+            <span class="stat-value" id="tournamentWins">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Tournament Played:</span>
+            <span class="stat-value" id="tournamentPlayed">none</span>
+        </div>
+    </div>
+    <h4>Pong Stats:</h4>
+    <div class="stats">
+        <div class="stat">
+            <span class="stat-label">Total Wins:</span>
+            <span class="stat-value" id="pongTotalWins">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Losses:</span>
+            <span class="stat-value" id="pongTotalLosses">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Games:</span>
+            <span class="stat-value" id="pongTotalGames">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Score:</span>
+            <span class="stat-value" id="pongTotalScore">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Fastest Win:</span>
+            <span class="stat-value" id="pongFastestWin">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Longest Game:</span>
+            <span class="stat-value" id="pongLongestGame">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Play Time:</span>
+            <span class="stat-value" id="pongPlayTime">none</span>
+        </div>
+    </div>
+    <h4>Tron Stats:</h4>
+    <div class="stats">
+        <div class="stat">
+            <span class="stat-label">Total Wins:</span>
+            <span class="stat-value" id="tronTotalWins">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Losses:</span>
+            <span class="stat-value" id="tronTotalLosses">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Games:</span>
+            <span class="stat-value" id="tronTotalGames">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Score:</span>
+            <span class="stat-value" id="tronTotalScore">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Fastest Win:</span>
+            <span class="stat-value" id="tronFastestWin">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Longest Game:</span>
+            <span class="stat-value" id="tronLongestGame">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Play Time:</span>
+            <span class="stat-value" id="tronPlayTime">none</span>
+        </div>
+    </div>
+    <h4>Gun and Monsters Stats:</h4>
+    <div class="stats">
+        <div class="stat">
+            <span class="stat-label">Total Wins:</span>
+            <span class="stat-value" id="gamTotalWins">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Losses:</span>
+            <span class="stat-value" id="gamTotalLosses">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Games:</span>
+            <span class="stat-value" id="gamTotalGames">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total Score:</span>
+            <span class="stat-value" id="gamTotalScore">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Fastest Win:</span>
+            <span class="stat-value" id="gamFastestWin">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Longest Game:</span>
+            <span class="stat-value" id="gamLongestGame">none</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Play Time:</span>
+            <span class="stat-value" id="gamPlayTime">none</span>
         </div>
     </div>
 </div>
-<script>loadProfile();</script>
+
+<script>
+    const queryString = window.location.search;
+    const queryWithoutQuestionMark = queryString.substring(1); // get username ~.~
+    if (queryWithoutQuestionMark)
+        searchUser(queryWithoutQuestionMark);
+    else
+        loadProfile();
+</script>
+<!-- <script>listRequest();</script> -->

@@ -12,99 +12,211 @@ function getElementFriend() {
 }
 
 function chat() {
-    // Données d'exemple pour les amis
-    console.log(1);
-    const friends = [
-        { id: 'chat1', name: 'Alice', lastMessage: 'How are you?' },
-        { id: 'chat2', name: 'Bob', lastMessage: 'What’s up?' },
-        { id: 'chat3', name: 'Charlie', lastMessage: 'Long time no see!' }
-    ];
+    // let friendsJson;
+    getFriendList()
+        .then(response => {
+            console.log("Liste des amis :", response);  // Utilisation de la réponse ici
+            let friendsJson = response;
 
-    const messages = {
-        chat1: ['Hello Alice!', 'How are you?'],
-        chat2: ['Hi Bob!', 'What’s up?'],
-        chat3: ['Hey Charlie!', 'Long time no see!']
-    };
+            console.log(friendsJson);
 
-    // Fonction pour ajouter un message à la zone de chat
-    function addMessage(message, type) {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message', type);
-        messageElement.textContent = message;
-        chatArea.appendChild(messageElement);
+            // Fonction pour ajouter un message à la zone de chat
+            function addMessage(message, type) {
+                console.log('addMessage', message, type);
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', type);
+                if (message.split(' ')[0] === '/invite') { // lorsque le message est /invite {gameId} je voudrais que le message soit un bouton 'join the duel'et que je puisse recuperer le gameId
+                    messageElement.innerHTML = '<button class="join-duel">Join the duel</button>';
+                    const gameId = message.split(' ')[1];
+                    if (!gameId)
+                        return;
+                    const click = ({ target }) => {
+                        console.log('join the duel');
+                        localStorage.setItem("gameId", gameId);
+                        loadPage('pong', 1);
+                        // loadGame(gameId);
+                    }
+                    messageElement.addEventListener('click', click);
+                } else {
+                    messageElement.textContent = message;
+                }
+                chatArea.appendChild(messageElement);
 
-        // Faire défiler vers le bas pour afficher le dernier message
-        chatArea.scrollTop = chatArea.scrollHeight;
-    }
+                // Faire défiler vers le bas pour afficher le dernier message
+                chatArea.scrollTop = chatArea.scrollHeight;
+                if (type === 'sent') {
+                    console.log('message envoyé');
+                    chatSocket.send(JSON.stringify({
+                        'message': message
+                    }));
+                }
+            }
 
-    // Fonction pour charger le chat d'un ami
-    function loadChat(chatId) {
-        // Effacer le contenu actuel du chat
-        chatArea.innerHTML = '';
+            // Fonction pour charger le chat d'un ami
+            function loadChat(chatusername) {
+                // Effacer le contenu actuel du chat
+                chatArea.innerHTML = '';
 
-        // Ajouter les messages de l'ami sélectionné
-        if (messages[chatId]) {
-            messages[chatId].forEach(msg => {
-                addMessage(msg, 'received');
+                // Demarrer une websocket avec le username de l'ami
+                // if (chatSocket !== undefined) {
+                //     console.log('on passe ici');
+                //     chatSocket.close();
+                // }
+                chatSocket = new WebSocket(
+                    'wss://' + window.location.hostname + ':8002/ws/chat/' + getCookie("userId") + '/' + chatusername + '/' + getCookie("token") + '/'
+                );
+
+                chatSocket.onopen = function (e) {
+                    console.log('socket open with ', chatusername);
+                };
+
+                chatSocket.onmessage = function (e) {
+                    const data = JSON.parse(e.data);
+                    // console.log('message socket ', data);
+                    if (data.sender === chatusername)
+                        addMessage(data.message, 'received');
+                };
+
+                chatSocket.onclose = function (e) {
+                    console.log('Chat socket closed unexpectedly');
+                };
+
+                // Ajouter les messages de l'ami sélectionné
+                /*if (messages[chatId]) {
+                    messages[chatId].forEach(msg => {
+                        addMessage(msg, 'received');
+                    });
+        
+                    // Ajouter un message d'exemple
+                } else {
+                    addMessage('This is a new message.', 'sent');
+                } */
+                let chatUsernameDisplay = document.createElement('p');
+                chatUsernameDisplay.innerHTML = chatusername;
+                chatUsernameDisplay.classList.add('chat-username');
+                const click = async ({ target }) => {
+                    await loadPage('profile', 1, target.innerHTML);
+                    // searchUser(target.innerHTML);
+                }
+
+                chatUsernameDisplay.addEventListener('click', click);
+                chatArea.appendChild(chatUsernameDisplay);
+                // chatArea.innerHTML = '<p>Sélectionnez un ami ou ajoutez en un pour commencer à discuter.</p>';
+            }
+
+            // Ajouter les amis à la liste
+            friendsJson.friends.forEach(friends => {
+                const listItem = document.createElement('li');
+                listItem.dataset.chat = friends.id;
+
+                const nameSpan = document.createElement('span');
+                nameSpan.classList.add('friend-name');
+                nameSpan.textContent = friends.username;
+
+                // const previewSpan = document.createElement('span');
+                // previewSpan.classList.add('last-message-preview');
+                // previewSpan.textContent = friend.lastMessage;
+
+                listItem.appendChild(nameSpan);
+                // listItem.appendChild(previewSpan);
+
+                listItem.addEventListener('click', () => loadChat(friends.username));
+                friendList.appendChild(listItem);
             });
 
-            // Ajouter un message d'exemple
-            addMessage('This is a new message.', 'sent');
-        } else {
-            chatArea.innerHTML = '<p>Sélectionnez un ami pour commencer à discuter.</p>';
-        }
-    }
-
-    // Ajouter les amis à la liste
-    friends.forEach(friend => {
-        const listItem = document.createElement('li');
-        listItem.dataset.chat = friend.id;
-
-        const nameSpan = document.createElement('span');
-        nameSpan.classList.add('friend-name');
-        nameSpan.textContent = friend.name;
-
-        const previewSpan = document.createElement('span');
-        previewSpan.classList.add('last-message-preview');
-        previewSpan.textContent = friend.lastMessage;
-
-        listItem.appendChild(nameSpan);
-        listItem.appendChild(previewSpan);
-
-        listItem.addEventListener('click', () => loadChat(friend.id));
-        friendList.appendChild(listItem);
-    });
-
-    // Charger le chat du premier ami par défaut
-    if (friends.length > 0) {
-        loadChat(friends[0].id);
-    }
-
-    // Fonction pour envoyer un nouveau message
-    function sendMessage() {
-        const message = messageInput.value.trim();
-        if (message) {
-            addMessage(message, 'sent');
-            messageInput.value = ''; // Efface le champ de saisie
-
-            // Optionnel : Ajouter le message au chat de l'ami sélectionné
-            const selectedFriendId = document.querySelector('#friend-list li.selected')?.dataset.chat;
-            if (selectedFriendId) {
-                messages[selectedFriendId] = messages[selectedFriendId] || [];
-                messages[selectedFriendId].push(message);
+            // Charger le chat du premier ami par défaut
+            if (friendsJson.length > 0) {
+                loadChat(friends[0].username);
             }
-        }
-    }
 
-    // Ajouter un gestionnaire d'événements pour le bouton d'envoi
-    sendButton.addEventListener('click', sendMessage);
+            // Fonction pour envoyer un nouveau message
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                if (message) {
+                    if (message.split(' ')[0] == '/invite') { // faire une requete api pour creer une game, recupere le gameId et l'envoyer
+                        createGameChat().then(gameId => {
+                            // console.log('gameId', gameId);
+                            addMessage(`/invite ${gameId}`, 'sent');
+                        }).catch(error => {
+                            console.error(error);
+                        });
 
-    // Optionnel : Ajouter un gestionnaire d'événements pour appuyer sur Entrée pour envoyer un message
-    messageInput.addEventListener('keypress', function (event) {
-        if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault(); // Évite de sauter une ligne
-            sendMessage();
-        }
+                    }
+                    else
+                        addMessage(message, 'sent');
+                    messageInput.value = ''; // Efface le champ de saisie
+
+                    // Optionnel : Ajouter le message au chat de l'ami sélectionné
+                    const selectedFriendId = document.querySelector('#friend-list li.selected')?.dataset.chat;
+                    if (selectedFriendId) {
+                        messages[selectedFriendId] = messages[selectedFriendId] || [];
+                        messages[selectedFriendId].push(message);
+                    }
+                }
+            }
+
+            // Ajouter un gestionnaire d'événements pour le bouton d'envoi
+            sendButton.addEventListener('click', sendMessage);
+
+            // Optionnel : Ajouter un gestionnaire d'événements pour appuyer sur Entrée pour envoyer un message
+            messageInput.addEventListener('keypress', function (event) {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault(); // Évite de sauter une ligne
+                    sendMessage();
+                }
+            });
+        })
+        .catch(error => {
+            console.error(error);  // Gérer les erreurs
+        });
+}
+
+function getFriendList() {
+    return new Promise((resolve, reject) => {
+        let url = "https://" + window.location.hostname + ":8000/friends/" + getCookie("userId") + "/";
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.withCredentials = true;
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200 || xhr.status === 201) {
+                    let response = JSON.parse(xhr.responseText);
+                    console.log(response);  // La réponse est ici
+                    resolve(response);      // Résoudre la promesse avec la réponse
+                } else {
+                    reject('Error: ' + xhr.responseText);  // Rejeter la promesse en cas d'erreur
+                }
+            }
+        };
+        xhr.send();
     });
 }
 
+function createGameChat() {
+    return new Promise((resolve, reject) => {
+        var xhr = new XMLHttpRequest();
+        let url = "https://localhost:8001/game/create";
+        url = url.replace("localhost", window.location.hostname);
+        xhr.withCredentials = true;
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {  // Requête terminée
+                if (xhr.status === 200) {  // Succès de la requête
+                    console.log('Game created');
+                    var gameId = JSON.parse(xhr.responseText).game_id;
+                    console.log("game id :" + gameId);
+                    localStorage.setItem("gameId", gameId);
+                    resolve(gameId);  // Résoudre la promesse avec l'ID de la partie
+                } else {
+                    console.log('Error creating game');
+                    console.log(xhr.responseText);
+                    reject(new Error('Failed to create game'));  // Rejeter la promesse
+                }
+            }
+        };
+
+        xhr.send("partyName=tmp&game=pong&gameType=custom&playerNumber=2&gameMode=ffa&map=0&ballSpeed=5&paddleSpeed=30");
+    });
+}

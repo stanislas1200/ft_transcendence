@@ -1,4 +1,4 @@
-let button;
+// let button;
 // let pp;
 
 function loadSettings() {
@@ -27,9 +27,41 @@ function loadSettings() {
         }
     };
     xhr.send();
-    button = document.getElementById('saveButton');
+    // button = document.getElementById('saveButton');
     // validateForm();
     inputsChangement();
+    deleteProfile();
+}
+
+function deleteProfile() {
+    const deleteButton = document.getElementById('deleteButton');
+
+    const click = ({ target }) => {
+        let pwd = document.getElementById('oldPassword').value;
+        console.log(pwd);
+        if (!pwd)
+            return (alert('need your password'));
+        let url = "https://localhost:8000/delete_user/";
+        url = url.replace("localhost", window.location.hostname);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.withCredentials = true;
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200 || xhr.status === 201) {
+                    response = JSON.parse(xhr.responseText);
+                    console.log(response);
+                    testIfLoggedIn();
+                } else {
+                    alert('Error: ' + JSON.parse(xhr.responseText).error);
+                }
+            }
+        };
+        xhr.send(pwd);
+    }
+
+    deleteButton.addEventListener('click', click);
 }
 
 function containsUpperCase(pwd) {
@@ -52,20 +84,20 @@ function checkPassword(pwd) {
     let check = 0;
 
     if (!containsUpperCase(pwd)) {
-        document.getElementById('newPasswordError').textContent = "the password must contain at least one capital letter";
+        // document.getElementById('newPasswordError').textContent = "the password must contain at least one capital letter";
         check++;
     }
     if (!containsLowerCase(pwd)) {
-        document.getElementById('newPasswordError').textContent = "password must contain at least one lowercase letter";
+        // document.getElementById('newPasswordError').textContent = "password must contain at least one lowercase letter";
         check++;
     }
     if (!containsNumber(pwd)) {
-        document.getElementById('newPasswordError').textContent = "password must contain at least one number";
+        // document.getElementById('newPasswordError').textContent = "password must contain at least one number";
         check++;
     }
     if (!containsSpecialCharacter(pwd)) {
-        console.log(containsSpecialCharacter(pwd));
-        document.getElementById('newPasswordError').textContent = "password must contain at least one special caracter";
+        // console.log(containsSpecialCharacter(pwd));
+        // document.getElementById('newPasswordError').textContent = "password must contain at least one special caracter";
         check++;
     }
     if (check != 0)
@@ -75,7 +107,7 @@ function checkPassword(pwd) {
 
 // function validateForm() {
 function validateForm() {
-    console.log('button press');
+    // console.log('button press');
     let valid = 1;
 
     const newFirstName = document.getElementById('firstName');
@@ -133,21 +165,38 @@ function validateForm() {
 
     const newPassword = document.getElementById('newPassword');
     const spanNewPassword = document.getElementById('span-newpwd');
-    if (currentPassword.value == '') {
+    var newPwd = 0;
+    var oldPwd = 0;
+    if (currentPassword.value == '' && newPassword.value != '') {
+        oldPwd = 1;
         console.log('no password enter');
-        valid = 0;
+    } else if (currentPassword.value != '' && newPassword.value == '') {
+        //
+    } else if (currentPassword.value != '' && newPassword != '') {
+        if (currentPassword.value === newPassword.value) {
+            console.log('same pwd than before error');
+            newPwd = 1;
+        }
+        if (checkPassword(newPassword.value) != 0) {
+            console.log('new pwd error');
+            newPwd = 1;
+        }
     }
-    if (newPassword == '') {
-        console.log('no new password');
+    if (newPwd == 1) {
         valid = 0;
+        newPassword.classList.add('error');
+        spanNewPassword.style.color = 'var(--accent)';
+    } else {
+        newPassword.classList.remove('error');
+        spanNewPassword.style.color = 'var(--secondary)';
     }
-    if (currentPassword.value === newPassword.value) {
-        console.log('same pwd than before error');
+    if (oldPwd == 1) {
         valid = 0;
-    }
-    if (checkPassword(newPassword.value) != 0) {
-        console.log('new pwd error');
-        valid = 0;
+        currentPassword.classList.add('error');
+        spanCurrentPassword.style.color = 'var(--accent)';
+    } else {
+        currentPassword.classList.remove('error');
+        spanCurrentPassword.style.color = 'var(--secondary)';
     }
     return valid;
 }
@@ -192,6 +241,8 @@ function inputsChangement() {
 
 function loadProfilePicture(id) {
     const profilePicture = document.getElementById('profileImage');
+    if (!profilePicture)
+        return;
     var response;
     let url = "https://localhost:8000/users/<int:user_id>/avatar";
     url = url.replace("localhost", window.location.hostname); var xhr = new XMLHttpRequest();
@@ -220,6 +271,8 @@ function sleep(ms) {
 
 function saveChangement(id) {
     const saveButton = document.getElementById('saveButton');
+    if (!saveButton)
+        return;
     saveButton.addEventListener('click', function () {
         let verif = 1
         verif = validateForm();
@@ -229,6 +282,10 @@ function saveChangement(id) {
             const userName = document.getElementById('username');
             const email = document.getElementById('email');
             const profilePicture = document.getElementById('profilePic');
+
+            if (!firstName || !lastName || !userName || !email)
+                return;
+
             let url = "https://localhost:8000/users/<int:user_id>/edit";
             url = url.replace("localhost", window.location.hostname); var xhr = new XMLHttpRequest();
             url = url.replace("<int:user_id>", id);
@@ -256,8 +313,3 @@ function saveChangement(id) {
         }
     });
 }
-
-
-
-email.classList.add('error');
-emailSpan.style.color = 'var(--accent)';

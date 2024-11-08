@@ -36,19 +36,92 @@ function getElementGame() {
     // ballSpeed = parseInt(document.getElementById('ball-speed').value);
     // paddleSpeed = parseInt(document.getElementById('paddle-speed').value);
 
-    gameModeDisabler();
+    gameModeDisablerForRandom();
+    gameModeDisablerForCreate();
     inputAnimation();
     randomJoinGameButton();
     createGameButton();
     // waitingRoom();
 }
 
-function gameModeDisabler() {
-    // Désactive le choix du mode de jeu si 2 joueurs sont sélectionnés
-    const maxPlayersSelectRandom = document.getElementById('max-players-random');
-    const gameModeSelect = document.getElementById('game-mode');
+function gameModeDisablerForCreate() {
+    const maxPlayersSelect = document.getElementById('max-players-create');
+    const gameModeCreateTeam = document.getElementById('game-mode-create-team');
+    const gameModeCreateFfa = document.getElementById('game-mode-create-ffa');
+    const gameModeCreateSolo = document.getElementById('game-mode-create-solo');
+    const gameModeCreateLocal = document.getElementById('game-mode-create-local');
+    const gameModeCreateTournament = document.getElementById('game-mode-create-tournament');
+    const gameStyle = document.getElementById('gameCreate');
+    const gameModeSelect = document.getElementById('game-mode-create');
+    const map = document.getElementById('map-choice');
+
+    gameModeSelect.value = "solo-ia";
     gameModeSelect.disabled = true;
-    maxPlayersSelectRandom.addEventListener('change', function () {
+
+    gameStyle.addEventListener('change', function () {
+        if (this.value === 'tron') {
+            // gameModeSelect.value = 'ffa';
+            // gameModeSelect.disabled = true;
+            // maxPlayersSelect.value = '2';
+            // maxPlayersSelect.disabled = true;
+            map.value = '0';
+            map.disabled = true;
+        } else {
+            maxPlayersSelect.disabled = false;
+            map.disabled = false;
+        }
+    });
+
+    maxPlayersSelect.addEventListener('change', function () {
+        if (this.value === '1') {
+            gameModeSelect.value = "solo-ia";
+            gameModeSelect.disabled = true;
+            map.disabled = false;
+        } else if (this.value == '2') {
+            gameModeSelect.value = 'ffa';
+            gameModeSelect.disabled = false;
+            gameModeCreateFfa.disabled = false;
+            gameModeCreateSolo.disabled = true;
+            gameModeCreateTeam.disabled = true;
+            gameModeCreateLocal.disabled = false;
+            gameModeCreateTournament.disabled = true;
+        } else if (this.value == '8') {
+            gameModeSelect.value = 'tournament';
+            gameModeSelect.disabled = true;
+        } else {
+            gameModeSelect.value = 'ffa';
+            gameModeSelect.disabled = false;
+            gameModeCreateFfa.disabled = false;
+            gameModeCreateSolo.disabled = true;
+            gameModeCreateTeam.disabled = false;
+            gameModeCreateLocal.disabled = true;
+        }
+    });
+
+}
+
+function gameModeDisablerForRandom() {
+    // Désactive le choix du mode de jeu si 2 joueurs sont sélectionnés
+    const maxPlayersSelect = document.getElementById('max-players-random');
+    const gameModeSelect = document.getElementById('game-mode');
+    const gameStyle = document.getElementById('gameRandom');
+    gameModeSelect.disabled = false;
+
+    // console.log(gameStyle.value);
+
+    gameStyle.addEventListener('change', function () {
+        if (this.value === 'tron') {
+            gameModeSelect.value = 'ffa';
+            maxPlayersSelect.value = '2';
+            gameModeSelect.disabled = true;
+            maxPlayersSelect.disabled = true;
+        } else {
+            // gameModeSelect.disabled = false;
+            maxPlayersSelect.disabled = false;
+        }
+    });
+
+    maxPlayersSelect.addEventListener('change', function () {
         if (this.value === '2') {
             gameModeSelect.value = 'ffa';
             gameModeSelect.disabled = true;
@@ -56,45 +129,23 @@ function gameModeDisabler() {
             gameModeSelect.disabled = false;
         }
     });
-
-    const maxPlayersSelectCreate = document.getElementById('max-players-create');
-    const gameModeCreateTeam = document.getElementById('game-mode-create-team');
-    const gameModeCreateFfa = document.getElementById('game-mode-create-ffa');
-    const gameModeCreateSolo = document.getElementById('game-mode-create-solo');
-    gameModeCreateFfa.disabled = true;
-    gameModeCreateTeam.disabled = true;
-
-    maxPlayersSelectCreate.addEventListener('change', function () {
-        if (this.value === '1') {
-            gameModeSelectCreate.value = 'solo-ia';
-            gameModeCreateFfa.disabled = true;
-            gameModeCreateTeam.disabled = true;
-            gameModeCreateSolo.disabled = false;
-        } else if (this.value === '2') {
-            gameModeSelectCreate.value = 'ffa';
-            gameModeCreateSolo.disabled = true;
-            gameModeCreateTeam.disabled = true;
-            gameModeCreateFfa.disabled = false;
-        } else {
-            gameModeCreateSolo.disabled = true;
-            gameModeCreateFfa.disabled = false;
-            gameModeCreateTeam.disabled = false;
-        }
-    });
 }
 
 function randomJoinGameButton() {
     const randomGameButton = document.getElementById('random-game-button');
-    const gameModeSelect = document.getElementById('game-mode');
-    const maxPlayersSelectRandom = document.getElementById('max-players-random');
 
     randomGameButton.addEventListener('click', function () {
+        randomGameButton.disabled = true;
+        const gameModeSelect = document.getElementById('game-mode');
+        const maxPlayersSelectRandom = document.getElementById('max-players-random');
+        const gameStyle = document.getElementById('gameRandom').value;
         var xhr = new XMLHttpRequest();
-        var url = "https://" + window.location.hostname + ":8001/game/join?gameName=pong&gameMode=" + gameModeSelect.value + "&nbPlayers=" + maxPlayersSelectRandom.value;
+        var url = "https://" + window.location.hostname + ":8001/game/join?gameName={{gameStyle}}&gameMode=" + gameModeSelect.value + "&nbPlayers=" + maxPlayersSelectRandom.value;
+        url = url.replace("{{gameStyle}}", gameStyle);
         xhr.withCredentials = true;
-        xhr.open("GET", url, true);
+        xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.onreadystatechange = function () {
+        xhr.onreadystatechange = async function () {
             if (xhr.readyState === 4)
                 if (xhr.status === 200) {
                     console.log('Game joined');
@@ -102,7 +153,13 @@ function randomJoinGameButton() {
                     console.log("game id :" + gameId);
                     localStorage.setItem("gameId", gameId);
                     console.log(xhr.responseText);
-                    window.location.replace('/pong');
+                    if (gameStyle === 'tron')
+                        await loadPage("tron", 1);
+                    else if (gameStyle === 'gun_and_monsters')
+                        await loadPage("gam", 1);
+                    else
+                        await loadPage("pong", 1);
+                    randomGameButton.disabled = false;
                 }
                 else {
                     console.log('Error joining game'); // TODO put a message
@@ -117,35 +174,65 @@ function createGameButton() {
     const createGameButton = document.getElementById('create-game-button');
 
     createGameButton.addEventListener('click', function () {
-        const partyName = document.getElementById('partyName').value;
+        // const partyName = document.getElementById('partyName').value;
         const playerNumber = document.getElementById('max-players-create').value;
         const gameMode = document.getElementById('game-mode-create').value;
         const mapChoice = document.getElementById('map-choice').value;
         const ballSpeed = document.getElementById('ball-speed').value;
         const paddleSpeed = document.getElementById('paddle-speed').value;
+        const gameStyle = document.getElementById('gameCreate').value;
 
-        var xhr = new XMLHttpRequest();
-        let url = "https://" + window.location.hostname + ":8001" + "/game/create";
-        console.log(url);
-        xhr.withCredentials = true;
-        xhr.open("POST", url, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4)
-                if (xhr.status === 200) {
-                    console.log('Game created');
-                    var gameId = JSON.parse(xhr.responseText).game_id;
-                    console.log("game id :" + gameId);
-                    localStorage.setItem("gameId", gameId);
-                    console.log(xhr.responseText);
-                    window.location.replace('/pong');
-                }
-                else {
-                    console.log('Error creating game'); // TODO put a message
-                    console.log(xhr.responseText);
-                }
+        if (gameStyle == 'local')
+            return loadPage("localpong", 1)
+        else if (gameMode == 'tournament') {
+            var xhr = new XMLHttpRequest();
+            let url = "https://localhost:8001/game/create_tournament";
+            url = url.replace("localhost", window.location.hostname);
+            xhr.withCredentials = true;
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4)
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        document.cookie = 'tournament_id=' + response.tournament_id;
+                        loadPage('tournament', 1);
+                    }
+                    else {
+                        console.log('Error creating game'); // TODO put a message
+                        console.log(xhr.responseText);
+                    }
+            }
+            xhr.send("name=tounament&game=pong&start_date=2023-04-01T12:00:00Z");
+        } else {
+            createGameButton.disabled = true;
+            var xhr = new XMLHttpRequest();
+            let url = "https://localhost:8001/game/create";
+            url = url.replace("localhost", window.location.hostname);
+            xhr.withCredentials = true;
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = async function () {
+                if (xhr.readyState === 4)
+                    if (xhr.status === 200) {
+                        console.log('Game created');
+                        var gameId = JSON.parse(xhr.responseText).game_id;
+                        console.log("game id :" + gameId);
+                        localStorage.setItem("gameId", gameId);
+                        console.log(xhr.responseText);
+                        if (gameStyle === 'tron')
+                            loadPage("tron", 1);
+                        else
+                            loadPage("pong", 1);
+                        createGameButton.disabled = false;
+                    }
+                    else {
+                        console.log('Error creating game'); // TODO put a message
+                        console.log(xhr.responseText);
+                    }
+            }
+            xhr.send("partyName=tmp&game=" + gameStyle + "&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
         }
-        xhr.send("partyName=" + partyName + "&game=pong&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
     });
 }
 
@@ -212,6 +299,11 @@ function inputAnimation() {
     }
 
     inputs.forEach((input) => {
+        const span = input.previousElementSibling;
+        if (input.value !== '' && span) {
+            span.classList.add('span-active'); // Ajoute la classe si l'input a déjà du texte
+        }
+
         input.addEventListener('focus', handleFocus);
         input.addEventListener('blur', handleFocusOut);
     });

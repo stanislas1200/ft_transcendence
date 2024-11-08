@@ -11,16 +11,58 @@ from django.contrib.auth.decorators import login_required
 import requests, secrets, os
 from .models import UserToken, Friendship, FriendRequest, Block
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import redirect
 
 from django.core.files.images import get_image_dimensions
 
 from PIL import Image, ImageSequence
 from io import BytesIO
 from django.core.files.base import ContentFile
+from django.utils import timezone
+
+from django.utils.html import escape
 
 from django.shortcuts import get_object_or_404
 
-@csrf_exempt # Disable CSRF protection for this view
+def friend_request_notif(sender, receiver):
+	message = {
+		"type": "friend_request",
+		"data": {
+			"title": "Friend Request",
+			"content": f"{sender.username} sent you a friend request",
+			"timestamp": timezone.now().isoformat(),
+			"user_id": receiver.id,
+			"metadata": {
+				"requester_id": sender.id,
+				"requester_name": sender.username
+			}
+		}
+	}
+	return message
+
+def friend_request_accept_notif(sender, receiver):
+	message = {
+		"type": "friend_request_accepted",
+		"data": {
+			"title": "Friend Request Accepted",
+			"content": f"{sender.username} accepted your friend request",
+			"timestamp": timezone.now().isoformat(),
+			"user_id": receiver.id,
+			"metadata": {
+				"requester_id": sender.id,
+				"requester_name": sender.username
+			}
+		}
+	}
+	return message
+
+def send_notif(message, user_id):
+	headers = {
+		'X-Internal-Secret': os.environ['INTERNAL_SECRET']
+	}
+	response = requests.post(f'https://game-service:8001/game/send-notification/', headers=headers, json={"user_id": [user_id], "message": message}, verify=False)
+
+@csrf_exempt
 @require_POST
 def send_friend_request(request, user_id):
 	try:
@@ -42,21 +84,24 @@ def send_friend_request(request, user_id):
 		receiver = User.objects.get(id=user_id)
 		if sender == receiver:
 			return JsonResponse({'error': 'Users cannot send requests to themselves'}, status=403)
+
+		if sender in receiver.blocked:
+			return JsonResponse({'error': "You can't send the request"}, status=403)
 		
 		if Friendship.objects.filter(user1=sender, user2=receiver).exists() or Friendship.objects.filter(user1=receiver, user2=sender).exists():
 			return JsonResponse({'error': 'Users are already friends'}, status=409)
 		
-		friend_request, created = FriendRequest.objects.get_or_create(sender=sender, receiver=receiver)
-		
-		if created:
-			return JsonResponse({'message': 'Successfully sent request'})
-		else:
-			return JsonResponse({'error': 'Friend request already exists'}, status=409) # TODO : check sender receiver and receiver sender 
+		if FriendRequest.objects.filter(sender=sender, receiver=receiver).exists() or FriendRequest.objects.filter(sender=receiver, receiver=sender).exists():
+			return JsonResponse({'error': 'Friend request already exists'}, status=409)
+
+		FriendRequest.objects.get_or_create(sender=sender, receiver=receiver)
+		message = friend_request_notif(sender, receiver)
+		send_notif(message, receiver.id)
+		return JsonResponse({'message': 'Successfully sent request'})
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
-
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_POST
 def accept_friend_request(request, request_id):
 	try:
@@ -75,9 +120,13 @@ def accept_friend_request(request, request_id):
 
 		if not FriendRequest.objects.filter(id=request_id).exists():
 			return JsonResponse({'error': 'Request not found'}, status=404)
+
 		friend_request = FriendRequest.objects.get(id=request_id)
 		if friend_request.receiver == user:
-			Friendship.objects.create(user1=friend_request.sender, user2=friend_request.receiver)
+			if not Friendship.objects.filter(user1=friend_request.sender, user2=friend_request.receiver).exists():
+				Friendship.objects.create(user1=friend_request.sender, user2=friend_request.receiver)
+			message = friend_request_accept_notif(friend_request.receiver, friend_request.sender)
+			send_notif(message, friend_request.sender.id)
 			friend_request.delete()
 			return JsonResponse({'message': 'Successfully accepted request'})
 			
@@ -85,7 +134,7 @@ def accept_friend_request(request, request_id):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_POST
 def remove_friend(request, user_id):
 	try:
@@ -117,7 +166,7 @@ def remove_friend(request, user_id):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_POST
 def decline_friend_request(request, request_id):
 	try:
@@ -137,7 +186,7 @@ def decline_friend_request(request, request_id):
 		if not FriendRequest.objects.filter(id=request_id).exists():
 			return JsonResponse({'error': 'Request not found'}, status=404)
 		friend_request = FriendRequest.objects.get(id=request_id)
-		if friend_request.receiver == user: # TODO : use decline to remove request so or friend_request.sender == user
+		if friend_request.receiver == user or friend_request.sender == user:
 			friend_request.delete()
 			return JsonResponse({'message': 'Successfully declined request'})
 			
@@ -148,21 +197,12 @@ def decline_friend_request(request, request_id):
 @require_GET
 def list_friends(request, user_id):
 	try:
-		# TODO: private ??
+		# TODO NM: add option to set as private
 		if not User.objects.filter(id=user_id).exists():
 			return JsonResponse({'error': 'User not found'}, status=404)
 		user = User.objects.get(id=user_id)
-		# user = get_object_or_404(User, id=user_id)
-		# friendships = Friendship.objects.filter(user1=user) | Friendship.objects.filter(user2=user)
-		# friends = []
-		# for friendship in friendships:
-		# 	if friendship.user1 == user:
-		# 		friends.append(friendship.user2)
-		# 	else:
-		# 		friends.append(friendship.user1)
-
 		friends = user.friends
-		return JsonResponse({'friends': [{'id': friend.id, 'username': friend.username} for friend in friends]})
+		return JsonResponse({'friends': [{'id': friend.id, 'username': friend.username, 'is_online': True if friend.is_online else False} for friend in friends]})
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
@@ -194,29 +234,26 @@ def list_friend_requests(request):
 @require_GET
 def list_blocked_user(request):
 	try:
-		u_id = request.COOKIES.get('userId')
 		# if request.user.is_authenticated:
 		# 	user = request.user
 		# else:
-		# 	status = verify_token(request)
+		# 	status = verify_token(request) # TODO NM: check cuz not working for tchat
 		# 	if (status == 200):
-		# 		u_id = request.GET.get('UserId')
-		# 		if not u_id:
-		# 			u_id = request.COOKIES.get('userId')
-
-		user = User.objects.get(id=u_id)
+		u_id = request.GET.get('UserId')
+		if not u_id:
+			u_id = request.COOKIES.get('userId')
 		# 	else:
 		# 		return JsonResponse({'error': 'User is not logged in'}, status=401)
-		
+		# u_id = request.COOKIES.get('userId')
+		user = User.objects.get(id=u_id)
 		return JsonResponse({'blocked_user': [{'id': b.id, 'username': b.username} for b in user.blocked]})
 
 	except ObjectDoesNotExist:
 		return JsonResponse({'error': 'Object not found'}, status=404)
 	except Exception as e:
-		print(e, flush=True)
 		return JsonResponse({'error': 'Server error'}, status=500)
 
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_POST
 def block_user(request, user_id):
 	try:
@@ -251,7 +288,7 @@ def block_user(request, user_id):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_POST
 def unblock_user(request, user_id):
 	try:
@@ -278,7 +315,6 @@ def unblock_user(request, user_id):
 		return JsonResponse({'error': 'Object not found'}, status=404)
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
-
 
 def compress_gif(avatar):
 	with Image.open(avatar) as img:
@@ -329,7 +365,7 @@ def process_avatar(avatar, content_type):
 	# validate dimensions
 	if w != h:
 		new_size = min(w, h)
-		# TODO : use Middle ?
+		# TODO NM: use Middle ?
 		left = (w - new_size)/2
 		top = (h - new_size)/2
 		right = (w + new_size)/2
@@ -359,7 +395,7 @@ def process_avatar(avatar, content_type):
 	
 	return avatar
 
-@csrf_exempt
+@require_GET
 def get_avatar(request, user_id):
 	try:
 		user = User.objects.get(id=user_id)
@@ -375,6 +411,7 @@ def get_avatar(request, user_id):
 
 @csrf_exempt
 @login_required
+@require_POST
 def update_user(request, user_id):
 	try:
 		# Check login
@@ -393,7 +430,7 @@ def update_user(request, user_id):
 
 		# Check authorisation
 		if user_id != user.id:
-			if not user.is_staff: # TODO accept token accepted
+			if not user.is_staff:
 				return JsonResponse({'error': 'Unauthorized'}, status=403)
 			if not User.objects.filter(id=user_id).exists():
 				return JsonResponse({'error': 'User not found'}, status=404)
@@ -402,6 +439,7 @@ def update_user(request, user_id):
 
 		# Get Input
 		username = request.POST.get('username')
+		username = escape(username)
 		email = request.POST.get('email')
 		first_name = request.POST.get('first_name')
 		last_name = request.POST.get('last_name')
@@ -409,15 +447,15 @@ def update_user(request, user_id):
 		new_password = request.POST.get('new_password')
 		avatar = request.FILES.getlist("avatar")
 		
+		if "deleted_user" in username:
+			return JsonResponse({'error': 'Username already taken'}, status=403)
 		
-
-		# Update User TODO : all user info
 		if username and username != user.username:
 			validate_unicode_slug(username)
 			if User.objects.filter(username=username).exists():
 				return JsonResponse({'error': 'Username already taken'}, status=400)
 			user.username = username
-		if email and email != user.email: # TODO : password to change email
+		if email and email != user.email: # TODO NM: password to change email
 			validate_email(email)
 			if User.objects.filter(email=email).exists():
 				return JsonResponse({'error': 'Email already taken'}, status=400)
@@ -434,7 +472,7 @@ def update_user(request, user_id):
 			validate_image_file_extension(avatar[0])
 			if (UserToken.objects.filter(user=user).exists()):
 				profile = UserToken.objects.get(user=user)
-				if profile.avatar:
+				if profile.avatar and profile.avatar.name != 'default.png':
 					profile.avatar.delete(save=True)
 				profile.avatar = process_avatar(avatar[0], request.FILES['avatar'].content_type)
 				profile.save()
@@ -444,7 +482,7 @@ def update_user(request, user_id):
 				if not check_password(current_password, user.password):
 					return JsonResponse({'error': 'Current password is incorrect'}, status=400)
 				validate_password(new_password, user)
-				user.set_password(new_password) # TODO : change token ??
+				user.set_password(new_password)
 				password_changed(new_password, user)
 			except Exception as e:
 				return JsonResponse({'error': str(e)}, status=400)
@@ -452,13 +490,41 @@ def update_user(request, user_id):
 		return JsonResponse({'message': f'Successfully updated profile'})
 	except Exception as e:
 		return JsonResponse({'error': str(e)}, status=400)
-	except: # TODO : better except
+	except:
 		return JsonResponse({'error': 'Failed to update user'}, status=400)
 
-# TODO : decorator : ex remove csrf_exempt
-
 @csrf_exempt
-# 42 auth
+@require_POST
+@login_required
+def delete_user(request):
+	if request.user.is_authenticated:
+		user = request.user
+	else:
+		status = verify_token(request)
+		if (status == 200):
+			u_id = request.GET.get('UserId')
+			if not u_id:
+				u_id = request.COOKIES.get('userId')
+
+			user = User.objects.get(id=u_id)
+		else:
+			return JsonResponse({'error': 'User is not logged in'}, status=401)
+	
+	# user.delete()
+	user.username = "deleted_user"+str(user.id)
+	user.email = "deleted@deleted.deleted"
+	user.first_name = "deleted"
+	user.last_name = "deleted"
+	user.is_active = False
+	user.save()
+
+	profile = UserToken.objects.get(user=user)
+	profile.token = ""
+	profile.avatar = "default.png"
+	profile.save()
+	# TODO : delete chat ?
+	return JsonResponse({'message': f'Successfully delete user'})
+
 @require_GET
 def oauth42(request):
 	code = request.GET.get('code', None)
@@ -471,7 +537,7 @@ def oauth42(request):
 			'client_id': os.environ['CLIENT_UID_42'],
 			'client_secret': os.environ['CLIENT_SECRET_42'],
 			'code': code,
-			'redirect_uri': os.environ['OAUTH_REDIRECT_URI'],  # Replace with your redirect URI
+			'redirect_uri': os.environ['OAUTH_REDIRECT_URI'],
 		})
 		
 		if response.status_code != 200:
@@ -495,10 +561,10 @@ def oauth42(request):
 		make_avatar = False
 		# Check if a user with this email already exists
 		if not User.objects.filter(email=email).exists():
-			if User.objects.filter(username=username).exists():
+			if User.objects.filter(username=username).exists() or 'delete_user' in username:
 				username += secrets.token_hex(4)
-				if User.objects.filter(username=username).exists(): # TODO : improve
-					return JsonResponse({'error': 'Username already taken'}, status=400)
+				if User.objects.filter(username=username).exists():
+					return JsonResponse({'error': 'Username already taken, please retry'}, status=400)
 			# Create a new user
 			profile = User.objects.create_user(username=username, email=email, first_name=data['first_name'], last_name=data['last_name'])
 			make_avatar = True
@@ -517,33 +583,41 @@ def oauth42(request):
 				avatar = BytesIO(avatar)
 				content_type = response.headers['Content-Type']
 
-				if profile.avatar:
+				if profile.avatar and profile.avatar.name != 'default.png':
 					profile.avatar.delete(save=True)
 				profile.avatar = process_avatar(avatar, content_type)
 				profile.save()
 
-		response = JsonResponse({'message': f'Logged in successfully as {username}'}, status=201)
-		response.set_cookie(key='token', value=token, secure=True, samesite='Strict') # max_age=??
-		response.set_cookie(key='userId', value=user.id, samesite='None') 
+		response = HttpResponseRedirect('https://localhost:8003/')
+		response.set_cookie(key='token', value=token, secure=True, httponly=True, samesite='Strict')
+		response.set_cookie(key='userId', value=user.id, samesite='None')
 		return response
-	
 	except Exception as e:
 		return JsonResponse({'error': 'An error occurred while processing your request'}, status=500)
 
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_POST
 def register(request):
 	try:
 		first_name = request.POST.get('first_name')
 		last_name = request.POST.get('last_name')
 		username = request.POST.get('username')
+		username = escape(username)
 		password = request.POST.get('password')
 		cpassword = request.POST.get('c_password')
 		email = request.POST.get('email')
-		#TODO : uncoment
-		# if not username or not password or not email or not first_name or not last_name or not cpassword:
-		# 	return JsonResponse({'error': 'Missing required fields'}, status=400)
-		if User.objects.filter(username=username).exists():
+		agree = request.POST.get('agree')
+
+		if not agree:
+			return JsonResponse({'error': 'You need to agree to the Privacy Policy and Terms of Service. '}, status=400)
+
+		if not User.objects.filter(username='AI').exists(): # get_or_create Temp so ai have a profile image 
+			ai = User.objects.create_user(username='AI')
+			UserToken.objects.update_or_create(user=ai, defaults={'token': 'TODO : check if can connect as ai'}) # TODO : check if can connect as ai
+
+		if not username or not password or not email or not first_name or not last_name or not cpassword:
+			return JsonResponse({'error': 'Missing required fields'}, status=400)
+		if User.objects.filter(username=username).exists() or "deleted_user" in username:
 			return JsonResponse({'error': 'Username already taken'}, status=400)
 		if User.objects.filter(email=email).exists():
 			return JsonResponse({'error': 'Email already taken'}, status=400)
@@ -554,17 +628,18 @@ def register(request):
 	except:
 		return JsonResponse({'error': 'Failed to register user'}, status=400)
 
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
 @require_POST
 def login_view(request):
 	try:
 		username = request.POST.get('username')
+		username = escape(username)
 		password = request.POST.get('password')
 		if not username or not password:
 			return JsonResponse({'error': 'Missing required fields'}, status=400)
 		u = authenticate(request, username=username, password=password) # slow
 		if not u:
-			if User.objects.filter(email=username).exists():
+			if User.objects.filter(email=username).exists() or username == 'delete_user':
 				username = User.objects.get(email=username).username
 				u = authenticate(request, username=username, password=password)
 		if u is not None:
@@ -579,15 +654,15 @@ def login_view(request):
 		else:
 			return JsonResponse({'error': 'Invalid login credentials'}, status=400)
 	except Exception as e:
-		print(e, flush=True)
 		return JsonResponse({'error': 'Failed to login'}, status=500)
 	
-@csrf_exempt # Disable CSRF protection for this view
+@csrf_exempt
+@login_required
 @require_POST
 def logout_view(request):
 	try:
 		if request.user.is_authenticated:
-			UserToken.objects.filter(user=request.user).delete()
+			UserToken.objects.filter(user=request.user).update(token=secrets.token_hex(16))
 		logout(request)
 		return JsonResponse({'message': 'Logged out successfully'})
 	except:
@@ -602,32 +677,29 @@ def user_to_dict(user):
 		'lastname': user.last_name
 	}
 
-def verify_token(request, token=None):
-	user_id = request.GET.get('UserId') # need to be in url to work
+def verify_token(request, token=None, user_id=None):
+	if not user_id:
+		user_id = request.GET.get('UserId') # need to be in url to work
 
 	if not token:
 		token = request.COOKIES.get('token')
 	if not user_id:
 		user_id = request.COOKIES.get('userId')
 	try:
-		print(user_id)
-		print(user_id)
-		print(user_id, flush=True)
 		user_token = UserToken.objects.get(user_id=user_id)
 		if check_password(token, user_token.token):
 			return 200
 		else:
-			return 200
+			return 401
 	except UserToken.DoesNotExist:
 		return 404
 
-@csrf_exempt # Disable CSRF protection for this view
 @require_GET
 def me(request):
 	try:
-		session_key = request.session.session_key
-		if request.user.is_authenticated:
-			return JsonResponse(user_to_dict(request.user))
+		# session_key = request.session.session_key # removed for testIflogin
+		# if request.user.is_authenticated:
+		# 	return JsonResponse(user_to_dict(request.user))
 
 		status = verify_token(request)
 		if (status == 200):
@@ -643,24 +715,47 @@ def me(request):
 	except:
 		return JsonResponse({'error': 'Server error'}, status=500)
 
-@csrf_exempt # Disable CSRF protection for this view
+@require_GET
+def get_user_info(request, user_id):
+	try:
+		user = User.objects.get(id=user_id)
+		user = {
+			'id': user.id,
+			'username': user.username,
+			'avatar_url': get_avatar(None, user_id).content.decode()
+		}
+		return JsonResponse(user)
+	except ObjectDoesNotExist:
+		return JsonResponse({'error': 'User not found'}, status=404)
+	except:
+		return JsonResponse({'error': 'Server error'}, status=500)
+
 # service comunication
-def get_user_from_session(request): # TODO : make a verif token for comunication and a get_user to get user info and /me to get personal info
-	session_key = request.GET.get('session_key')
-	token = request.GET.get('token') # TODO : HTTP_AUTHORIZATION or cookie 
-	if not session_key:
-		status = verify_token(request, token)
-		if (status == 200):
-			user = User.objects.get(id=request.GET.get('UserId'))
-			return JsonResponse({'username': user.username, 'email': user.email})
-		elif (status == 401):
-			return JsonResponse({'error': 'Invalid token'}, status=401)
-		return JsonResponse({'error': 'User token not found'}, status=404)
-	else:
-		sess = Session.objects.get(session_key=session_key)
-		uid = sess.get_decoded().get('_auth_user_id')
-		user = User.objects.get(id=uid)
-	return JsonResponse({'username': user.username, 'email': user.email})
+def verify_user_token(request):
+	try:
+		if request:
+			internal_secret = request.headers.get('X-Internal-Secret')
+
+			if internal_secret != os.environ['INTERNAL_SECRET']:
+				return JsonResponse({'error': 'Unauthorized access'}, status=403)
+
+		session_key = request.COOKIES.get('session_key')
+		session_key = None
+		token = request.COOKIES.get('token')
+		if not session_key:
+			status = verify_token(request, token)
+			if (status == 200):
+				return JsonResponse({'message': 'Valid token'})
+			elif (status == 401):
+				return JsonResponse({'error': 'Invalid token'}, status=401)
+			return JsonResponse({'error': 'User token not found'}, status=404)
+		else:
+			sess = Session.objects.get(session_key=session_key)
+			uid = sess.get_decoded().get('_auth_user_id')
+			verify_token(request, token, uid)
+		return JsonResponse({'message': 'Valid token'})
+	except:
+		return JsonResponse({'error': 'Server error'}, status=500)
 
 
 # dev
@@ -682,6 +777,8 @@ def get_game_page(request):
 	return HttpResponse(data)
 
 def get_js(request):
-	with open(os.path.join(os.path.dirname(__file__), 'templates/pong.js'), 'r') as file:
+	with open(os.path.join(os.path.dirname(__file__), 'templates/GAM.js'), 'r') as file:
 		data = file.read()
+	# with open(os.path.join(os.path.dirname(__file__), 'templates/pong.js'), 'r') as file:
+	# 	data = file.read()
 	return HttpResponse(data, content_type='text/javascript')

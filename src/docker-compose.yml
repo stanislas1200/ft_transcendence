@@ -1,4 +1,4 @@
-version: '3.5'
+# version: '3.5'
 services:
   auth-service:
     build: ./services/AuthenticationService
@@ -17,6 +17,7 @@ services:
       CLIENT_UID_42: ${CLIENT_UID_42}
       CLIENT_SECRET_42: ${CLIENT_SECRET_42}
       OAUTH_REDIRECT_URI: ${OAUTH_REDIRECT_URI}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
     depends_on:
       - db
       - game-service
@@ -35,6 +36,7 @@ services:
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
     depends_on:
       - db
     restart: on-failure:3
@@ -58,17 +60,20 @@ services:
     restart: unless-stopped
     volumes:
       - ./services/Tchat:/usr/src/app
-      - ssl_cert_volume:/etc/ssl/certs
+      - ssl_cert_volume:/etc/ssl/certs:ro
     depends_on:
       - db
+      - game-service
   
   ui-service:
     build: ./services/UserInterface
     volumes:
       - ./services/UserInterface:/usr/src/app
-      - ssl_cert_volume:/etc/ssl/certs
+      - ssl_cert_volume:/etc/ssl/certs:ro
     ports:
       - "8003:8003"
+    environment:
+      OAUTH_LINK: ${OAUTH_LINK}
     depends_on:
       - db
       - game-service

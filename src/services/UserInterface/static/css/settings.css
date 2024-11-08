@@ -1,8 +1,8 @@
-.container {
+.settings-container {
     display: flex;
     width: 100%;
     max-width: 1400px;
-    background-color: var(--background);
+    background-color: var(--tertiary);
     border-radius: 5px;
     border: 2px solid var(--secondary);
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
@@ -15,12 +15,14 @@
     padding: 40px;
 }
 
-.profile-container {
+.profile-container-settings {
     width: 25%;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: space-evenly;
     align-items: center;
     border-left: 2px solid;
+    padding: 25px;
 }
 
 h2 {
@@ -107,4 +109,28 @@ h2 {
 
 .sucess-saving {
     background-color: green;
+}
+
+.settings-input {
+    background-color: var(--background);
+}
+
+.delete-button {
+    width: 75%;
+    color: red;
+    font-weight: bold;
+    box-shadow: red 0 0 20px 7px;
+    background-color: transparent;
+    transition-property: background-color, color;
+    transition-duration: 150ms;
+    transition-timing-function: ease-in-out;
+}
+
+.delete-button:hover {
+    background-color: red;
+    color: var(--tertiary);
+}
+
+button:focus {
+    outline: none;
 }

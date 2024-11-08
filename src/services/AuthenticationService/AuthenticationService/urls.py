@@ -12,7 +12,8 @@ urlpatterns = [
     path('logout', views.logout_view),
     path('oauth42', views.oauth42),
     path('me', views.me),
-    path('get_user/', views.get_user_from_session),
+    path('verify_token/', views.verify_user_token),
+    path('users/<int:user_id>', views.get_user_info),
     path('users/<int:user_id>/edit', views.update_user),
     path('users/<int:user_id>/avatar', views.get_avatar), # call pour la pp
 
@@ -30,6 +31,7 @@ urlpatterns = [
     path('block_user/<int:user_id>/', views.block_user, name='block_user'),
     path('list_blocked_user/', views.list_blocked_user, name='list_blocked_user'),
     path('unblock_user/<int:user_id>/', views.unblock_user, name='unblock_user'),
+    path('delete_user/', views.delete_user, name='delete_user'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

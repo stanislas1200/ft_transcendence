@@ -1,21 +1,17 @@
 {% load static %}
 
 <div id="game-lobby-container">
-    <!-- Partie gauche supérieure: Rejoindre une partie par nom -->
-    <div id="join-game">
-        <!-- TODO : a retirer -->
-        <h2>Join a game (maybe a retirer)</h2>
-        <label class="login__label">
-            <span>Game name</span>
-            <input id="username" type="text" name="username" class="input">
-        </label>
-        <!-- <input type="text" id="join-game-name" placeholder="Entrez le nom de la partie" /> -->
-        <button class="join-game-button" id="join-game-button">Join</button>
-    </div>
-
     <!-- Partie gauche inférieure: Trouver une partie aléatoire -->
     <div id="random-game">
         <h2>Find a random game</h2>
+        <label for="gameRandom">
+            <span>game</span>
+            <select id="gameRandom">
+                <option value="pong">pong</option>
+                <option value="tron">tron</option>
+                <option value="gun_and_monsters">gun_and_monsters</option>
+            </select>
+        </label>
         <label for="max-players-random">
             <span>Numbers of players</span>
             <select id="max-players-random">
@@ -36,9 +32,14 @@
     <!-- Partie droite: Créer une partie -->
     <div id="create-game">
         <h2>Create a game</h2>
-        <label class="login__label">
-            <span>Game name (optional)</span>
-            <input id="partyName" type="text" name="username" class="input">
+        <label for="gameCreate">
+            <span>game</span>
+            <select id="gameCreate">
+                <option value="pong">pong</option>
+                <option value="tron">tron</option>
+                <option value="local">local pong</option>
+                <option value="gun_and_monsters">gun_and_monsters</option>
+            </select>
         </label>
 
         <label for="max-players-create">
@@ -47,6 +48,7 @@
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="4">4</option>
+                <option value="8">8</option>
             </select>
         </label>
 
@@ -56,6 +58,8 @@
                 <option id="game-mode-create-solo" value="solo-ia">Solo-IA</option>
                 <option id="game-mode-create-ffa" value="ffa">FFA</option>
                 <option id="game-mode-create-team" value="team">Team</option>
+                <option id="game-mode-create-local" value="local">Local</option>
+                <option id="game-mode-create-tournament" value="tournament">Tournament</option>
             </select>
         </label>
 

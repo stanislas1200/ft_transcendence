@@ -48,4 +48,8 @@ User.add_to_class(
     'blocked',
     property(lambda u: User.objects.filter(id__in=Block.objects.filter(blocker=u).values_list('blocked_id', flat=True)))
 )
-    
+
+User.add_to_class(
+    'is_online',
+    models.PositiveIntegerField(default=0)
+)

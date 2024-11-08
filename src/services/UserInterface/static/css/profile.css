@@ -17,50 +17,19 @@
     grid-auto-rows: minmax(100px, auto);
 }
 
-.settings-grid-userCard {
-    grid-row: 1 / 4;
-    grid-column: 1 / 3;
-    color: var(--text);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
 
-.settings-grid-userInformation {
-    color: var(--text);
-    grid-column: 3 / 10;
-    grid-row: 1 / 4;
-}
-
-#profile-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    background-color: var(--background);
-    margin: 6rem;
-    border-left: none;
-    flex-direction: column;
-}
-
-#profile-picture {
+.profilePictureUserCard {
     position: relative;
-    width: 300px;
     height: 300px;
     border-radius: 50%;
     overflow: hidden;
-    border: 3px solid #ccc;
-    cursor: default;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.2s ease-in-out;
 }
 
-#profile-picture img {
+.profilePictureUserCard img {
     width: 100%;
-    height: 100%;
     object-fit: cover;
     border-radius: 50%;
+    border: 2px solid #ccc;
 }
 
 .addFriend {
@@ -87,8 +56,384 @@
 }
 
 .info-area {
-    width: 100%;
-    height: 25%;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.game {
+    color: var(--text);
+    background-color: var(--background);
+    margin-bottom: 10px;
+    height: 70px;
     display: flex;
     flex-direction: row;
+}
+
+.game:hover {
+    background-color: var(--primary);
+}
+
+
+.legend {
+    display: flex;
+    flex-direction: row;
+    width: 600px;
+    color: var(--primary);
+}
+
+.victory,
+.score,
+.dateHistory,
+.status,
+.mode {
+    display: flex;
+    justify-content: center;
+    margin-top: 23px;
+    width: 118px;
+}
+
+.pipe {
+    margin-top: 23px;
+}
+
+.history_win_loose,
+.history_date,
+.history_game_mode,
+.history_score,
+.history_status {
+    margin-top: 23px;
+    width: 115px;
+    display: flex;
+    justify-content: center;
+}
+
+.border_history {
+    width: 600px;
+    max-height: 75vw;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+.center {
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+
+@keyframes progress {
+    0% {
+        stroke-dasharray: 0 100;
+    }
+}
+
+.circle-svg {
+    display: block;
+    margin: 10px, auto;
+    max-height: 200px;
+}
+
+.circle-svg path.percent {
+    stroke: var(--primary);
+    fill: none;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    animation: progress 1s ease-out forwards;
+}
+
+.circle-svg path.around {
+    stroke: #c4c4c4;
+    fill: none;
+    stroke-width: 2.8;
+}
+
+.graphInformation {
+    width: 200px;
+}
+
+.request-recieve {
+    display: flex;
+    flex-direction: column;
+    /* align-items: center; */
+    border: 2px solid var(--secondary);
+    border-radius: 5px;
+    width: 100%;
+    gap: 5px;
+    height: 90px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+
+    p {
+        margin-bottom: 0;
+    }
+}
+
+.my-fa {
+    /* position: relative; */
+    /* display: table-cell; */
+    width: 30px;
+    /* height: 20px; */
+    /* text-align: center; */
+    /* vertical-align: middle; */
+    font-size: 20px;
+    opacity: 65%;
+    background-color: var(--background) 0%;
+}
+
+.my-fa:hover {
+    transform: scale(1.2);
+    opacity: 100%;
+    background-color: var(--background) 0%;
+}
+
+.friend-request {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--tertiary);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.valueForGraph {
+    fill: var(--text);
+    text-anchor: middle;
+    font-size: 10px;
+}
+
+.smaller {
+    font-size: 8px;
+}
+
+.reallySmall {
+    font-size: 6px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.profile-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+.profile-info {
+    flex: 1 1 200px;
+    max-width: 300px;
+    text-align: center;
+    padding: 10px;
+    border: 2px solid var(--secondary);
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-pic {
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+}
+
+/* Stats and Game History */
+.stats-and-history {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 2;
+    padding: 10px;
+    border: 2px solid var(--secondary);
+    border-radius: 5px;
+    gap: 10px;
+}
+
+.game-history {
+    flex: 1;
+    margin-bottom: 20px;
+    max-height: 500px;
+}
+
+.party-info-section {
+    flex: 1;
+}
+
+.graph-section {
+    display: flex;
+    border: 2px solid var(--secondary);
+    border-radius: 5px;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    flex: 1;
+    gap: 10px;
+}
+
+.party-state {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.party-details {
+    flex: 1;
+    color: var(--text);
+    padding: 10px;
+}
+
+.player-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: space-evenly;
+}
+
+.player-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 120px;
+    padding: 10px;
+    background: var(--tertiary);
+    border-radius: 10px;
+    cursor: pointer;
+
+    img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 10px;
+    }
+}
+
+.line-charts,
+.bar-charts, .circle-graphs {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+    
+    canvas {
+        width: 100% !important;
+        max-width: 300px;
+        max-height: 200px;
+    }
+}
+
+
+.skeleton-loader {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+
+.skeleton-row {
+    max-width: 90%;
+    height: 20px;
+}
+
+.skeleton {
+    background-color: #cbcbcb94;
+    border-radius: 4px;
+    width: 100%;
+    margin: 10px;
+    animation: pulse 1.5s infinite;
+}
+
+.skeleton-circle {
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+}
+
+.skeleton-chart {
+    max-width: 300px;
+    height: 180px;
+}
+
+@keyframes pulse {
+    0% {
+        background-color: #cbcbcb94;
+    }
+
+    50% {
+        background-color: #8b8b8b94;
+    }
+
+    100% {
+        background-color: #cbcbcb94;
+    }
+}
+
+
+.stats-section {
+    margin-top: 20px;
+    padding-bottom: 10px;
+    color: var(--text);
+}
+
+.stats-section h4 {
+    margin-bottom: 10px;
+    color: var(--secondary);
+}
+
+.stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: var(--tertiary);
+    padding: 10px;
+    border-radius: 5px;
+    flex: 1;
+}
+
+.stat-label {
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.stat-value {
+    margin-top: 5px;
+}
+
+.buttonFriendMessage {
+    display: none;
+    color: var(--text);
+
+    .disabled {
+        pointer-events: none;
+        opacity: 0.5;
+    }
 }

@@ -1,44 +1,45 @@
 {% load static %}
 <div class="spa-flex">
-    <div class="container">
+    <div class="settings-container">
         <div class="form-container">
-            <h2>Modifier les informations du compte</h2>
+            <h2>Change creditentials</h2>
             <form id="accountForm" onsubmit="return validateForm()" enctype="multipart/form-data">
                 <div class="input-row">
                     <label class="login__label" id="firstName_label">
                         <span class="span-active" id="span-firstname">First name</span>
-                        <input id="firstName" type="text" name="firstName" class="input">
+                        <input id="firstName" type="text" name="firstName" class="input settings-input">
                     </label>
                     <label class="login__label" id="lastName_label">
                         <span class="span-active" id="span-lastname">Last name</span>
-                        <input id="lastName" type="text" name="lastName" class="input">
+                        <input id="lastName" type="text" name="lastName" class="input settings-input">
                     </label>
                 </div>
                 <label class="login__label">
                     <span class="span-active" id="span-username">User name</span>
-                    <input id="username" type="text" name="userName" class="input">
+                    <input id="username" type="text" name="userName" class="input settings-input">
                 </label>
                 <label class="login__label span-active">
                     <span class="span-active" id="span-email">email</span>
-                    <input id="email" type="text" name="email" class="input">
+                    <input id="email" type="text" name="email" class="input settings-input">
                 </label>
                 <label class="login__label">
                     <span id="span-oldpwd">Old password</span>
-                    <input id="oldPassword" type="password" name="oldPassword" class="input">
+                    <input id="oldPassword" type="password" name="oldPassword" class="input settings-input">
                 </label>
                 <label class="login__label">
                     <span id="span-newpwd">New password</span>
-                    <input id="newPassword" type="password" name="newPassword" class=" input">
+                    <input id="newPassword" type="password" name="newPassword" class="input settings-input">
                 </label>
-                <button type="button" id="saveButton">Save changement</button>
+                <button type="button" id="saveButton">Save</button>
             </form>
         </div>
-
-        <div class="profile-container">
+        
+        <div class="profile-container-settings">
             <div class="profile-picture" onclick="triggerFileInput()">
                 <img id="profileImage" src="{% static 'images/pp.png' %}" alt="">
                 <input type="file" id="profilePic" name="profilePic" accept="image/*" onchange="previewImage(event)">
             </div>
+            <button type="button" class="delete-button" id="deleteButton">Delete account</button>
         </div>
     </div>
 </div>
