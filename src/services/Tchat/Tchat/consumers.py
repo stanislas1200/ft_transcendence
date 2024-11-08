@@ -7,18 +7,26 @@ from .views import get_user
 from room.models import Chat, Message
 from asgiref.sync import sync_to_async
 import requests 
-
-# def blocked(user):
-#     return user.blocked
+from django.db.models import Q
 
 def _get_chat_room(user, recipient):
-    chat, created = Chat.objects.get_or_create(users__id=user.id)
-    if created:
-        chat.users.add(user)
-        chat.users.add(recipient)
+    try:
+        chats = Chat.objects.filter(users=user)
+        for chat in chats:
+            if chat.users.filter(id=recipient.id).exists():
+                return chat
+    except Chat.DoesNotExist:
+        pass
+
+    chat = Chat.objects.create()
+    chat.users.add(user)
+    chat.users.add(recipient)
     return chat
 
 class TChatConsumer(AsyncWebsocketConsumer):
+    async def update_history_state(self, event):
+        await self.send(text_data=json.dumps(event['history']))
+    
     async def connect(self):
         self.userId         = self.scope["url_route"]["kwargs"]["UserId"] #get user id
         recipient_username  = self.scope["url_route"]["kwargs"]["Recipient"]
@@ -56,6 +64,15 @@ class TChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
+        await self.channel_layer.group_send(
+            self.chat_group_name,
+            {
+                'type': 'update_history_state',
+                'history': {
+                    'history': model_to_dict(self.chat.message)
+                }
+            }
+        )
 
 
     async def _check_if_recipient_is_blocked(self, recipient, username):
@@ -86,11 +103,17 @@ class TChatConsumer(AsyncWebsocketConsumer):
         small_msg =  json.loads(text_data)['message']
         if not (small_msg):
             return
-        message = f'{self.user}: {small_msg}'
+        # create message
+        message = await sync_to_async(Message.objects.create)(user=self.user, content=small_msg)
+        await sync_to_async(self.chat.messages.add)(message)
+        print(message, flush=True)
         await self.channel_layer.group_send(
             self.chat_group_name,
             {
                 'type': 'update_message_state',
-                'message': {'message': message}
+                'message': {
+                    'sender': self.user.username,
+                    'message': small_msg
+                }
             }
         )
