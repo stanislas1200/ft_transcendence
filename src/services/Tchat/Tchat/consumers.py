@@ -8,6 +8,7 @@ from room.models import Chat, Message
 from asgiref.sync import sync_to_async
 import requests 
 from django.db.models import Q
+from django.forms.models import model_to_dict
 
 def _get_chat_room(user, recipient):
     try:
@@ -56,7 +57,7 @@ class TChatConsumer(AsyncWebsocketConsumer):
 
         # get or create room in db
         self.chat = await sync_to_async(_get_chat_room)(self.user, self.recipient)
-        print(self.chat, flush=True)
+        # print(self.chat.messages, flush=True)
 
         self.chat_group_name = group_name
         await self.channel_layer.group_add(
@@ -64,12 +65,15 @@ class TChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
+        history = []
+        for message in self.chat.messages:
+            history.push(model_to_dict(message))
         await self.channel_layer.group_send(
             self.chat_group_name,
             {
                 'type': 'update_history_state',
                 'history': {
-                    'history': model_to_dict(self.chat.message)
+                    'history': model_to_dict(self.chat.messages)
                 }
             }
         )

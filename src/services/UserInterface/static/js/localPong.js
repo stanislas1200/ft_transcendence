@@ -1,4 +1,6 @@
 let paddleHeight = 100;
+let paddlePadding = 40;
+let paddleWidth = 10;
 let w = s = 1;
 let p = q = s1 = s2 = 0;
 let x = 400; y = 300;
@@ -52,23 +54,25 @@ function localupdateBall() {
     x += dx;
     y += dy;
 
-    if (y - r < 0 || y + r > 600) {
+    if (y <= 0 + r || y > 600 + r) {
         dy = -dy;
+        y += dy*1.5;
     }
 
-    if (x - r < 40 + 10 && y > positions[0] - paddleHeight / 2 && y < positions[0] + paddleHeight / 2)
-        dx = -dx;
-    if (x - r < 10) {
+    if (x <= 10/4 + r) {
         scores[1]++;
         localresetBall();
     }
-
-    if (x + r > 800 - 40 - 10 && y > positions[1] - paddleHeight / 2 && y < positions[1] + paddleHeight / 2)
-        dx = -dx;
-    if (x + r > 800 - 10) {
+    if (x >= 800 - 10/4 - r) {
         scores[0]++;
         localresetBall();
     }
+
+    if (x <= paddlePadding + paddleWidth + r && x >= paddlePadding && y > positions[0] - paddleHeight / 2 && y < positions[0] + paddleHeight / 2) 
+        dx = -dx;
+
+    if (x >= 800 - paddlePadding - paddleWidth - r && x <= 800 - paddlePadding && y > positions[1] - paddleHeight / 2 && y < positions[1] + paddleHeight / 2)
+        dx = -dx;
 }
 
 function localdraw() {
@@ -92,12 +96,12 @@ function localgameLoop() {
     localupdateBall()
     
     canv.textAlign = 'center'
-    if (scores[0] > 10)
+    if (scores[0] >= 10)
 	{
         canv.fillText("player 1 won", 800/2, 600/2)
 		return
 	}
-    else if (scores[1] > 10)
+    else if (scores[1] >= 10)
 	{
         canv.fillText("player 2 won", 800/2, 600/2)
 		return
