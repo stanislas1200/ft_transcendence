@@ -4,6 +4,7 @@ function loadRegister() {
 	const login = document.getElementById("login");
 
 	login.addEventListener("click", () => {
+		event.preventDefault();
 		loadPage("login", 1);
 	});
 

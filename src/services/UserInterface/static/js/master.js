@@ -116,6 +116,9 @@ function setActive(element, pageName) {
 
 function testIfLoggedIn() {
     if (window.location.pathname === '/login/' || window.location.pathname === '/register/') {
+        const navbar = document.getElementById("navbar");
+        if (navbar)
+            navbar.style.display = 'none';
         return;
     }
     let url = "https://localhost:8000/me";
@@ -130,6 +133,9 @@ function testIfLoggedIn() {
             if (xhr.status !== 200 && xhr.status !== 201) {
                 disconnectFromNotifications();
                 loadPage("login", 1);
+                const navbar = document.getElementById("navbar");
+                if (navbar)
+                    navbar.style.display = 'none';
             }
             // console.log(xhr.responseText);
         }

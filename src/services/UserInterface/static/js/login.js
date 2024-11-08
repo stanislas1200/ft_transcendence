@@ -5,6 +5,7 @@ function loadLogin() {
     const register = document.getElementById("register");
 
     register.addEventListener("click", () => {
+        event.preventDefault();
         loadPage("register", 1);
     });
 
@@ -64,6 +65,8 @@ function loadLogin() {
                     localStorage.setItem('token', response.token);
                     loadPage("index", 1);
                     connectToNotifications();
+                    const navbar = document.getElementById("navbar")
+                    navbar.style.display = 'block';
                 } else {
                     alert('Error: ' + JSON.parse(xhr.responseText).error);
                 }

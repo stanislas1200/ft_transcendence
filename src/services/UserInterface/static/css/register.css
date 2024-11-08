@@ -26,6 +26,8 @@
 .names-label {
 	display: flex;
 	gap: 20px;
+	border: none !important;
+	padding: 0 !important;
 }
 
 .register-label {
@@ -92,6 +94,8 @@
 	justify-content: space-evenly;
 	width: 100%;
 	margin-top: 60px;
+	border: none !important;
+	padding: 0 !important;
 }
 
 .register-button {
@@ -142,9 +146,11 @@
 }
 
 .consent-box {
-	font-size: 15px;
-	color: var(--secondary);
+	font-size: small;
+	color: var(--secondary) !important;
 	margin-top: 10px;
+	border: none !important;
+	padding: 0 !important;
 	
 	a {
 		color: var(--accent)

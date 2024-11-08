@@ -1,40 +1,5 @@
 {% load static %}
-
-<!DOCTYPE html>
-<html lang="pt-br" data-theme="dark">
-
-<head>
-    <meta charset="UTF">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="{% static 'images/pong.png' %}" type="image/x-icon">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/themeToggle.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/register.css' %}">
-    <script src="{% static 'js/themeToggle.js' %}"></script>
-    <script src="{% static 'js/register.js' %}"></script>
-    <title>Register</title>
-</head>
-
-<body>
-    <main>
-        <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn" type="checkbox">
-            <input type="checkbox" id="themeToggle" class="themeToggleInput" />
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" stroke="none">
-                <mask id="moon-mask">
-                    <rect x="0" y="0" width="20" height="20" fill="white"></rect>
-                    <circle cx="11" cy="3" r="8" fill="black"></circle>
-                </mask>
-                <circle class="sunMoon" cx="10" cy="10" r="8" mask="url(#moon-mask)"></circle>
-                <g>
-                    <circle class="sunRay sunRay1" cx="18" cy="10" r="1.5"></circle>
-                    <circle class="sunRay sunRay2" cx="14" cy="16.928" r="1.5"></circle>
-                    <circle class="sunRay sunRay3" cx="6" cy="16.928" r="1.5"></circle>
-                    <circle class="sunRay sunRay4" cx="2" cy="10" r="1.5"></circle>
-                    <circle class="sunRay sunRay5" cx="6" cy="3.1718" r="1.5"></circle>
-                    <circle class="sunRay sunRay6" cx="14" cy="3.1718" r="1.5"></circle>
-                </g>
-            </svg>
-        </label>
+<main>
         <section class="register">
             <div class="wrapper">
                 <h1 class="register-title">Register</h1>
@@ -89,7 +54,4 @@
             </div>
         </section>
     </main>
-</body>
-<script>loadRegister();</script>
-
-</html>
+<script>loadRegister();testIfLoggedIn();</script>
