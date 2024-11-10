@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.decorators import login_required
-import requests, secrets, os
+import requests, secrets, os, re
 from .models import UserToken, Friendship, FriendRequest, Block
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import redirect
@@ -451,7 +451,10 @@ def update_user(request, user_id):
 			return JsonResponse({'error': 'Username already taken'}, status=403)
 		
 		if username and username != user.username:
-			validate_unicode_slug(username)
+			username_regex = re.compile(r'^[a-zA-Z0-9_]+$')
+			if not username_regex.match(username):
+				return JsonResponse({'error': 'Invalid username. Only letters, numbers, and underscores are allowed.'}, status=400)
+			# validate_unicode_slug(username)
 			if User.objects.filter(username=username).exists():
 				return JsonResponse({'error': 'Username already taken'}, status=400)
 			user.username = username
@@ -479,9 +482,10 @@ def update_user(request, user_id):
 			
 		if new_password:
 			try :
-				if not check_password(current_password, user.password):
-					return JsonResponse({'error': 'Current password is incorrect'}, status=400)
-				validate_password(new_password, user)
+				if user.has_usable_password():
+					if not check_password(current_password, user.password):
+						return JsonResponse({'error': 'Current password is incorrect'}, status=400)
+					validate_password(new_password, user)
 				user.set_password(new_password)
 				password_changed(new_password, user)
 			except Exception as e:
@@ -502,6 +506,9 @@ def delete_user(request):
 	else:
 		status = verify_token(request)
 		if (status == 200):
+			current_password = request.POST.get('current_password')
+			if not check_password(current_password, user.password):
+				return JsonResponse({'error': 'Current password is incorrect'}, status=400)
 			u_id = request.GET.get('UserId')
 			if not u_id:
 				u_id = request.COOKIES.get('userId')
@@ -531,13 +538,14 @@ def oauth42(request):
 	if not code:
 		return JsonResponse({'error': 'Code not provided'}, status=400)
 	try:
+		redirect_uri = request.build_absolute_uri('/oauth42')
 		# Exchange the authorization code for an access token
 		response = requests.post('https://api.intra.42.fr/oauth/token', data={
 			'grant_type': 'authorization_code',
 			'client_id': os.environ['CLIENT_UID_42'],
 			'client_secret': os.environ['CLIENT_SECRET_42'],
 			'code': code,
-			'redirect_uri': os.environ['OAUTH_REDIRECT_URI'],
+			'redirect_uri': redirect_uri,
 		})
 		
 		if response.status_code != 200:
@@ -590,7 +598,7 @@ def oauth42(request):
 
 		response = HttpResponseRedirect('https://localhost:8003/')
 		response.set_cookie(key='token', value=token, secure=True, httponly=True, samesite='Strict')
-		response.set_cookie(key='userId', value=user.id, samesite='None')
+		response.set_cookie(key='userId', value=user.id, secure=True, samesite='None')
 		return response
 	except Exception as e:
 		return JsonResponse({'error': 'An error occurred while processing your request'}, status=500)
@@ -617,12 +625,17 @@ def register(request):
 
 		if not username or not password or not email or not first_name or not last_name or not cpassword:
 			return JsonResponse({'error': 'Missing required fields'}, status=400)
+
+		username_regex = re.compile(r'^[a-zA-Z0-9_]+$')
+		if not username_regex.match(username):
+			return JsonResponse({'error': 'Invalid username. Only letters, numbers, and underscores are allowed.'}, status=400)
+
 		if User.objects.filter(username=username).exists() or "deleted_user" in username:
 			return JsonResponse({'error': 'Username already taken'}, status=400)
 		if User.objects.filter(email=email).exists():
 			return JsonResponse({'error': 'Email already taken'}, status=400)
-		# if cpassword != password:
-		# 	return JsonResponse({'error': 'password not same'}, status=400)
+		if cpassword != password:
+			return JsonResponse({'error': 'password not same'}, status=400)
 		User.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name)
 		return JsonResponse({'message': 'User registered successfully'})
 	except:
