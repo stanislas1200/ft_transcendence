@@ -156,13 +156,13 @@ function drawPaddle() {
 		c.fillRect(40, game_state.positions[0] - 100/2, 10, 100)
 		c.fillStyle = colors[1]
 		c.fillRect(800 - 40 - 10, game_state.positions[1] - 100/2, 10, 100)
-		if (game_state.mode == "team") {
+		if (game_state.gameMode == "team") {
 			c.fillStyle = colors[2]
 			c.fillRect(40, game_state.positions[2] - 100/2, 10, 100)
 			c.fillStyle = colors[3]
 			c.fillRect(800 - 40 - 10, game_state.positions[3] - 100/2, 10, 100)
 		}
-		else if (game_state.mode == "ffa" && usernames[2]) {
+		else if (game_state.gameMode == "ffa" && game_state.usernames[2]) {
 			c.fillStyle = colors[2]
 			c.fillRect(game_state.positions[2] - 100/2, 40, 100, 10)
 			c.fillStyle = colors[3]
@@ -174,17 +174,26 @@ function drawPaddle() {
 function drawNS() {
 	c.font = "20px monospace";
 	if (game_state.usernames) {
-		spaceB = c.width / game_state.usernames.length
+		spaceB = c.width/2 / game_state.usernames.length
 		colors = ['#7e3047', '#498d14', '#a891d5', 'white']
 		c.textAlign = 'left'
 		c.textBaseline = "middle"
 		c.fillStyle = 'white'
 		c.fillRect(0, 600, 800, 2)
-		if (game_state.mode == "team") {
-			c.fillText('Team 1: ', spaceB * 0, 625, 100)
-			c.fillText(game_state.scores[0], spaceB * 0 + c.measureText('Team 1: '), 625)
-			c.fillText('Team 2: ', spaceB * c.width / 2, 625, 100)
-			c.fillText(game_state.scores[2], spaceB * c.width / 2 + c.measureText('Team 2: '), 625) // TODO : username
+		if (game_state.gameMode == "team") {
+			c.fillText('Team 1: ',  0, 625, 100)
+			c.fillText(game_state.scores[0],  0 + c.measureText('Team 1: ').width, 625)
+			c.fillStyle = colors[0]
+			c.fillText(`  ${game_state.usernames[0]} `, 0 + c.measureText('Team 1: ').width + c.measureText(game_state.scores[0]).width, 625, 100)
+			c.fillStyle = colors[2]
+			c.fillText(game_state.usernames[2], 0 + c.measureText('Team 1: ').width + c.measureText(game_state.scores[0]).width + 100, 625, 100)
+			c.fillStyle = 'white'
+			c.fillText('Team 2: ',  800 / 2, 625, 100)
+			c.fillText(game_state.scores[1],  c.width / 2 + c.measureText('Team 1: ').width, 625)
+			c.fillStyle = colors[1]
+			c.fillText(`  ${game_state.usernames[1]} `, 800 / 2 + c.measureText('Team 1: ').width + c.measureText(game_state.scores[2]).width, 625, 250)
+			c.fillStyle = colors[3]
+			c.fillText(game_state.usernames[3], 800 / 2 + c.measureText('Team 1: ').width + c.measureText(game_state.scores[2]).width + 100, 625, 100)
 		}
 		else
 			game_state.usernames.forEach((player, index) => {
