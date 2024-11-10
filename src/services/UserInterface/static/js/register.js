@@ -1,9 +1,9 @@
 function loadRegister() {
 	const inputs = document.querySelectorAll('.input');
 	const button = document.querySelector('.register-button');
-	const login = document.getElementById("login");
+	const loginLink = document.getElementById("login");
 
-	login.addEventListener("click", () => {
+	loginLink.addEventListener("click", () => {
 		event.preventDefault();
 		loadPage("login", 1);
 	});

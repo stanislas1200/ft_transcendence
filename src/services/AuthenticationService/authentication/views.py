@@ -657,7 +657,7 @@ def login_view(request):
 		return JsonResponse({'error': 'Failed to login'}, status=500)
 	
 @csrf_exempt
-@login_required
+@login_required # remove cus redirect to /accounts/login/?next=/logout ?
 @require_POST
 def logout_view(request):
 	try:
@@ -695,6 +695,7 @@ def verify_token(request, token=None, user_id=None):
 		return 404
 
 @require_GET
+@login_required
 def me(request):
 	try:
 		# session_key = request.session.session_key # removed for testIflogin

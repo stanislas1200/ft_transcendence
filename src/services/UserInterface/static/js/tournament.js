@@ -160,7 +160,7 @@ function organizeMatches(tournamentData, currentUserId) {
 
     tournamentData.matches.forEach(match => {
         // Vérifier si je suis dans le match
-        const isMyGame = match.player_one?.id === currentUserId || match.player_two?.id === currentUserId;
+        var isMyGame = match.player_one?.id === currentUserId || match.player_two?.id === currentUserId;
         if (match.status === 'finished')
             isMyGame = false;
         if (isMyGame) {

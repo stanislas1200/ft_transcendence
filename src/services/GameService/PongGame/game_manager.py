@@ -288,6 +288,7 @@ class Party:
 			if not player_found and player.player == user:
 				self.players.append(self.get_player_info(player, token))
 				break
+		self.players = sorted(self.players, key=lambda x: x['n'])
 
 	def get_player_info(self, player, token=None):
 		return {
@@ -446,7 +447,7 @@ def setup(game_id, player, token):
 		else:
 			party.add_player(prop.players.all(), player, token)
 
-		if party.player_number == game.players.count():
+		if (party.player_number == game.players.count() and not party.tournament) or (len(party.players) == game.players.count() and party.tournament):
 			for player in game.players.all():
 				active_players = [p for p in party.players if 'deleted_user' not in p['name']]
 				if len(active_players) == 1 or (len(active_players) == 2 and len(party.players) == 4 and party.gameMode == 'team' and ((party.player[0] in active_players and party.player[2] in active_players) or (party.player[1] in active_players and party.player[3] in active_players))):

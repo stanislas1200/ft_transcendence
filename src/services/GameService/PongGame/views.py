@@ -132,7 +132,7 @@ def create_tournament(request):
         if not all([name, start_date, game_name]):
             return JsonResponse({"success": False, "message": "Missing required fields."}, status=400)
         
-        tournament = Tournament.objects.create(max_player=8, name=name, gameName=game_name, start_date=start_date)
+        tournament = Tournament.objects.create(max_player=2, name=name, gameName=game_name, start_date=start_date)
         return JsonResponse({"success": True, "message": "Tournament created ", "tournament_id":  str(tournament.id)})
 
     except Exception as e:
