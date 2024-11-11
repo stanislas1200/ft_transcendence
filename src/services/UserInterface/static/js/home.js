@@ -293,7 +293,7 @@ function loadGame() {
                 response = JSON.parse(xhr.responseText);
                 displayGame(response);
             } else {
-                alert('Error: ' + JSON.parse(xhr.responseText).error);
+                // alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
     };

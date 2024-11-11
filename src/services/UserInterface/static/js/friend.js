@@ -57,11 +57,12 @@ function chat() {
                 // Effacer le contenu actuel du chat
                 chatArea.innerHTML = '';
 
+                // close l'ancienne websocket si elle existe
+                if (chatSocket !== undefined && chatSocket.readyState === WebSocket.OPEN) {
+                    chatSocket.close();
+                }
+
                 // Demarrer une websocket avec le username de l'ami
-                // if (chatSocket !== undefined) {
-                //     console.log('on passe ici');
-                //     chatSocket.close();
-                // }
                 chatSocket = new WebSocket(
                     'wss://' + window.location.hostname + ':8002/ws/chat/' + getCookie("userId") + '/' + chatusername + '/' + getCookie("token") + '/'
                 );
@@ -72,7 +73,7 @@ function chat() {
 
                 chatSocket.onmessage = function (e) {
                     const data = JSON.parse(e.data);
-                    // console.log('message socket ', data);
+                    console.log('message socket ', data);
                     if (data.sender === chatusername)
                         addMessage(data.message, 'received');
                 };
