@@ -97,30 +97,8 @@ function clickOnFriend() {
 }
 
 function joinTournamentFromHome(gameId) {
-    var xhr = new XMLHttpRequest();
-    var url = "https://localhost:8001/game/join_tournament/{{GameId}}";
-    url = url.replace("localhost", window.location.hostname);
-    url = url.replace("{{GameId}}", gameId);
-    xhr.withCredentials = true;
-    xhr.open("POST", url, true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4)
-            if (xhr.status === 200) {
-                let response = JSON.parse(xhr.responseText).game_id;
-                // console.log(response);
-                console.log(gameId);
-                console.log(document.cookie);
-                document.cookie = 'tournament_id=' + gameId;
-                console.log(document.cookie);
-                loadPage('tournament', 1)
-            }
-            else {
-                console.log('Error joining game'); // TODO put a message
-                console.log(xhr.responseText);
-            }
-    };
-    xhr.send();
+    document.cookie = 'tournament_id=' + gameId + '; path=/';
+    loadPage('tournament', 1)
 }
 
 function clickOnTournamenet() {
@@ -140,7 +118,6 @@ function clickOnTournamenet() {
 function displayTournament(response) {
     // console.log(response);
     let tournamentList = document.getElementById('tournament-list');
-
     if (!tournamentList)
         return;
 
@@ -150,6 +127,8 @@ function displayTournament(response) {
     }
 
     for (let i = 0; i < response.length; i++) {
+        if (response[i].end_date != null)
+            continue;
         if (response[i].status != 'finished') {
             let newDiv = document.createElement('div');
             newDiv.classList.add('list-element');
@@ -163,7 +142,7 @@ function displayTournament(response) {
             if (response[i].player_number == '8')
                 newButton.innerHTML = 'Watch ➞';
             else
-                newButton.innerHTML = response[i].player_number + '/8 Join ➞ ';
+                newButton.innerHTML = response[i].player_number + '/8 Go ➞ ';
             newDiv.classList.add(response[i].id);
             newDiv.append(newButton);
             tournamentList.append(newDiv);

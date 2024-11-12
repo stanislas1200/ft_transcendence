@@ -499,16 +499,13 @@ def update_user(request, user_id):
 
 @csrf_exempt
 @require_POST
-@login_required
+# @login_required
 def delete_user(request):
 	if request.user.is_authenticated:
 		user = request.user
 	else:
 		status = verify_token(request)
 		if (status == 200):
-			current_password = request.POST.get('current_password')
-			if not check_password(current_password, user.password):
-				return JsonResponse({'error': 'Current password is incorrect'}, status=400)
 			u_id = request.GET.get('UserId')
 			if not u_id:
 				u_id = request.COOKIES.get('userId')
@@ -517,6 +514,9 @@ def delete_user(request):
 		else:
 			return JsonResponse({'error': 'User is not logged in'}, status=401)
 	
+	current_password = request.POST.get('current_password')
+	if not check_password(current_password, user.password):
+		return JsonResponse({'error': 'Current password is incorrect'}, status=400)
 	# user.delete()
 	user.username = "deleted_user"+str(user.id)
 	user.email = "deleted@deleted.deleted"

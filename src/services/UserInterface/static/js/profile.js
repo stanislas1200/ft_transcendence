@@ -14,6 +14,7 @@ function loadProfile() {
                 userName.innerHTML = response.username;
                 loadProfilePicture(response.id);
                 loadHistoryFromUser(response.id);
+                listRequest();
             } else {
                 alert('Error: ' + JSON.parse(xhr.responseText).error);
             }

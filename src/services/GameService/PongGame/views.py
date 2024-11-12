@@ -131,6 +131,9 @@ def create_tournament(request):
 
         if not all([name, start_date, game_name]):
             return JsonResponse({"success": False, "message": "Missing required fields."}, status=400)
+
+        if Tournament.objects.filter(end_date__isnull=True).exists:
+            return JsonResponse({'error': 'A tournament already exist'}, status=409)
         
         tournament = Tournament.objects.create(max_player=2, name=name, gameName=game_name, start_date=start_date)
         return JsonResponse({"success": True, "message": "Tournament created ", "tournament_id":  str(tournament.id)})
@@ -453,8 +456,8 @@ def startPong(request, player, token, gameType, gameMode, playerNumber):
         # pong.width = request.POST.get('width', 800)
         # pong.height = request.POST.get('height', 600)
         pong.maxScore = request.POST.get('maxScore', 10)
-        pong.ballSpeed = request.POST.get('ballSpeed', 2.0)
-        speed = int(request.POST.get('paddleSpeed', 2.0))
+        pong.ballSpeed = request.POST.get('ballSpeed', 15.0)
+        speed = int(request.POST.get('paddleSpeed', 20.0))
         pong.paddleSpeed = speed if speed > 0 else speed * -1
         pong.save()
 

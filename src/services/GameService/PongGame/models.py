@@ -63,8 +63,8 @@ class Pong(models.Model):
     playerNumber = models.IntegerField(default=1)
     players = models.ManyToManyField(PongPlayer)
     maxScore = models.IntegerField(default=10)  # Maximum score to win the game
-    ballSpeed = models.FloatField(default=4.0)  # Speed of the ball
-    paddleSpeed = models.FloatField(default=15.0)  # Speed of the paddles
+    ballSpeed = models.FloatField(default=15.0)  # Speed of the ball
+    paddleSpeed = models.FloatField(default=20.0)  # Speed of the paddles
     mapId = models.IntegerField(default=0)
     gameMode = models.CharField(max_length=20, default='ffa')
 

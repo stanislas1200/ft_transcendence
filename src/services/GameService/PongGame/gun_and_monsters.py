@@ -180,14 +180,18 @@ TILE_SIZE = 64
 monsters = []
 projectiles = []
 waves = [
-	{"count": 5, "hp": 100, "speed": 1},
-	{"count": 10, "hp": 150, "speed": 1.5},
-	{"count": 15, "hp": 200, "speed": 2},
+	{"count": 1, "hp": 1, "speed": 1},
+	{"count": 5, "hp": 2, "speed": 1.5},
+	{"count": 10, "hp": 4, "speed": 2},
+	{"count": 15, "hp": 4, "speed": 2},
+	{"count": 20, "hp": 5, "speed": 2},
+	{"count": 25, "hp": 5, "speed": 2},
+	{"count": 30, "hp": 5, "speed": 2},
 ]
 
 current_wave = 0
 
-ATTACK_COOLDOWN = 2.0
+ATTACK_COOLDOWN = 25.0
 
 def is_valid_spawn(x, y, game):
 	"""Check if the spawn position is valid"""
@@ -199,16 +203,16 @@ def is_valid_spawn(x, y, game):
 		return False
 	return True
 
-def spawn_wave(wave, game):
+def spawn_wave(wave, game, i=0):
 	"""Spawn a wave of monsters"""
 	global monsters
 	monsters = []
-	for _ in range(wave["count"]):
+	for _ in range(wave["count"] + i):
 		while True:
 			x = random.randint(0, len(map[0]) - 1) * TILE_SIZE
 			y = random.randint(0, len(map) - 1) * TILE_SIZE
 			if is_valid_spawn(x, y, game):
-				monsters.append({"x": x, "y": y, "hp": wave["hp"], "speed": wave["speed"], "angle": 0})
+				monsters.append({"x": x, "y": y, "hp": wave["hp"] + i, "speed": wave["speed"] + i*0.01, "angle": 0})
 				break
 
 def update_monsters(game):
@@ -304,9 +308,11 @@ async def update_gam(game_id):
 
 	if all(monster["hp"] <= 0 for monster in monsters):
 		global current_wave
-		current_wave += 1
 		if current_wave < len(waves):
 			spawn_wave(waves[current_wave], game)
+		else:
+			spawn_wave(waves[len(waves)-1], game, current_wave)
+		current_wave += 1
 		# else:
 		# 	game.state = 'won'
 	
