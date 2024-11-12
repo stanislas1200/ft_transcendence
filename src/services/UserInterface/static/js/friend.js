@@ -2,6 +2,7 @@ let friendList;
 let chatArea;
 let messageInput;
 let sendButton;
+// let chatSocket;
 
 function getElementFriend() {
     friendList = document.getElementById('friend-list');
@@ -58,9 +59,9 @@ function chat() {
                 chatArea.innerHTML = '';
 
                 // close l'ancienne websocket si elle existe
-                if (chatSocket !== undefined && chatSocket.readyState === WebSocket.OPEN) {
-                    chatSocket.close();
-                }
+                // if (chatSocket !== undefined && chatSocket.readyState === WebSocket.OPEN) {
+                //     chatSocket.close();
+                // }
 
                 // Demarrer une websocket avec le username de l'ami
                 chatSocket = new WebSocket(
@@ -218,6 +219,6 @@ function createGameChat() {
             }
         };
 
-        xhr.send("partyName=tmp&game=pong&gameType=custom&playerNumber=2&gameMode=ffa&map=0&ballSpeed=5&paddleSpeed=30");
+        xhr.send("partyName=tmp&game=pong&gameType=custom&playerNumber=2&gameMode=ffa&map=0&ballSpeed=15&paddleSpeed=20");
     });
 }
