@@ -410,7 +410,7 @@ function showLastGame(response) {
 
     if (response.length == 0)
         return (title.innerHTML += ' lets play!');
-    var lastGame = response[response.length - 1];
+    var lastGame = response[0];
     console.log('lastgame');
     console.log(lastGame);
 

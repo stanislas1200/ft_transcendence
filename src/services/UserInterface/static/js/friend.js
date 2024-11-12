@@ -131,6 +131,20 @@ function chat() {
                 // chatArea.innerHTML = '<p>Sélectionnez un ami ou ajoutez en un pour commencer à discuter.</p>';
             }
 
+            const friendList = document.getElementById('friend-list');
+
+            // Add the "System" item to the list
+            const systemItem = document.createElement('li');
+            systemItem.dataset.chat = 'system';
+
+            const systemNameSpan = document.createElement('span');
+            systemNameSpan.classList.add('friend-name');
+            systemNameSpan.textContent = 'System';
+
+            systemItem.appendChild(systemNameSpan);
+            systemItem.addEventListener('click', () => loadChat('AI'));
+            friendList.appendChild(systemItem);
+
             // Ajouter les amis à la liste
             friendsJson.friends.forEach(friends => {
                 const listItem = document.createElement('li');
@@ -145,7 +159,6 @@ function chat() {
                 // previewSpan.textContent = friend.lastMessage;
 
                 listItem.appendChild(nameSpan);
-                // listItem.appendChild(previewSpan);
 
                 listItem.addEventListener('click', () => loadChat(friends.username), { once: true });
                 friendList.appendChild(listItem);
