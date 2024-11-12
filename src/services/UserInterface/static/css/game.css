@@ -154,3 +154,7 @@ label:has(> select) span {
     padding: 25px 10px 10px;
     margin-bottom: 0px;
 }
+
+.hide {
+    display: none;
+}

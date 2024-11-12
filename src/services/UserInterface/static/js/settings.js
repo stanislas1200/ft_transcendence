@@ -287,6 +287,7 @@ function saveChangement(id) {
             const oldPwd = document.getElementById('oldPassword');
             const newPwd = document.getElementById('newPassword');
 
+            console.log();
             if (!firstName || !lastName || !userName || !email)
                 return;
 
