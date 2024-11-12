@@ -21,7 +21,4 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.homepage),
     path('about/', views.about),
-    path('room/', include('room.urls')),
-    path('chat', views.chatpage),
-    path('conv/<int:user_id>/', views.add_new_private_room),
 ]
