@@ -48,7 +48,7 @@ function chat() {
             console.log(friendsJson);
 
             // Fonction pour ajouter un message à la zone de chat
-            function addMessage(message, type) {
+            function addMessage(message, type, history = true) {
                 console.log('addMessage', message, type);
                 const messageElement = document.createElement('div');
                 messageElement.classList.add('message', type);
@@ -68,7 +68,7 @@ function chat() {
 
                 // Faire défiler vers le bas pour afficher le dernier message
                 chatArea.scrollTop = chatArea.scrollHeight;
-                if (type === 'sent') {
+                if (type === 'sent' && history) {
                     console.log('message envoyé');
                     chatSocket.send(JSON.stringify({
                         'message': message
@@ -99,7 +99,17 @@ function chat() {
 
                 chatSocket.onmessage = function (e) {
                     const data = JSON.parse(e.data);
-                    console.log('message socket ', data);
+                    if (data.history != undefined) {
+                        userid = getCookie("userId")
+                        data.history.forEach(message => 
+                            {
+                                if (userid == message.user)
+                                addMessage(message.content, 'sent', false)
+                                else
+                                addMessage(message.content, 'received', false)
+                            }
+                        )
+                    }
                     if (data.sender === chatusername)
                         addMessage(data.message, 'received');
                 };
