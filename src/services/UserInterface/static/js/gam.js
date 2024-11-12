@@ -243,6 +243,8 @@ const frameDuration = 100;
 let lastFrameTime = 0;
 function updateWeaponAnimation(deltaTime) {
     if (isFiring) {
+	    if (currentFrame==0)
+		    gunFire.play();
         lastFrameTime += deltaTime;
         if (lastFrameTime >= frameDuration) {
             currentFrame++;
@@ -456,6 +458,16 @@ function sendKeystate() {
 	// 	previousKeyState = { ...keyState };
 	// }
 }
+
+var url = "https://localhost:8003/usr/src/app/static/"
+url = url.replace("localhost", window.location.hostname);
+   
+let gunFire = new Audio('https://localhost:8003/usr/src/app/static/sounds/gun.wav');
+let gunImpact = new Audio('https://localhost:8003/usr/src/app/static/sounds/impact.mp3');
+let chubDead= new Audio('https://localhost:8003/usr/src/app/static/sounds/chubbs_dead.mp3');
+let playerHit = new Audio('https://localhost:8003/usr/src/app/static/sounds/player_hit.mp3');
+let song = new Audio('https://localhost:8003/usr/src/app/static/sounds/song.wav');
+
 function loadGam() {
 	let partyId = localStorage.getItem('gameId');
 	// localStorage.removeItem('gameId');
@@ -537,6 +549,7 @@ function loadGam() {
 
 		isGameLoopRunning = true;
 		gameLoop('gam');
+		song.play();
 	}
 }
 
