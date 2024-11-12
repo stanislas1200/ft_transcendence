@@ -22,4 +22,4 @@ document.addEventListener('DOMContentLoaded', () => {
 			appendAlert('Nice, you found me!', 'success')
 		})
 	}
-});
+}, { once: true });

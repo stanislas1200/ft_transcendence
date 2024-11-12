@@ -102,7 +102,7 @@ function gameModeDisablerForRandom() {
         } else {
             gameModeSelect.disabled = false;
         }
-    });
+    }, { once: true });
 }
 
 function randomJoinGameButton() {
@@ -207,7 +207,7 @@ function createGameButton() {
             }
             xhr.send("partyName=tmp&game=" + gameStyle + "&gameType=custom&playerNumber=" + playerNumber + "&gameMode=" + gameMode + "&map=" + mapChoice + "&ballSpeed=" + ballSpeed + "&paddleSpeed=" + paddleSpeed);
         }
-    });
+    }, { once: true });
 }
 
 // function waitingRoom() {

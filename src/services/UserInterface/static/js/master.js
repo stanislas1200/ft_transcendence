@@ -214,6 +214,6 @@ function findFriend() {
     }
 
     inputs.forEach((input) => {
-        input.addEventListener('click', click);
+        input.addEventListener('click', click, { once: true });
     });
 }
