@@ -12,6 +12,32 @@ function getElementFriend() {
     chat();
 }
 
+function joinGameFromChat(gameId, gameStyle) {
+    var xhr = new XMLHttpRequest();
+    var url = "https://localhost:8001/game/join?gameId={{GameId}}&gameName={{gameStyle}}";
+    url = url.replace("localhost", window.location.hostname);
+    url = url.replace("{{GameId}}", gameId);
+    url = url.replace("{{gameStyle}}", gameStyle);
+    xhr.withCredentials = true;
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4)
+            if (xhr.status === 200) {
+                console.log('Game joined');
+                var gameId = JSON.parse(xhr.responseText).game_id;
+                console.log("game id :" + gameId);
+                localStorage.setItem("gameId", gameId);
+                loadPage(gameStyle, 1)
+            }
+            else {
+                console.log('Error joining game'); // TODO put a message
+                console.log(xhr.responseText);
+            }
+    };
+    xhr.send();
+}
+
 function chat() {
     // let friendsJson;
     getFriendList()
@@ -32,12 +58,9 @@ function chat() {
                     if (!gameId)
                         return;
                     const click = ({ target }) => {
-                        console.log('join the duel');
-                        localStorage.setItem("gameId", gameId);
-                        loadPage('pong', 1);
-                        // loadGame(gameId);
+                        joinGameFromChat(gameId, 'pong');
                     }
-                    messageElement.addEventListener('click', click);
+                    messageElement.addEventListener('click', click, { once: true });
                 } else {
                     messageElement.textContent = message;
                 }
@@ -69,6 +92,8 @@ function chat() {
                 );
 
                 chatSocket.onopen = function (e) {
+                    // const data = JSON.parse(e.data);
+                    console.log('message socket on open ', e);
                     console.log('socket open with ', chatusername);
                 };
 
@@ -101,7 +126,7 @@ function chat() {
                     // searchUser(target.innerHTML);
                 }
 
-                chatUsernameDisplay.addEventListener('click', click);
+                chatUsernameDisplay.addEventListener('click', click, { once: true });
                 chatArea.appendChild(chatUsernameDisplay);
                 // chatArea.innerHTML = '<p>Sélectionnez un ami ou ajoutez en un pour commencer à discuter.</p>';
             }
@@ -122,7 +147,7 @@ function chat() {
                 listItem.appendChild(nameSpan);
                 // listItem.appendChild(previewSpan);
 
-                listItem.addEventListener('click', () => loadChat(friends.username));
+                listItem.addEventListener('click', () => loadChat(friends.username), { once: true });
                 friendList.appendChild(listItem);
             });
 
@@ -158,7 +183,7 @@ function chat() {
             }
 
             // Ajouter un gestionnaire d'événements pour le bouton d'envoi
-            sendButton.addEventListener('click', sendMessage);
+            sendButton.addEventListener('click', sendMessage, { once: true });
 
             // Optionnel : Ajouter un gestionnaire d'événements pour appuyer sur Entrée pour envoyer un message
             messageInput.addEventListener('keypress', function (event) {

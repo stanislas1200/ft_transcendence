@@ -101,7 +101,7 @@ function displayRequest(response) {
 
         const inputs = document.querySelectorAll('.my-fa');
         inputs.forEach((input) => {
-            input.addEventListener('click', click);
+            input.addEventListener('click', click, { once: true });
         });
     }
 }

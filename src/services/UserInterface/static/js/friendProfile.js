@@ -119,7 +119,7 @@ function displayHistoryFromOneGame(response) {
         playerCard.addEventListener('click', async () => {
             await loadPage('profile', 1, player.name);
             // searchUser(player.name);
-        });
+        }, { once: true });
         playerCardsContainer.appendChild(playerCard);
 
     });
@@ -284,7 +284,7 @@ function displayHistorique(userId, response) {
 
     const inputs = document.querySelectorAll('.history');
     inputs.forEach((input) => {
-        input.addEventListener('click', click);
+        input.addEventListener('click', click, { once: true });
     });
     const addFriend = document.getElementById('addFriend');
     const message = document.getElementById('message');
@@ -329,13 +329,13 @@ function displayHistorique(userId, response) {
         if (text == 'Remove friend') {
             addFriend.textContent = '+Add friend';
         }
-    });
+    }, { once: true });
     message.addEventListener('click', function () {
         console.log('message');
-    });
+    }, { once: true });
     duel.addEventListener('click', function () {
         console.log('duel');
-    });
+    }, { once: true });
     block.addEventListener('click', function () {
         text = block.textContent.trim();
         console.log(text);
@@ -348,7 +348,7 @@ function displayHistorique(userId, response) {
                 block.textContent = 'Block user';
             }
         }
-    });
+    }, { once: true });
 }
 // retirer sur pas finish
 
