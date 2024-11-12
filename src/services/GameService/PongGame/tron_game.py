@@ -40,12 +40,12 @@ class Party:
 			'id': player.id,
 			'token': token,
 			'n': player.n,
-			'x': player.n * 250,
+			'x': player.n * 800//((self.player_number+1)*2),
 			'y': 100 if player.n // 2 else 600,
 			'trail': [],
 			'direction': "down" if player.n // 2 else "up",
 			'alive': True,
-			'color': ['red', 'green', 'yellow'][player.n-1],
+			'color': ['red', 'green', 'yellow', 'white'][player.n-1],
 			'ai': False
 		} 
 

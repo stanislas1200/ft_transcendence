@@ -41,6 +41,13 @@ def update_connection(user_id, i):
         user.is_online += i
         user.save()
 
+def send_system_message(user_id, message):
+    headers = {
+        'X-Internal-Secret': os.environ['INTERNAL_SECRET']
+    }
+    response = requests.get('https://tchat:8002/mq/', headers=headers, json={"message": message, "users_id": user_id}, verify=False)
+    print(response, flush=True)
+
 @csrf_exempt
 def send_notification(request, users_id=None, message=None):
     if request:
@@ -132,7 +139,8 @@ def create_tournament(request):
         if not all([name, start_date, game_name]):
             return JsonResponse({"success": False, "message": "Missing required fields."}, status=400)
 
-        if Tournament.objects.filter(end_date__isnull=True).exists:
+        ts = Tournament.objects.filter(end_date__isnull=True)
+        if ts:
             return JsonResponse({'error': 'A tournament already exist'}, status=409)
         
         tournament = Tournament.objects.create(max_player=2, name=name, gameName=game_name, start_date=start_date)
@@ -157,6 +165,7 @@ def make_tournament_notif(tournament):
         }
     users_id = [player.player.id for player in tournament.players.all()]
     send_notification(None, users_id, message)
+    send_system_message(users_id, message)
 
 @csrf_exempt
 @require_POST
@@ -470,7 +479,7 @@ def startTron(request, player, token, gameType, gameMode, playerNumber):
 
     if not playerNumber or not gameType:
         return JsonResponse({'error': 'Missing setting'}, status=400)
-    if int(playerNumber) not in [1, 2]:
+    if int(playerNumber) not in [1, 2, 4]:
         return JsonResponse({'error': 'Invalid player number'}, status=400)
 
     if gameMode == 'solo-ia' and int(playerNumber) > 1:
