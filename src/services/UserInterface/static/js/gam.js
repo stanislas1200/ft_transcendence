@@ -449,12 +449,12 @@ async function drawEndGam() {
 
 let previousKeyState = { ...keyState };
 function sendKeystate() {
-	if (JSON.stringify(keyState) !== JSON.stringify(previousKeyState)) {
-		if (socket.readyState === WebSocket.OPEN) {
-			socket.send(JSON.stringify({ command: 'move', k: keyState, angle: player.angle }));
-		}
-		previousKeyState = { ...keyState };
+	// if (JSON.stringify(keyState) !== JSON.stringify(previousKeyState)) {
+	if (socket.readyState === WebSocket.OPEN) {
+		socket.send(JSON.stringify({ command: 'move', k: keyState, angle: player.angle }));
 	}
+	// 	previousKeyState = { ...keyState };
+	// }
 }
 function loadGam() {
 	let partyId = localStorage.getItem('gameId');
@@ -477,6 +477,7 @@ function loadGam() {
 			let sensitivity = 0.005;
 			let movementX = event.movementX || event.mozMovementX || 0;
 			player.angle += movementX * sensitivity;
+			sendKeystate();
 		});
 
 

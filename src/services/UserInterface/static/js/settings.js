@@ -45,7 +45,9 @@ function deleteProfile() {
         url = url.replace("localhost", window.location.hostname);
         var xhr = new XMLHttpRequest();
         xhr.open('POST', url, true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        formData = new FormData();
+        formData.append("current_password", pwd);
+        // xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.withCredentials = true;
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
@@ -58,7 +60,7 @@ function deleteProfile() {
                 }
             }
         };
-        xhr.send(pwd);
+        xhr.send(formData);
     }
 
     deleteButton.addEventListener('click', click);
@@ -282,6 +284,8 @@ function saveChangement(id) {
             const userName = document.getElementById('username');
             const email = document.getElementById('email');
             const profilePicture = document.getElementById('profilePic');
+            const oldPwd = document.getElementById('oldPassword');
+            const newPwd = document.getElementById('newPassword');
 
             if (!firstName || !lastName || !userName || !email)
                 return;
@@ -299,6 +303,8 @@ function saveChangement(id) {
             formData.append("email", email.value);
             formData.append("first_name", firstName.value);
             formData.append("last_name", lastName.value);
+            formData.append("current_password", oldPwd.value);
+            formData.append("new_password", newPwd.value);
             console.log(formData);
             xhr.send(formData);
             saveButton.innerHTML = 'save with sucess!';
