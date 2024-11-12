@@ -24,4 +24,5 @@ urlpatterns = [
     path('room/', include('room.urls')),
     path('chat', views.chatpage),
     path('conv/<int:user_id>/', views.add_new_private_room),
+    path('mq/', views.system_message)
 ]
