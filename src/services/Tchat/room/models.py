@@ -14,8 +14,8 @@ class Chat(models.Model):
     users = models.ManyToManyField(User)
     messages = models.ManyToManyField(Message)
     
-    class Meta:
-        unique_together = ('users',)
+    # class Meta:
+    #     unique_together = ('users',)
 
 class Block(models.Model):
     blocker = models.ForeignKey(User, related_name='blocker', on_delete=models.CASCADE)
