@@ -24,6 +24,15 @@ def _get_chat_room(user, recipient):
     chat.users.add(recipient)
     return chat
 
+def _get_history(chat):
+    try:
+        history = []
+        for message in chat.messages.all():
+            history.append(model_to_dict(message))
+        return history
+    except:
+        return []
+
 class TChatConsumer(AsyncWebsocketConsumer):
     async def update_history_state(self, event):
         await self.send(text_data=json.dumps(event['history']))
@@ -65,18 +74,16 @@ class TChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
-        # history = []
-        # for message in self.chat.messages:
-        #     history.push(model_to_dict(message))
-        # await self.channel_layer.group_send(
-        #     self.chat_group_name,
-        #     {
-        #         'type': 'update_history_state',
-        #         'history': {
-        #             'history': model_to_dict(self.chat.messages)
-        #         }
-        #     }
-        # )
+        history = await sync_to_async(_get_history)(self.chat)
+        await self.channel_layer.group_send(
+            self.chat_group_name,
+            {
+                'type': 'update_history_state',
+                'history': {
+                    'history': history
+                }
+            }
+        )
 
 
     async def _check_if_recipient_is_blocked(self, recipient, username):
