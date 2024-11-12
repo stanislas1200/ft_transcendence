@@ -1,47 +1,18 @@
-// let maxPlayersSelectRandom;
-// let maxPlayersSelectCreate;
-// let gameModeSelect;
-// let gameModeSelectCreate;
-// let joinGameButton;
-// let joinGameName;
-// let randomGameButton;
 let loadingOverlay;
 let loadingText;
 let playerPositions;
-// let createGameButton;
-// let gameName;
-// let gameMode;
-// let mapChoice;
-// let ballSpeed;
-// let paddleSpeed;
 
 function getElementGame() {
     console.log('game');
-    // maxPlayersSelectRandom = document.getElementById('max-players-random');
-    // maxPlayersSelectCreate = document.getElementById('max-players-create');
-    // gameModeSelect = document.getElementById('game-mode');
-    // gameModeSelect.disabled = true;
-    // gameModeSelectCreate = document.getElementById('game-mode-create');
-    // joinGameButton = document.getElementById('join-game-button');
-    // joinGameName = document.getElementById('join-game-name').value;
-    // randomGameButton = document.getElementById('random-game-button');
     loadingOverlay = document.getElementById('loading-overlay');
     loadingText = document.getElementById('loading-text');
     playerPositions = document.getElementById('player-positions');
-    // createGameButton = document.getElementById('create-game-button');
-
-    // gameName = document.getElementById('game-name').value;
-    // gameMode = document.getElementById('game-mode').value;
-    // mapChoice = document.getElementById('map-choice').value;
-    // ballSpeed = parseInt(document.getElementById('ball-speed').value);
-    // paddleSpeed = parseInt(document.getElementById('paddle-speed').value);
 
     gameModeDisablerForRandom();
     gameModeDisablerForCreate();
     inputAnimation();
     randomJoinGameButton();
     createGameButton();
-    // waitingRoom();
 }
 
 function gameModeDisablerForCreate() {
@@ -49,24 +20,33 @@ function gameModeDisablerForCreate() {
     const gameModeCreateTeam = document.getElementById('game-mode-create-team');
     const gameModeCreateFfa = document.getElementById('game-mode-create-ffa');
     const gameModeCreateSolo = document.getElementById('game-mode-create-solo');
-    const gameModeCreateLocal = document.getElementById('game-mode-create-local');
-    const gameModeCreateTournament = document.getElementById('game-mode-create-tournament');
     const gameStyle = document.getElementById('gameCreate');
     const gameModeSelect = document.getElementById('game-mode-create');
     const map = document.getElementById('map-choice');
+    const gameModeDisable = document.getElementById('game-mode-disable');
+    const numberOfPlayerDisable = document.getElementById('number-of-player-disable');
+    const mapChoiceDisable = document.getElementById('map-choice-disable');
+    const ballSpeedDisable = document.getElementById('ball-speed-disable');
+    const paddleSpeedDisable = document.getElementById('paddle-speed-disable');
 
     gameModeSelect.value = "solo-ia";
     gameModeSelect.disabled = true;
 
     gameStyle.addEventListener('change', function () {
-        if (this.value === 'tron') {
-            // gameModeSelect.value = 'ffa';
-            // gameModeSelect.disabled = true;
-            // maxPlayersSelect.value = '2';
-            // maxPlayersSelect.disabled = true;
+        if (this.value === 'tron' || this.value === 'gun_and_monsters' || this.value === 'local') {
+            gameModeDisable.classList.add('hide');
+            mapChoiceDisable.classList.add('hide');
+            ballSpeedDisable.classList.add('hide');
+            paddleSpeedDisable.classList.add('hide');
+            numberOfPlayerDisable.classList.add('hide');
             map.value = '0';
             map.disabled = true;
         } else {
+            gameModeDisable.classList.remove('hide');
+            mapChoiceDisable.classList.remove('hide');
+            ballSpeedDisable.classList.remove('hide');
+            paddleSpeedDisable.classList.remove('hide');
+            numberOfPlayerDisable.classList.remove('hide');
             maxPlayersSelect.disabled = false;
             map.disabled = false;
         }
@@ -83,18 +63,12 @@ function gameModeDisablerForCreate() {
             gameModeCreateFfa.disabled = false;
             gameModeCreateSolo.disabled = true;
             gameModeCreateTeam.disabled = true;
-            gameModeCreateLocal.disabled = false;
-            gameModeCreateTournament.disabled = true;
-        } else if (this.value == '8') {
-            gameModeSelect.value = 'tournament';
-            gameModeSelect.disabled = true;
         } else {
             gameModeSelect.value = 'ffa';
             gameModeSelect.disabled = false;
             gameModeCreateFfa.disabled = false;
             gameModeCreateSolo.disabled = true;
             gameModeCreateTeam.disabled = false;
-            gameModeCreateLocal.disabled = true;
         }
     });
 

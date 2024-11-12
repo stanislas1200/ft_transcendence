@@ -1,6 +1,7 @@
 // TO DO: pouvoir se connecter a une partie qui est en cour ou en attente
 
 function loadHome() {
+    testIfLoggedIn();
     let userId = getCookie('userId');
     loadHistoryForHomePage(userId);
     loadFriend(userId);

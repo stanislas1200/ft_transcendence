@@ -282,7 +282,10 @@ function saveChangement(id) {
             const userName = document.getElementById('username');
             const email = document.getElementById('email');
             const profilePicture = document.getElementById('profilePic');
+            const oldPwd = document.getElementById('oldPassword');
+            const newPwd = document.getElementById('newPassword');
 
+            console.log();
             if (!firstName || !lastName || !userName || !email)
                 return;
 
