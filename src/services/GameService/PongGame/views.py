@@ -143,7 +143,7 @@ def create_tournament(request):
         if ts:
             return JsonResponse({'error': 'A tournament already exist'}, status=409)
         
-        tournament = Tournament.objects.create(max_player=2, name=name, gameName=game_name, start_date=start_date)
+        tournament = Tournament.objects.create(max_player=8, name=name, gameName=game_name, start_date=start_date)
         return JsonResponse({"success": True, "message": "Tournament created ", "tournament_id":  str(tournament.id)})
 
     except Exception as e:
