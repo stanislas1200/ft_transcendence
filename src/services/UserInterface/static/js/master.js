@@ -103,12 +103,12 @@ function logout() {
 
 async function setActive(element, pageName) {
     // disable the chat button
+    event.preventDefault();
     document.getElementById('chatButtonMaster').removeAttribute('href');
     console.log('test setActive : ', isActive);
     if (isActive == true)
         return;
     isActive = true;
-    event.preventDefault();
     // Retirer la classe 'active' de tous les liens
     event.preventDefault(); // Prevent the form from submitting the traditional way
     const links = document.querySelectorAll('ul li a');
