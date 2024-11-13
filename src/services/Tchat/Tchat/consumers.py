@@ -9,6 +9,7 @@ from asgiref.sync import sync_to_async
 import requests 
 from django.db.models import Q
 from django.forms.models import model_to_dict
+import http.cookies, os
 
 def _get_chat_room(user, recipient):
     try:
@@ -33,14 +34,39 @@ def _get_history(chat):
     except:
         return []
 
+def _verify_token(session_key, token, user_id):
+    try:
+        headers = {
+            'X-Internal-Secret': os.environ['INTERNAL_SECRET']
+        }
+        response = requests.get('https://auth-service:8000/verify_token/', headers=headers, cookies={'session_key': session_key, 'token': token, 'userId': user_id}, verify=False)
+        print(response, flush=True)
+        if response.status_code == 200:
+            return True
+        return False
+    except Exception as e:
+        print(e, flush=True)
+        return False
+
 class TChatConsumer(AsyncWebsocketConsumer):
     async def update_history_state(self, event):
         await self.send(text_data=json.dumps(event['history']))
     
     async def connect(self):
-        self.userId         = self.scope["url_route"]["kwargs"]["UserId"] #get user id
+        headers = dict(self.scope['headers'])
+        self.token = self.user_id = self.group_name= None
+        if b'cookie' in headers:
+            cookie = headers[b'cookie'].decode()
+            cookie = http.cookies.SimpleCookie(cookie)
+            self.token = cookie['token'].value if 'token' in cookie else None
+            self.userId = cookie['userId'].value if 'userId' in cookie else None
+
+        player = await sync_to_async(_verify_token)(None, self.token, self.userId)
+        if not (player):
+            print(f"player not register")
+            return ;    
+        
         recipient_username  = self.scope["url_route"]["kwargs"]["Recipient"]
-        self.token          = self.scope["url_route"]["kwargs"]["token"]
 
         self.user = await sync_to_async(get_user)(self.userId) #get user name
         try:    
@@ -80,6 +106,7 @@ class TChatConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'update_history_state',
                 'history': {
+                    'userId': self.userId,
                     'history': history
                 }
             }
