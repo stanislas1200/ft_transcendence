@@ -397,6 +397,12 @@ class Party:
 				if (not m.next_match): #TODO NM : end tournament
 					m.tournament.end_date = timezone.now()
 					m.tournament.save()
+					for player in m.tournament.players.all():
+						stats = PlayerStats.objects.get(player=player.player)
+						stats.tournament_played = F('tournament_played') + 1
+						if m.winner == player.player:
+							stats.tournament_win = F('tournament_win') + 1
+						stats.save()
 					return
 
 				player = PongPlayer.objects.create(player=winner, score=0, n=m.next_match.game.players.count()+1)
