@@ -1,14 +1,15 @@
 // TO DO: pouvoir se connecter a une partie qui est en cour ou en attente
 
-function loadHome() {
+async function loadHome() {
     testIfLoggedIn();
     let userId = getCookie('userId');
     loadHistoryForHomePage(userId);
-    loadFriend(userId);
+    await loadFriend(userId);
     loadAchivement(userId);
     loadGame();
     loadTounament();
     goToButton();
+    console.log('load home');
 }
 
 function goToButton() {
@@ -78,7 +79,7 @@ function goToButton() {
     chat.addEventListener('click', clickChat);
 }
 
-function clickOnFriend() {
+async function clickOnFriend() {
     const click = async ({ target }) => {
         let userName = target.innerHTML;
         userName = userName.substr(24, userName.length - 24);
@@ -120,6 +121,7 @@ function displayTournament(response) {
     if (!tournamentList)
         return;
 
+    tournamentList.innerHTML = "";
     if (response.length == 0) {
         tournamentList.innerHTML = 'no tournament for the moment';
         return;
@@ -231,6 +233,7 @@ function displayGame(response) {
     if (!gameList)
         return;
 
+    gameList.innerHTML = "";
     for (let i = 0; i < response.length; i++) {
         if (response[i].status != 'finished') {
             let newDiv = document.createElement('div');
@@ -285,6 +288,8 @@ function displayAchivement(response) {
     if (!achivementList)
         return;
 
+    achivementList.innerHTML = "";
+
     if (response.unlocked.length == 0)
         console.log('no achivement unlock for the moment');
     else {
@@ -322,12 +327,14 @@ function loadAchivement(userId) {
     xhr.send();
 }
 
-function displayFriendList(response) {
+async function displayFriendList(response) {
     // console.log(response);
     let friendList = document.getElementById('friend-list-home-page');
 
     if (!friendList)
         return;
+
+    friendList.innerHTML = "";
 
     if (response.friends.length == 0) {
         friendList.innerHTML = 'no friend 😢';
@@ -342,6 +349,7 @@ function displayFriendList(response) {
             let newSpan = document.createElement('span');
             newSpan.classList.add('list-span');
             newSpan.innerHTML = response.friends[i].username;
+            console.log(response.friends[i]);
             if (response.friends[i].is_online)
                 newSpan.innerHTML += '(online)';
             else
@@ -354,28 +362,36 @@ function displayFriendList(response) {
             friendList.append(newDiv);
         }
     }
-    clickOnFriend();
+    await clickOnFriend();
 }
 
-function loadFriend(userId) {
+async function loadFriend(userId) {
     let url = "https://localhost:8000/friends/{{UserId}}/";
     url = url.replace("localhost", window.location.hostname);
     url = url.replace("{{UserId}}", userId);
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.withCredentials = true;
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200 || xhr.status === 201) {
-                response = JSON.parse(xhr.responseText);
-                displayFriendList(response);
-            } else {
-                alert('Error: ' + JSON.parse(xhr.responseText).error);
-            }
-        }
-    };
-    xhr.send();
+    // var xhr = new XMLHttpRequest();
+    // xhr.open('GET', url, true);
+    // xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    // xhr.withCredentials = true;
+    // xhr.onreadystatechange = async function () {
+    //     if (xhr.readyState === 4) {
+    //         if (xhr.status === 200 || xhr.status === 201) {
+    //             response = JSON.parse(xhr.responseText);
+    //             console.log('osef');
+    //             displayFriendList(response);
+    //         } else {
+    //             alert('Error: ' + JSON.parse(xhr.responseText).error);
+    //         }
+    //     }
+    // };
+    await fetch(url, { method: "GET" }).then(async (response) => {
+        //const supereponse = JSON.parse(response);
+        await displayFriendList(await response.json());
+        //console.log(await response.json());
+    }).catch((error) => {
+        alert(error);
+    })
+    //xhr.send();
 }
 
 function clickOnbackToGame() {

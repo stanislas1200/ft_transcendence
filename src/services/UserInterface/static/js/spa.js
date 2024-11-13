@@ -86,7 +86,7 @@ async function loadPage(page, prevent, username) {
             showTournamentInfo();
             break;
         case 'index':
-            loadHome();
+            await loadHome();
             break;
         case 'tron':
             loadTron();
