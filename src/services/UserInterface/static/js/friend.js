@@ -3,6 +3,7 @@ let chatArea;
 let messageInput;
 let sendButton;
 let chatSocket;
+let isChatLoading = false;
 
 async function getElementFriend() {
     friendList = document.getElementById('friend-list');
@@ -78,6 +79,9 @@ async function chat() {
 
             // Fonction pour charger le chat d'un ami
             async function loadChat(chatusername) {
+                if (isChatLoading == true)
+                    return;
+                isChatLoading = true;
                 // Effacer le contenu actuel du chat
                 chatArea.innerHTML = '';
                 data = null;
@@ -101,6 +105,7 @@ async function chat() {
                         // const data = JSON.parse(e.data);
                         console.log('message socket on open ', e);
                         console.log('socket open with ', chatusername);
+                        isChatLoading = false;
                     };
 
                     chatSocket.onmessage = function (e) {
