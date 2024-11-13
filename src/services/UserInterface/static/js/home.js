@@ -72,10 +72,10 @@ function goToButton() {
     const achievement = document.getElementById('goToAchivement');
     const chat = document.getElementById('goToChat');
 
-    game.addEventListener('click', clickGame, { once: true });
-    tournament.addEventListener('click', clickTournament, { once: true });
-    achievement.addEventListener('click', clickAchivement, { once: true });
-    chat.addEventListener('click', clickChat, { once: true });
+    game.addEventListener('click', clickGame);
+    tournament.addEventListener('click', clickTournament);
+    achievement.addEventListener('click', clickAchivement);
+    chat.addEventListener('click', clickChat);
 }
 
 function clickOnFriend() {
@@ -91,7 +91,7 @@ function clickOnFriend() {
 
     const inputs = document.querySelectorAll('#friendList');
     inputs.forEach((input) => {
-        input.addEventListener('click', click, { once: true });
+        input.addEventListener('click', click);
     });
 }
 
@@ -110,7 +110,7 @@ function clickOnTournamenet() {
 
     const inputs = document.querySelectorAll('#tournamentList');
     inputs.forEach((input) => {
-        input.addEventListener('click', click, { once: true });
+        input.addEventListener('click', click);
     });
 }
 
@@ -220,7 +220,7 @@ function clickOnGame() {
 
     const inputs = document.querySelectorAll('#gameList');
     inputs.forEach((input) => {
-        input.addEventListener('click', click, { once: true });
+        input.addEventListener('click', click);
     });
 }
 
@@ -394,7 +394,7 @@ function clickOnbackToGame() {
     const inputs = document.querySelectorAll('#BackToGameButton');
     // console.log(inputs);
     inputs.forEach((input) => {
-        input.addEventListener('click', click, { once: true });
+        input.addEventListener('click', click);
     });
 }
 

@@ -103,7 +103,13 @@ function logout() {
     xhr.send();
 }
 
-function setActive(element, pageName) {
+async function setActive(element, pageName) {
+    // disable the chat button
+    document.getElementById('chatButtonMaster').removeAttribute('href');
+    console.log('test setActive : ', isActive);
+    if (isActive == true)
+        return;
+    isActive = true;
     event.preventDefault();
     // Retirer la classe 'active' de tous les liens
     event.preventDefault(); // Prevent the form from submitting the traditional way
@@ -116,7 +122,10 @@ function setActive(element, pageName) {
     element.classList.add('active');
 
     // Charger la page correspondante
-    loadPage(pageName, 1);
+    console.log('first setActive :', isActive);
+    await loadPage(pageName, 1);
+    document.getElementById('chatButtonMaster').setAttribute('href', '#' + pageName);
+    console.log('setActive :', isActive);
 }
 
 function testIfLoggedIn() {
@@ -219,6 +228,6 @@ function findFriend() {
     }
 
     inputs.forEach((input) => {
-        input.addEventListener('click', click, { once: true });
+        input.addEventListener('click', click);
     });
 }

@@ -31,8 +31,8 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}">
 
     <script src="{% static 'js/themeToggle.js' %}"></script>
-    <script src="{% static 'js/master.js' %}"></script>
     <script src="{% static 'js/friend.js' %}"></script>
+    <script src="{% static 'js/master.js' %}"></script>
     <script src="{% static 'js/spa.js' %}"></script>
     <script src="{% static 'js/game.js' %}"></script>
     <script src="{% static 'js/pong.js' %}"></script>
@@ -118,7 +118,7 @@
             <nav class="navbar-top">
                 <ul>
                     <li>
-                        <a href="#friend" onclick="setActive(this, 'friend')">
+                        <a id="chatButtonMaster" href="#friend" onclick="setActive(this, 'friend')">
                             <i class="fa fa-comments fa-2x"></i>
                         </a>
                     </li>
