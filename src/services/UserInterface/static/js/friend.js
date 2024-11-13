@@ -88,7 +88,7 @@ function chat() {
 
                 // Demarrer une websocket avec le username de l'ami
                 chatSocket = new WebSocket(
-                    'wss://' + window.location.hostname + ':8002/ws/chat/' + getCookie("userId") + '/' + chatusername + '/' + getCookie("token") + '/'
+                    'wss://' + window.location.hostname + ':8002/ws/chat/' + chatusername + '/'
                 );
 
                 chatSocket.onopen = function (e) {
@@ -101,14 +101,17 @@ function chat() {
                     const data = JSON.parse(e.data);
                     if (data.history != undefined) {
                         userid = getCookie("userId")
-                        data.history.forEach(message => 
-                            {
-                                if (userid == message.user)
-                                addMessage(message.content, 'sent', false)
-                                else
-                                addMessage(message.content, 'received', false)
-                            }
-                        )
+                        if (userid == data.userId)
+                        {
+                            data.history.forEach(message => 
+                                {
+                                    if (userid == message.user)
+                                    addMessage(message.content, 'sent', false)
+                                    else
+                                    addMessage(message.content, 'received', false)
+                                }
+                            )
+                        }
                     }
                     if (data.sender === chatusername)
                         addMessage(data.message, 'received');
