@@ -1,14 +1,18 @@
 // TO DO: pouvoir se connecter a une partie qui est en cour ou en attente
 
-function loadHome() {
-    testIfLoggedIn();
-    let userId = getCookie('userId');
-    loadHistoryForHomePage(userId);
-    loadFriend(userId);
-    loadAchivement(userId);
-    loadGame();
-    loadTounament();
-    goToButton();
+async function loadHome() {
+    testIfLoggedIn(function(isLoggedIn) {
+        if (isLoggedIn === 0) {
+            console.log("ok");
+            let userId = getCookie('userId');
+            loadHistoryForHomePage(userId);
+            loadFriend(userId);
+            loadAchivement(userId);
+            loadGame();
+            loadTounament();
+            goToButton();
+        }
+    });
 }
 
 function goToButton() {
@@ -164,7 +168,7 @@ function loadTounament() {
                 response = JSON.parse(xhr.responseText);
                 displayTournament(response);
             } else {
-                alert('Error: ' + JSON.parse(xhr.responseText).error);
+                // alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
     };
@@ -372,7 +376,8 @@ function loadFriend(userId) {
                 response = JSON.parse(xhr.responseText);
                 displayFriendList(response);
             } else {
-                alert('Error: ' + JSON.parse(xhr.responseText).error);
+                // console.log(xhr.responseText)
+                // alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
     };

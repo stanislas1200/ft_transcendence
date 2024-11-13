@@ -1,4 +1,4 @@
-testIfLoggedIn();
+let wss;
 
 function getCookie(name) {
     var value = "; " + document.cookie;
@@ -22,7 +22,7 @@ function notifications(Title) {
     <span aria-hidden="true">&times;</span>
     </button>
     `;
-    
+
     let newNotif = document.createElement('div');
     newNotif.classList.add('alert', `alert-succes`, 'alert-dismissible', 'fade', 'show');
     newNotif.innerHTML = alertHtml;
@@ -30,7 +30,6 @@ function notifications(Title) {
     removeAlertAfterTimeout(newNotif)
 }
 
-let wss;
 function disconnectFromNotifications() {
     if (wss) {
         wss.close();
@@ -39,45 +38,49 @@ function disconnectFromNotifications() {
     }
 }
 function connectToNotifications() {
-    let userId = getCookie('userId');
-    if (!userId) {
-        return;
-    }
-    if (window.location.pathname.includes('/login') || window.location.pathname.includes('/register')) {
-        return;
-    }
-    let wsUrl = `wss://localhost:8001/ws/notifications/${userId}`;
-    wsUrl = wsUrl.replace('localhost', window.location.hostname);
+    testIfLoggedIn(function (isLoggedIn) {
+        if (isLoggedIn === 0) {
+            let userId = getCookie('userId');
+            if (!userId) {
+                return;
+            }
+            if (window.location.pathname.includes('/login') || window.location.pathname.includes('/register')) {
+                return;
+            }
+            let wsUrl = `wss://localhost:8001/ws/notifications/${userId}`;
+            wsUrl = wsUrl.replace('localhost', window.location.hostname);
 
-    wss = new WebSocket(wsUrl);
+            wss = new WebSocket(wsUrl);
 
-    wss.addEventListener('open', function (event) {
-        console.log('Connected to notifications system.')
-    });
+            wss.addEventListener('open', function (event) {
+                console.log('Connected to notifications system.')
+            });
 
-    wss.addEventListener('message', function (event) {
-        let serverMessage = JSON.parse(event.data);
-        if (!(serverMessage && serverMessage.data && serverMessage.data.content))
-            return
-        let content = serverMessage.data.content;
-        notifications(content);
-        if (serverMessage.type === 'friend_request' && window.location.pathname === '/profile/') {
-            listRequest();
+            wss.addEventListener('message', function (event) {
+                let serverMessage = JSON.parse(event.data);
+                if (!(serverMessage && serverMessage.data && serverMessage.data.content))
+                    return
+                let content = serverMessage.data.content;
+                notifications(content);
+                if (serverMessage.type === 'friend_request' && window.location.pathname === '/profile/') {
+                    listRequest();
+                }
+
+            });
+
+            wss.addEventListener('close', function (event) {
+                connectToNotifications()
+                // console.log('Close: ', event);
+            });
+
+            wss.addEventListener('error', function (event) {
+                // console.log('Error: ', event);
+            });
         }
-
-    });
-
-    wss.addEventListener('close', function (event) {
-        connectToNotifications()
-        // console.log('Close: ', event);
-    });
-
-    wss.addEventListener('error', function (event) {
-        // console.log('Error: ', event);
     });
 }
 
-connectToNotifications()
+// connectToNotifications()
 
 function logout() {
     event.preventDefault();
@@ -114,7 +117,7 @@ function setActive(element, pageName) {
     loadPage(pageName, 1);
 }
 
-function testIfLoggedIn() {
+async function testIfLoggedIn(callback) {
     if (window.location.pathname === '/login/' || window.location.pathname === '/register/') {
         const navbar = document.getElementById("navbar");
         if (navbar)
@@ -126,7 +129,7 @@ function testIfLoggedIn() {
 
 
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
+    xhr.open('GET', url, false);
     xhr.withCredentials = true;
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
@@ -135,8 +138,11 @@ function testIfLoggedIn() {
                 loadPage("login", 1);
                 const navbar = document.getElementById("navbar");
                 if (navbar)
-                    navbar.style.display = 'none';
+                navbar.style.display = 'none';
+                if (callback) callback(1);
             }
+            else
+                if (callback) callback(0);
             // console.log(xhr.responseText);
         }
     };
@@ -177,7 +183,7 @@ function searchAllUser(searchName, proposition) {
                 printAllResponse(response, proposition);
                 findFriend();
             } else {
-                alert('Error: ' + JSON.parse(xhr.responseText).error);
+                // alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
     };

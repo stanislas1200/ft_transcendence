@@ -708,7 +708,7 @@ def verify_token(request, token=None, user_id=None):
 		return 404
 
 @require_GET
-@login_required
+# @login_required
 def me(request):
 	try:
 		# session_key = request.session.session_key # removed for testIflogin

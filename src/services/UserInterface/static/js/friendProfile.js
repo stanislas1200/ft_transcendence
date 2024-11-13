@@ -37,7 +37,7 @@ function searchUser(usernameSearching) {
                     loadProfilePicture(response.users[numUser].id);
                     loadHistoryFromUser(response.users[numUser].id);
                 } else {
-                    alert('Error: ' + JSON.parse(xhr.responseText).error);
+                    // alert('Error: ' + JSON.parse(xhr.responseText).error);
                 }
             }
         };
@@ -63,7 +63,7 @@ function loadHistoryFromUser(id) {
                 displayMetrics(response);
                 displayHistorique(id, response);
             } else {
-                alert('Error: ' + JSON.parse(xhr.responseText).error);
+                // alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
     };
@@ -143,7 +143,7 @@ function loadHistoryFromGame(id, gameId) {
                 // console.log(response);
                 displayHistoryFromOneGame(response);
             } else {
-                alert('Error: ' + JSON.parse(xhr.responseText).error);
+                // alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
     };
@@ -166,7 +166,7 @@ function getStats(id) {
                 displayStats(response);
                 listRequest();
             } else {
-                alert('Error: ' + JSON.parse(xhr.responseText).error);
+                // alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
     };

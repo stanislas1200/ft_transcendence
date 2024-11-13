@@ -16,7 +16,7 @@ function loadProfile() {
                 loadHistoryFromUser(response.id);
                 listRequest();
             } else {
-                alert('Error: ' + JSON.parse(xhr.responseText).error);
+                // alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
     };
@@ -119,7 +119,7 @@ function listRequest() {
                 response = JSON.parse(xhr.responseText);
                 displayRequest(response);
             } else {
-                alert('Error: ' + JSON.parse(xhr.responseText).error);
+                // alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
     };

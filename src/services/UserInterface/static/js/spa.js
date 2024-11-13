@@ -35,10 +35,10 @@ async function fetchPage(page, prevent, username, cacheKey) {
 
 async function loadPage(page, prevent, username) {
 
-    cancelAllAnimationFrames()
+    if (typeof cancelAllAnimationFrames === 'function') cancelAllAnimationFrames();
     // destroyCharts()
     isGameLoopRunning = false
-    stopTournamentInfo()
+    if (typeof stopTournamentInfo === 'function') stopTournamentInfo();
 
     const cacheKey = `${CACHE_VERSION}-${page}`;
     const cachedContent = sessionStorage.getItem(cacheKey);
@@ -46,17 +46,20 @@ async function loadPage(page, prevent, username) {
 
     if (cachedContent && cacheTimestamp && (Date.now() - cacheTimestamp < CACHE_EXPIRATION_TIME)) {
         console.log('Cached content loaded');
-        document.getElementById('spa-content').innerHTML = cachedContent;
-        if (prevent == 1)
-            window.history.pushState({}, '', `/${page}/${username ? `?${username}` : ''}`);
-        if (username)
-            searchUser(username);
+        try {
+            document.getElementById('spa-content').innerHTML = cachedContent;
+            if (prevent == 1)
+                window.history.pushState({}, '', `/${page}/${username ? `?${username}` : ''}`);
+            if (username)
+                searchUser(username);
+        } catch (error) {
+            await fetchPage(page, prevent, username, cacheKey);
+        }
     }
     else {
         await fetchPage(page, prevent, username, cacheKey);
     }
     // console.log('page ' + page);
-    testIfLoggedIn()
     switch (page) {
         case 'friend':
             getElementFriend();
@@ -104,7 +107,13 @@ async function loadPage(page, prevent, username) {
         default:
             break;
     }
+    testIfLoggedIn();
 }
+
+testIfLoggedIn(function (isLoggedIn) {
+    if (isLoggedIn == 0)
+        connectToNotifications();
+});
 
 window.onpopstate = function () {
     // // Handle the back/forward buttons properly
