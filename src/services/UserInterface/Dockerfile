@@ -27,4 +27,4 @@ RUN python manage.py collectstatic --noinput
 EXPOSE 8003
 
 # Run the application
-CMD ["python", "-m", "uvicorn", "UI.asgi:application", "--reload", "--host", "0.0.0.0", "--port", "8003", "--ssl-keyfile=/etc/ssl/certs/key.pem", "--ssl-certfile=/etc/ssl/certs/cert.pem"]
+CMD ["./wait-for-cert.sh"]
