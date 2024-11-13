@@ -149,13 +149,14 @@ function createGameButton() {
 
     createGameButton.addEventListener('click', function () {
         // const partyName = document.getElementById('partyName').value;
-        const playerNumber = document.getElementById('max-players-create').value;
+        var playerNumber = document.getElementById('max-players-create').value;
         const gameMode = document.getElementById('game-mode-create').value;
         const mapChoice = document.getElementById('map-choice').value;
         const ballSpeed = document.getElementById('ball-speed').value;
         const paddleSpeed = document.getElementById('paddle-speed').value;
         const gameStyle = document.getElementById('gameCreate').value;
-
+        
+        if (gameStyle == 'gun_and_monsters') playerNumber = 2;
         if (gameStyle == 'local')
             return loadPage("localpong", 1)
         else if (gameMode == 'tournament') {

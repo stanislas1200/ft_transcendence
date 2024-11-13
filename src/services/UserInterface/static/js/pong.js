@@ -38,8 +38,7 @@ let game_state = {
 	scores: null
 }
 
-function drawError(error) {
-	cancelAllAnimationFrames();
+async function drawError(error) {
 	c.clearRect(0, 0, 800, 650);
 	c.font = "30px monospace";
 	c.textAlign = 'center';
@@ -47,9 +46,14 @@ function drawError(error) {
 	c.fillStyle = 'red';
 	c.fillText(error, 800 / 2, 600 / 2);
 	c.fillText('Moving to game page', 800 / 2, 650 / 2);
-	setTimeout(() => {
-		loadPage('game', 1)
-	}, 2000);
+	
+	await sleep(2000);
+	loadPage('game', 1)
+	cancelAllAnimationFrames()
+	game_state.scores = null;
+	game_state.usernames = null;
+	game_state.players = [];
+	game_state.state = 'nope';
 }
 
 function connect(game) {
@@ -65,6 +69,7 @@ function connect(game) {
 
 		if (serverMessage.error) {
 			drawError(serverMessage.error);
+			socket.close();
 			return;
 		}
 

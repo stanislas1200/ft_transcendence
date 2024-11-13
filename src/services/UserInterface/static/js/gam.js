@@ -242,7 +242,7 @@ const totalFrames = 4;
 const frameDuration = 100;
 let lastFrameTime = 0;
 function updateWeaponAnimation(deltaTime) {
-    if (isFiring) {
+    if (keyState[' ']) {
 	    if (currentFrame==0)
 		{
 			gunFire.currentTime = 0;
@@ -491,7 +491,7 @@ function loadGam() {
 	if (!isGameLoopRunning) {
 
 		document.addEventListener('mousemove', (event) => {
-			let sensitivity = 0.005;
+			let sensitivity = 0.008;
 			let movementX = event.movementX || event.mozMovementX || 0;
 			player.angle += movementX * sensitivity;
 			sendKeystate();

@@ -49,7 +49,8 @@ class Party:
 			'speedX': 0,
 			'alive': True,
 			'hp': 100,
-			'ai': False
+			'ai': False,
+			'last_fire': time.time()
 		} 
 
 	def save(self):
@@ -359,22 +360,25 @@ def move_gam(game_id, n, keyStates, angle):
 	game.players[n-1]['speed'] = 0
 	game.players[n-1]['speedX'] = 0
 	if keyStates.get('ArrowUp', False) or keyStates.get('z', False) or keyStates.get('w', False):
-		game.players[n-1]['speed'] += 2
+		game.players[n-1]['speed'] += 4
 
 	if keyStates.get('ArrowDown', False) or keyStates.get('s', False):
 		game.players[n-1]['speed'] += -1
 
 	if keyStates.get('ArrowLeft', False) or keyStates.get('q', False) or keyStates.get('a', False):
-		game.players[n-1]['speedX'] += -2
+		game.players[n-1]['speedX'] += -4
 
 	if keyStates.get('ArrowRight', False) or keyStates.get('d', False) or keyStates.get('d', False):
-		game.players[n-1]['speedX'] += 2
+		game.players[n-1]['speedX'] += 4
 
-	game.players[n-1]['speed'] = min(2, max(-1, game.players[n-1]['speed']))
-	game.players[n-1]['speedX'] = min(2, max(-2, game.players[n-1]['speedX']))
+	game.players[n-1]['speed'] = min(4, max(-1, game.players[n-1]['speed']))
+	game.players[n-1]['speedX'] = min(4, max(-4, game.players[n-1]['speedX']))
 
 	if keyStates.get(' ', False):
-		shoot(game.players[n-1])
+		current_time = time.time()
+		if current_time - game.players[n-1].get('last_fire', 0) >= 0.2:
+			game.players[n-1]['last_fire'] = current_time
+			shoot(game.players[n-1])
 		
 def shoot(player):
 	"""Create a projectile when the player shoots"""
