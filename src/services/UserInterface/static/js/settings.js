@@ -63,7 +63,7 @@ function deleteProfile() {
         xhr.send(formData);
     }
 
-    deleteButton.addEventListener('click', click, { once: true });
+    deleteButton.addEventListener('click', click);
 }
 
 function containsUpperCase(pwd) {
@@ -318,5 +318,5 @@ function saveChangement(id) {
         else {
             console.log('error');
         }
-    }, { once: true });
+    });
 }

@@ -1,4 +1,5 @@
 /********************************* GESTION SPA *********************************/
+let isActive = false;
 
 const CACHE_EXPIRATION_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
 const CACHE_VERSION = 'v1';
@@ -59,7 +60,8 @@ async function loadPage(page, prevent, username) {
     testIfLoggedIn()
     switch (page) {
         case 'friend':
-            getElementFriend();
+            await getElementFriend();
+            isActive = false;
             break;
         case 'game':
             getElementGame();
@@ -104,6 +106,8 @@ async function loadPage(page, prevent, username) {
         default:
             break;
     }
+    console.log('second setActive :', isActive);
+    isActive = false;
 }
 
 window.onpopstate = function () {

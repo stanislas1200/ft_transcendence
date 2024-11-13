@@ -6,7 +6,7 @@ function loadRegister() {
 	loginLink.addEventListener("click", () => {
 		event.preventDefault();
 		loadPage("login", 1);
-	}, { once: true });
+	});
 
 	const handleFocus = ({ target }) => {
 		const span = target.previousElementSibling;
@@ -108,7 +108,7 @@ function loadRegister() {
 				+ '&last_name=' + encodeURIComponent(lastNameInput) + '&email=' + encodeURIComponent(emailInput) + '&password=' + encodeURIComponent(passwordInput)
 				+ '&c_password=' + encodeURIComponent(confirmPasswordInput) + '&agree=' + consent.checked);
 		}
-	}, { once: true });
+	});
 
 
 	function validateEmail(email) {
