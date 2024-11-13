@@ -59,7 +59,7 @@ async function renderLeaderboard(data) {
 				await loadPage('profile', 1, usernameElement.dataset.username);
 				// searchUser(usernameElement.dataset.username);
 			}
-		}, { once: true });
+		});
 	});
 
 	data.forEach((player, index) => {
@@ -74,7 +74,7 @@ async function renderLeaderboard(data) {
 			row.addEventListener('click', async () => {
 				await loadPage('profile', 1, player.username);
 				// searchUser(player.username);
-			}, { once: true });
+			});
 			leaderboardBody.appendChild(row);
 		}
 	});

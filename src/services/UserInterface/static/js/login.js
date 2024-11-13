@@ -47,7 +47,7 @@ function loadLogin() {
         var password = document.getElementById('password').value;
 
         login(username, password);
-    }, { once: true });
+    });
 }
 
 function login(username, password) {

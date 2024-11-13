@@ -2,14 +2,14 @@ let friendList;
 let chatArea;
 let messageInput;
 let sendButton;
-// let chatSocket;
+let chatSocket;
 
-function getElementFriend() {
+async function getElementFriend() {
     friendList = document.getElementById('friend-list');
     chatArea = document.getElementById('chat-area');
     messageInput = document.getElementById('message-input');
     sendButton = document.getElementById('send-button');
-    chat();
+    await chat();
 }
 
 function joinGameFromChat(gameId, gameStyle) {
@@ -38,18 +38,18 @@ function joinGameFromChat(gameId, gameStyle) {
     xhr.send();
 }
 
-function chat() {
+async function chat() {
     // let friendsJson;
-    getFriendList()
+    await getFriendList()
         .then(response => {
-            console.log("Liste des amis :", response);  // Utilisation de la réponse ici
+            // console.log("Liste des amis :", response);  // Utilisation de la réponse ici
             let friendsJson = response;
 
-            console.log(friendsJson);
+            // console.log(friendsJson);
 
             // Fonction pour ajouter un message à la zone de chat
             function addMessage(message, type, history = true) {
-                console.log('addMessage', message, type);
+                // console.log('addMessage', message, type);
                 const messageElement = document.createElement('div');
                 messageElement.classList.add('message', type);
                 if (message.split(' ')[0] === '/invite') { // lorsque le message est /invite {gameId} je voudrais que le message soit un bouton 'join the duel'et que je puisse recuperer le gameId
@@ -60,7 +60,7 @@ function chat() {
                     const click = ({ target }) => {
                         joinGameFromChat(gameId, 'pong');
                     }
-                    messageElement.addEventListener('click', click, { once: true });
+                    messageElement.addEventListener('click', click);
                 } else {
                     messageElement.textContent = message;
                 }
@@ -69,7 +69,7 @@ function chat() {
                 // Faire défiler vers le bas pour afficher le dernier message
                 chatArea.scrollTop = chatArea.scrollHeight;
                 if (type === 'sent' && history) {
-                    console.log('message envoyé');
+                    // console.log('message envoyé');
                     chatSocket.send(JSON.stringify({
                         'message': message
                     }));
@@ -77,9 +77,15 @@ function chat() {
             }
 
             // Fonction pour charger le chat d'un ami
-            function loadChat(chatusername) {
+            async function loadChat(chatusername) {
                 // Effacer le contenu actuel du chat
                 chatArea.innerHTML = '';
+                data = null;
+
+                if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                    chatSocket.close();
+                    console.log('socket closed');
+                }
 
                 // close l'ancienne websocket si elle existe
                 // if (chatSocket !== undefined && chatSocket.readyState === WebSocket.OPEN) {
@@ -88,35 +94,40 @@ function chat() {
 
                 // Demarrer une websocket avec le username de l'ami
                 chatSocket = new WebSocket(
-                    'wss://' + window.location.hostname + ':8002/ws/chat/' + getCookie("userId") + '/' + chatusername + '/' + getCookie("token") + '/'
+                    'wss://' + window.location.hostname + ':8002/ws/chat/' + chatusername + '/'
                 );
+                if (!chatSocket.hasSetListener) {
+                    chatSocket.onopen = function (e) {
+                        // const data = JSON.parse(e.data);
+                        console.log('message socket on open ', e);
+                        console.log('socket open with ', chatusername);
+                    };
 
-                chatSocket.onopen = function (e) {
-                    // const data = JSON.parse(e.data);
-                    console.log('message socket on open ', e);
-                    console.log('socket open with ', chatusername);
-                };
-
-                chatSocket.onmessage = function (e) {
-                    const data = JSON.parse(e.data);
-                    if (data.history != undefined) {
-                        userid = getCookie("userId")
-                        data.history.forEach(message => 
-                            {
-                                if (userid == message.user)
-                                addMessage(message.content, 'sent', false)
-                                else
-                                addMessage(message.content, 'received', false)
+                    chatSocket.onmessage = function (e) {
+                        console.log('on message event');
+                        data = JSON.parse(e.data);
+                        if (data.history != undefined) {
+                            userid = getCookie("userId")
+                            if (userid == data.userId) {
+                                data.history.forEach(message => 
+                                    {
+                                        if (userid == message.user)
+                                        addMessage(message.content, 'sent', false)
+                                        else
+                                        addMessage(message.content, 'received', false)
+                                    }
+                                )
                             }
-                        )
-                    }
-                    if (data.sender === chatusername)
-                        addMessage(data.message, 'received');
-                };
+                        }
+                        if (data.sender === chatusername)
+                            addMessage(data.message, 'received');
+                    };
 
-                chatSocket.onclose = function (e) {
-                    console.log('Chat socket closed unexpectedly');
-                };
+                    chatSocket.onclose = function (e) {
+                        console.log('Chat socket closed unexpectedly');
+                    };
+                    chatSocket.hasSetListener = true;
+                }
 
                 // Ajouter les messages de l'ami sélectionné
                 /*if (messages[chatId]) {
@@ -136,7 +147,7 @@ function chat() {
                     // searchUser(target.innerHTML);
                 }
 
-                chatUsernameDisplay.addEventListener('click', click, { once: true });
+                chatUsernameDisplay.addEventListener('click', click);
                 chatArea.appendChild(chatUsernameDisplay);
                 // chatArea.innerHTML = '<p>Sélectionnez un ami ou ajoutez en un pour commencer à discuter.</p>';
             }
@@ -152,7 +163,7 @@ function chat() {
             systemNameSpan.textContent = 'System';
 
             systemItem.appendChild(systemNameSpan);
-            systemItem.addEventListener('click', () => loadChat('AI'));
+            systemItem.addEventListener('click', async () => await loadChat('AI'));
             if (!friendList) return;
             friendList.appendChild(systemItem);
 
@@ -171,7 +182,7 @@ function chat() {
 
                 listItem.appendChild(nameSpan);
 
-                listItem.addEventListener('click', () => loadChat(friends.username), { once: true });
+                listItem.addEventListener('click', async () => await loadChat(friends.username));
                 friendList.appendChild(listItem);
             });
 
@@ -207,7 +218,7 @@ function chat() {
             }
 
             // Ajouter un gestionnaire d'événements pour le bouton d'envoi
-            sendButton.addEventListener('click', sendMessage, { once: true });
+            sendButton.addEventListener('click', sendMessage);
 
             // Optionnel : Ajouter un gestionnaire d'événements pour appuyer sur Entrée pour envoyer un message
             messageInput.addEventListener('keypress', function (event) {
@@ -228,11 +239,11 @@ function getFriendList() {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
         xhr.withCredentials = true;
-        xhr.onreadystatechange = function () {
+        xhr.onreadystatechange = async function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200 || xhr.status === 201) {
                     let response = JSON.parse(xhr.responseText);
-                    console.log(response);  // La réponse est ici
+                    // console.log(response);  // La réponse est ici
                     resolve(response);      // Résoudre la promesse avec la réponse
                 } else {
                     reject('Error: ' + xhr.responseText);  // Rejeter la promesse en cas d'erreur

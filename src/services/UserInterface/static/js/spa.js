@@ -1,4 +1,5 @@
 /********************************* GESTION SPA *********************************/
+let isActive = false;
 
 const CACHE_EXPIRATION_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
 const CACHE_VERSION = 'v1';
@@ -62,7 +63,8 @@ async function loadPage(page, prevent, username) {
     // console.log('page ' + page);
     switch (page) {
         case 'friend':
-            getElementFriend();
+            await getElementFriend();
+            isActive = false;
             break;
         case 'game':
             getElementGame();
@@ -87,7 +89,7 @@ async function loadPage(page, prevent, username) {
             showTournamentInfo();
             break;
         case 'index':
-            loadHome();
+            await loadHome();
             break;
         case 'tron':
             loadTron();
@@ -107,6 +109,7 @@ async function loadPage(page, prevent, username) {
         default:
             break;
     }
+    isActive = false;
     testIfLoggedIn();
 }
 
