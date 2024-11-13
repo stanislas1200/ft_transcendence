@@ -288,11 +288,9 @@ function displayHistorique(userId, response) {
         input.addEventListener('click', click);
     });
     const addFriend = document.getElementById('addFriend');
-    const message = document.getElementById('message');
-    const duel = document.getElementById('duel');
     const block = document.getElementById('block');
 
-    if (!addFriend || !message || !duel || !block)
+    if (!addFriend || !block)
         return;
 
     // Check if user is friend to edit friend button
@@ -330,12 +328,6 @@ function displayHistorique(userId, response) {
         if (text == 'Remove friend') {
             addFriend.textContent = '+Add friend';
         }
-    });
-    message.addEventListener('click', function () {
-        console.log('message');
-    });
-    duel.addEventListener('click', function () {
-        console.log('duel');
     });
     block.addEventListener('click', function () {
         text = block.textContent.trim();
