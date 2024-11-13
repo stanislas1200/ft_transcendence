@@ -30,6 +30,7 @@ async function fetchAvatarUrl(userId) {
 
 async function renderLeaderboard(data) {
 	const leaderboardBody = document.getElementById('leaderboard-body');
+	if (!leaderboardBody) return;
 	leaderboardBody.innerHTML = ""; // Clear previous rows
 
 	// Update podium section

@@ -297,11 +297,13 @@
 </div>
 
 <script>
-    const queryString = window.location.search;
-    const queryWithoutQuestionMark = queryString.substring(1); // get username ~.~
-    if (queryWithoutQuestionMark)
-        searchUser(queryWithoutQuestionMark);
-    else
-        loadProfile();
+    window.onload = function() {
+        const queryString = window.location.search;
+        const queryWithoutQuestionMark = queryString.substring(1); // get username ~.~
+        if (queryWithoutQuestionMark)
+            searchUser(queryWithoutQuestionMark);
+        else
+            loadProfile();
+    };
 </script>
 <!-- <script>listRequest();</script> -->

@@ -164,6 +164,7 @@ async function chat() {
 
             systemItem.appendChild(systemNameSpan);
             systemItem.addEventListener('click', async () => await loadChat('AI'));
+            if (!friendList) return;
             friendList.appendChild(systemItem);
 
             // Ajouter les amis à la liste

@@ -244,7 +244,10 @@ let lastFrameTime = 0;
 function updateWeaponAnimation(deltaTime) {
     if (isFiring) {
 	    if (currentFrame==0)
+		{
+			gunFire.currentTime = 0;
 		    gunFire.play();
+		}
         lastFrameTime += deltaTime;
         if (lastFrameTime >= frameDuration) {
             currentFrame++;
@@ -441,6 +444,8 @@ async function drawEndGam() {
 		c.fillText(winner + " won", 800/2, 600/2)
 
 		c.fillText("Moving to " + page + " page", 800 / 2, 650 / 2)
+		song.pause();
+		song.currentTime = 0;
 		
 		await sleep(2000);
 		loadPage(page, 1)

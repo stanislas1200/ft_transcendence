@@ -22,7 +22,7 @@ function loadSettings() {
                 loadProfilePicture(response.id);
                 saveChangement(response.id);
             } else {
-                alert('Error: ' + JSON.parse(xhr.responseText).error);
+                // alert('Error: ' + JSON.parse(xhr.responseText).error);
             }
         }
     };
