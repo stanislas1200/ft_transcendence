@@ -1,7 +1,7 @@
 // TO DO: pouvoir se connecter a une partie qui est en cour ou en attente
 
 async function loadHome() {
-    testIfLoggedIn(function(isLoggedIn) {
+    testIfLoggedIn(async function(isLoggedIn) {
         if (isLoggedIn === 0) {
             let userId = getCookie('userId');
             loadHistoryForHomePage(userId);
