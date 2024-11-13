@@ -22,7 +22,7 @@ function notifications(Title) {
     <span aria-hidden="true">&times;</span>
     </button>
     `;
-    
+
     let newNotif = document.createElement('div');
     newNotif.classList.add('alert', `alert-succes`, 'alert-dismissible', 'fade', 'show');
     newNotif.innerHTML = alertHtml;
@@ -49,32 +49,37 @@ function connectToNotifications() {
     let wsUrl = `wss://localhost:8001/ws/notifications/${userId}`;
     wsUrl = wsUrl.replace('localhost', window.location.hostname);
 
-    wss = new WebSocket(wsUrl);
+    try {
+        wss = new WebSocket(wsUrl);
 
-    wss.addEventListener('open', function (event) {
-        console.log('Connected to notifications system.')
-    });
+        wss.addEventListener('open', function (event) {
+            console.log('Connected to notifications system.')
+        });
 
-    wss.addEventListener('message', function (event) {
-        let serverMessage = JSON.parse(event.data);
-        if (!(serverMessage && serverMessage.data && serverMessage.data.content))
-            return
-        let content = serverMessage.data.content;
-        notifications(content);
-        if (serverMessage.type === 'friend_request' && window.location.pathname === '/profile/') {
-            listRequest();
-        }
+        wss.addEventListener('message', function (event) {
+            let serverMessage = JSON.parse(event.data);
+            if (!(serverMessage && serverMessage.data && serverMessage.data.content))
+                return
+            let content = serverMessage.data.content;
+            notifications(content);
+            if (serverMessage.type === 'friend_request' && window.location.pathname === '/profile/') {
+                listRequest();
+            }
 
-    });
+        });
 
-    wss.addEventListener('close', function (event) {
-        connectToNotifications()
-        // console.log('Close: ', event);
-    });
+        wss.addEventListener('close', function (event) {
+            connectToNotifications()
+            // console.log('Close: ', event);
+        });
 
-    wss.addEventListener('error', function (event) {
-        // console.log('Error: ', event);
-    });
+        wss.addEventListener('error', function (event) {
+            console.error = function () { };
+            // console.log('Error: ', event);
+        });
+    } catch (error) {
+        console.log('error with websocket');
+    }
 }
 
 connectToNotifications()

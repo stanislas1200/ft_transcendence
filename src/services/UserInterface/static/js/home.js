@@ -12,7 +12,6 @@ function loadHome() {
 }
 
 function goToButton() {
-
     const clickChat = ({ target }) => {
         loadPage('friend', 1);
     }
