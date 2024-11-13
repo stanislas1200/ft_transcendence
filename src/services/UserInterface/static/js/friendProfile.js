@@ -92,8 +92,9 @@ function displayHistoryFromOneGame(response) {
     const startDate = partyState.querySelector('p:nth-child(3)');
     const endTime = partyState.querySelector('p:nth-child(4)');
 
+    console.log(response);
     gameMode.innerHTML = `<strong>Game: </strong> ${response[0]}`;
-    status.innerHTML = `<strong>Status:</strong> TODO`;
+    status.innerHTML = `<strong>Status: Finish</strong>`;
     startDate.innerHTML = `<strong>Start Date:</strong> ${formatDateTime(response[1])}`;
     endTime.innerHTML = `<strong>End Time:</strong> ${formatDateTime(response[2])}`;
 
@@ -400,7 +401,7 @@ function createChart(chartVariable, ctx, type, data, options) {
     //     chartVariable.destroy(); // TODO : fix disapear
     // }
 
-    
+
     ctx.canvas.width = ctx.canvas.parentNode.clientWidth;
     ctx.canvas.height = ctx.canvas.parentNode.clientHeight;
 
