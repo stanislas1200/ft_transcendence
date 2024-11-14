@@ -16,12 +16,12 @@ async function fetchLeaderboardData(game = 'all', time = 'all') {
 
 async function fetchAvatarUrl(userId) {
 	try {
-		const response = await fetch(`https://localhost:8000/users/${userId}/avatar`);
+		const response = await fetch(`https://` + window.location.hostname + `:8000/users/${userId}/avatar`);
 		if (!response.ok) {
 			throw new Error('Network response was not ok');
 		}
 		const avatar = await response.text();
-		return 'https://localhost:8000' + avatar;
+		return 'https://' + window.location.hostname + ':8000' + avatar;
 	} catch (error) {
 		console.error('There was a problem fetching the avatar:', error);
 		return '';

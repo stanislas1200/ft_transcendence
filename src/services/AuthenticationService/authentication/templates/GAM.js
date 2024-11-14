@@ -12,7 +12,7 @@ const RAY_COUNT = 200; // Number of rays to cast
 const MAX_DEPTH = 1000; // Max depth a ray can travel
 const WALL_HEIGHT = 200; // Height of walls in the 3D rendering
 
-const wallTextureUrl = 'https://localhost:8000/var/www/transcendence/media/default.png';
+const wallTextureUrl = 'https://' + window.location.hostname + ':8000/var/www/transcendence/media/default.png';
 const wallTexture = new Image();
 
 // Load the texture

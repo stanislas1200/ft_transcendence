@@ -358,7 +358,7 @@ function cancelAllAnimationFrames(){
 	}
  }
 
- let hitSound = new Audio('https://localhost:8003/usr/src/app/static/sounds/hit.mp3'); // need global var {% static 'sounds/hit.mp3' %}
+ let hitSound = new Audio('https://' + window.location.hostname + ':8003/usr/src/app/static/sounds/hit.mp3'); // need global var {% static 'sounds/hit.mp3' %}
 function loadPong() {
 	let partyId = localStorage.getItem('gameId');
 	// localStorage.removeItem('gameId');
