@@ -11,6 +11,7 @@ def register(request):
     return render(request, 'home/register.html', context)
 
 def login(request):
+    hostname = request.get_host()
     context = {
         '42_link': os.environ['OAUTH_LINK'],
     }
@@ -26,10 +27,11 @@ def bootstrap(request):
     return render(request, 'home/bootstrap.html')
 
 def load_page(request, page):
+    hostname = request.get_host()
     # Determine if the request is an AJAX request (for SPA)
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         # Return only the requested page's content
-        return render(request, f'home/{page}.html', {'42_link': os.environ['OAUTH_LINK']})
+        return render(request, f'home/{page}.html', {'42_link': os.environ['OAUTH_LINK'].replace("localhost", hostname.split(":")[0])})
     
     # For a full page load, render the master template with the requested page's content
-    return render(request, 'home/master.html', {'content': f'home/{page}.html', '42_link': os.environ['OAUTH_LINK']})
+    return render(request, 'home/master.html', {'content': f'home/{page}.html', '42_link': os.environ['OAUTH_LINK'].replace("localhost", hostname.split(":")[0])})

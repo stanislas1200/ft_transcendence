@@ -596,7 +596,13 @@ def oauth42(request):
 				profile.avatar = process_avatar(avatar, content_type)
 				profile.save()
 
-		response = HttpResponseRedirect('https://localhost:8003/')
+		base_url = request.build_absolute_uri('/')
+		if ':' in base_url:
+			base_url = base_url.rsplit(':', 1)[0] + ':8003/'
+		else:
+			base_url = base_url.rstrip('/') + ':8003/'
+
+		response = HttpResponseRedirect(base_url)
 		response.set_cookie(key='token', value=token, secure=True, httponly=True, samesite='Strict')
 		response.set_cookie(key='userId', value=user.id, secure=True, samesite='None')
 		return response
