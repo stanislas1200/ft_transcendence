@@ -190,7 +190,10 @@ function joinGameFromHome(gameId, gameStyle) {
                 var gameId = JSON.parse(xhr.responseText).game_id;
                 console.log("game id :" + gameId);
                 localStorage.setItem("gameId", gameId);
-                loadPage(gameStyle, 1)
+                if (gameStyle == 'gun_and_monsters')
+                    loadPage('gam', 1);
+                else
+                    loadPage(gameStyle, 1)
             }
             else {
                 console.log('Error joining game'); // TODO put a message
@@ -212,13 +215,21 @@ function clickOnGame() {
             }
             else
                 joinGameFromHome(target.classList[1], 'pong');
-        } else {
+        } else if (target.childNodes[0].innerHTML == 'tron') {
             if (target.classList[2] == 'watch') {
                 localStorage.setItem("gameId", target.classList[1]);
                 loadPage('tron', 1);
             }
             else
                 joinGameFromHome(target.classList[1], 'tron');
+        }
+        else {
+            if (target.classList[2] == 'watch') {
+                localStorage.setItem("gameId", target.classList[1]);
+                loadPage('gam', 1);
+            }
+            else
+                joinGameFromHome(target.classList[1], 'gun_and_monsters');
         }
     }
 

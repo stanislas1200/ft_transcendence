@@ -224,7 +224,7 @@ spritesData = {
 	},
 	weapon: {
 		spriteSheet: new Image(),
-		url: 'https://localhost:8003/usr/src/app/static/images/spritesheetGun.png',
+		url: 'https://' + window.location.hostname + ':8003/usr/src/app/static/images/spritesheetGun.png',
 		frames: 4,
 		frameDuration: 100,
 	}
@@ -467,11 +467,11 @@ function sendKeystate() {
 var url = "https://localhost:8003/usr/src/app/static/"
 url = url.replace("localhost", window.location.hostname);
    
-let gunFire = new Audio('https://localhost:8003/usr/src/app/static/sounds/gun.wav');
+let gunFire = new Audio('https://' + window.location.hostname + ':8003/usr/src/app/static/sounds/gun.wav');
 // let gunImpact = new Audio('https://localhost:8003/usr/src/app/static/sounds/impact.mp3');
 // let chubDead= new Audio('https://localhost:8003/usr/src/app/static/sounds/chubbs_dead.mp3');
 // let playerHit = new Audio('https://localhost:8003/usr/src/app/static/sounds/player_hit.mp3');
-let song = new Audio('https://localhost:8003/usr/src/app/static/sounds/song.wav');
+let song = new Audio('https://' + window.location.hostname + ':8003/usr/src/app/static/sounds/song.wav');
 
 function loadGam() {
 	let partyId = localStorage.getItem('gameId');
